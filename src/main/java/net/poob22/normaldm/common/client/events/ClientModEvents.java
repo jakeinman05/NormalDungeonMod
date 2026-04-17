@@ -1,5 +1,6 @@
 package net.poob22.normaldm.common.client.events;
 
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
