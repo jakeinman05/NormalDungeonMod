@@ -6,10 +6,10 @@ import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Mob;
 
-public class GenericMobRenderer<T extends Mob, M extends EntityModel<T>> extends MobRenderer<T, M> {
+public class GenericEntityRenderer<T extends Mob, M extends EntityModel<T>> extends MobRenderer<T, M> {
     private final ResourceLocation texture;
 
-    public GenericMobRenderer(EntityRendererProvider.Context ctx, M model, float shadowSize, ResourceLocation texture) {
+    public GenericEntityRenderer(EntityRendererProvider.Context ctx, M model, float shadowSize, ResourceLocation texture) {
         super(ctx, model, shadowSize);
         this.texture = texture;
     }
