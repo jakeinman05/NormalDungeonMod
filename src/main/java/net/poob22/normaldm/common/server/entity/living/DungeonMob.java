@@ -61,7 +61,8 @@ public class DungeonMob extends Monster {
     protected void tickDeath() {
         if(!this.level().isClientSide) {
             sendParticles(true);
-            PacketHandler.sendToTracking(this, new BloodPoolPacket(this.getX(), this.getY(), this.getZ(), this.getBbWidth() * 1.5F));
+            float sizeMultiplier = 1.3F + this.getRandom().nextInt(1);
+            PacketHandler.sendToTracking(this, new BloodPoolPacket(this.getX(), this.getY(), this.getZ(), this.getBbWidth() * sizeMultiplier));
         }
         this.remove(RemovalReason.KILLED);
     }

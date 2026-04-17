@@ -85,6 +85,11 @@ public class BloodPoolParticle extends TextureSheetParticle {
     }
 
     @Override
+    public boolean shouldCull() {
+        return false;
+    }
+
+    @Override
     public ParticleRenderType getRenderType() {
         return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
     }
