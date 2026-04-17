@@ -14,6 +14,8 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.poob22.normaldm.common.client.packet.PacketHandler;
+import net.poob22.normaldm.common.client.particles.NDMParticles;
 import net.poob22.normaldm.common.server.blocks.NDMBlocks;
 import net.poob22.normaldm.common.server.blocks.blockentities.NDMBlockEntities;
 import net.poob22.normaldm.common.server.entity.registry.DungeonMobs;
@@ -38,6 +40,8 @@ public class NormalDungeonMod
         NDMBlocks.register(modEventBus);
         NDMItems.register(modEventBus);
         NDMBlockEntities.register(modEventBus);
+        NDMParticles.register(modEventBus);
+        PacketHandler.registerPackets();
 
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
@@ -66,12 +70,4 @@ public class NormalDungeonMod
     // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {}
-
-    // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
-    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static class ClientModEvents
-    {
-        @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event)  {}
-    }
 }

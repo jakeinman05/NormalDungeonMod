@@ -1,6 +1,5 @@
 package net.poob22.normaldm.common.server.entity.living;
 
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
@@ -8,6 +7,9 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import net.poob22.normaldm.NormalDungeonMod;
+import net.poob22.normaldm.common.client.packet.BloodPoolPacket;
+import net.poob22.normaldm.common.client.packet.PacketHandler;
 
 public class DungeonMob extends Monster {
     SimpleParticleType particle;
@@ -59,6 +61,8 @@ public class DungeonMob extends Monster {
     protected void tickDeath() {
         if(!this.level().isClientSide) {
             sendParticles(true);
+            float sizeMultiplier = 1.3F + this.getRandom().nextInt(1);
+            PacketHandler.sendToTracking(this, new BloodPoolPacket(this.getX(), this.getY(), this.getZ(), this.getBbWidth() * sizeMultiplier));
         }
         this.remove(RemovalReason.KILLED);
     }
