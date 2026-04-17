@@ -18,9 +18,10 @@ public class DungeonMobs {
 
     public static ModelLayerLocation CHARGER_MAGGOT_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(MODID, "charger_maggot"), "main");
     public static ModelLayerLocation FLESH_GUY_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(MODID, "flesh_guy"), "main");
+    public static ModelLayerLocation FLESH_BLOB_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(MODID, "flesh_blob"), "main");
 
     //public static final DungeonMobDefinition<ChargerMaggotEntity> CHARGER_MAGGOT = DungeonMobRegistry.register(new DungeonMobDefinition<>("charger_maggot", ChargerMaggotEntity::new, MobCategory.MONSTER, 0.3F, 0.3F, ChargerMaggotEntity::createAttributes, CHARGER_MAGGOT_LAYER, ChargerMaggotModel::createBodyLayer, ctx -> new GenericEntityRenderer<>(ctx, new ChargerMaggotModel<>(ctx.bakeLayer(CHARGER_MAGGOT_LAYER)), 0.3F, ResourceLocation.fromNamespaceAndPath(MODID, "textures/entity/base.png"))));
     public static final DungeonMobDefinition<ChargerMaggotEntity> CHARGER_MAGGOT = DungeonMobRegistry.register(new DungeonMobDefinition<>("charger_maggot", ChargerMaggotEntity::new, MobCategory.MONSTER, 0.3F, 0.3F, ChargerMaggotEntity::createAttributes, CHARGER_MAGGOT_LAYER, ChargerMaggotModel::createBodyLayer, ChargerMaggotRenderer::new));
-
+    public static final DungeonMobDefinition<FleshGuyEntity> FLESH_GUY = DungeonMobRegistry.register(new DungeonMobDefinition<>("flesh_guy", FleshGuyEntity::new, MobCategory.MONSTER, 0.6F, 1.7F, FleshGuyEntity::createAttributes, FLESH_GUY_LAYER, FleshGuyModel::createBodyLayer, ctx -> new GenericEntityRenderer<>(ctx, new FleshGuyModel<>(ctx.bakeLayer(FLESH_GUY_LAYER)), 0.5F, ResourceLocation.fromNamespaceAndPath(MODID, "textures/entity/flesh_guy.png"))));
 
 }
