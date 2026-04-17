@@ -1,0 +1,9 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "normaldm:block/room_controller"
+      }
+    ]
+  }
+}
