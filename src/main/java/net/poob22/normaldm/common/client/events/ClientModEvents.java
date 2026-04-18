@@ -36,7 +36,7 @@ public class ClientModEvents {
 
     @SuppressWarnings("unchecked")
     private static <T extends Mob> void registerRenderer(DungeonMobDefinition<T> def) {
-        EntityRenderers.register((EntityType<T>) NDMEntities.get(def.id), def.renderer);
+        EntityRenderers.register((EntityType<T>) NDMEntities.get(def.id), (EntityRendererProvider<? super T>) def.renderer);
     }
 
     @SubscribeEvent

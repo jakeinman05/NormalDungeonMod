@@ -10,6 +10,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.poob22.normaldm.NormalDungeonMod;
+import net.poob22.normaldm.common.server.entity.registry.NDMEntities;
 
 public class FleshGuyEntity extends DungeonMob {
     public FleshGuyEntity(EntityType<? extends Monster> pEntityType, Level pLevel) {
@@ -32,9 +33,20 @@ public class FleshGuyEntity extends DungeonMob {
 
     @Override
     protected void tickDeath() {
-        super.tickDeath();
         if(!this.level().isClientSide) {
             NormalDungeonMod.LOGGER.info("Spawn blob");
+            spawnFleshBlob();
+        }
+        super.tickDeath();
+    }
+
+    private void spawnFleshBlob() {
+        EntityType<?> type = NDMEntities.get("flesh_blob");
+        FleshBlobEntity blob = (FleshBlobEntity) type.create(this.level());
+        if(blob != null) {
+            blob.setRespawnTimer(120);
+            blob.setPos(this.getX(), this.getY(), this.getZ());
+            this.level().addFreshEntity(blob);
         }
     }
 }
