@@ -14,6 +14,7 @@ public class NDMParticles {
 
     public static final RegistryObject<SimpleParticleType> BLOOD_POOL = DEF_REG.register("blood_pool", () -> new SimpleParticleType(false));
     public static final RegistryObject<SimpleParticleType> HURT_PARTICLE = DEF_REG.register("hurt_particle", () -> new SimpleParticleType(false));
+    public static final RegistryObject<SimpleParticleType> FLESH_PARTICLE = DEF_REG.register("flesh_particle", () -> new SimpleParticleType(false));
 
     public static void register(IEventBus bus) {
         DEF_REG.register(bus);

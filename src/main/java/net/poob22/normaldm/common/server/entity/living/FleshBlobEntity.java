@@ -21,7 +21,6 @@ public class FleshBlobEntity extends DungeonMob {
     public FleshBlobEntity(EntityType<? extends FleshBlobEntity> entityType, Level world) {
         super(entityType, world);
         this.throbAnimation.start(this.tickCount);
-        this.setParticleType(ParticleTypes.CRIT);
         this.setHurtParticleAmount(4);
         this.setDeathParticleAmount(10);
     }
@@ -77,6 +76,7 @@ public class FleshBlobEntity extends DungeonMob {
         if(fleshGuy != null) {
             fleshGuy.setHealth(Math.min(fleshGuy.getMaxHealth(), (fleshGuy.getMaxHealth()/3) + this.getHealth()));
             fleshGuy.setPos(this.getX(), this.getY(), this.getZ());
+            fleshGuy.sendParticles((byte)1);
             this.level().addFreshEntity(fleshGuy);
         } else {
             NormalDungeonMod.LOGGER.error("Entity to spawn is null!");

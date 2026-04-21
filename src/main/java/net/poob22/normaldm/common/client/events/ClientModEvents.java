@@ -11,6 +11,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.poob22.normaldm.common.client.particles.BloodPoolParticle;
+import net.poob22.normaldm.common.client.particles.FleshParticle;
+import net.poob22.normaldm.common.client.particles.HurtParticle;
 import net.poob22.normaldm.common.client.particles.NDMParticles;
 import net.poob22.normaldm.common.server.entity.definition.DungeonMobDefinition;
 import net.poob22.normaldm.common.server.entity.registry.DungeonMobRegistry;
@@ -42,5 +44,7 @@ public class ClientModEvents {
     @SubscribeEvent
     public static void registerParticles(RegisterParticleProvidersEvent event) {
         event.registerSpriteSet(NDMParticles.BLOOD_POOL.get(), BloodPoolParticle.Factory::new);
+        event.registerSpriteSet(NDMParticles.HURT_PARTICLE.get(), HurtParticle.Factory::new);
+        event.registerSpriteSet(NDMParticles.FLESH_PARTICLE.get(), FleshParticle.Factory::new);
     }
 }

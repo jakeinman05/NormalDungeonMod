@@ -15,9 +15,8 @@ import net.poob22.normaldm.common.server.entity.registry.NDMEntities;
 public class FleshGuyEntity extends DungeonMob {
     public FleshGuyEntity(EntityType<? extends Monster> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-        this.setParticleType(ParticleTypes.ITEM_SLIME);
-        this.setHurtParticleAmount(6);
-        this.setDeathParticleAmount(21);
+        this.setHurtParticleAmount(12);
+        this.setDeathParticleAmount(25);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
