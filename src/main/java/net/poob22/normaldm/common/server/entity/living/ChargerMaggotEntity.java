@@ -1,6 +1,5 @@
 package net.poob22.normaldm.common.server.entity.living;
 
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -42,13 +41,13 @@ public class ChargerMaggotEntity extends DungeonMob implements IChargingMob {
     protected void registerGoals() {
         super.registerGoals();
         this.goalSelector.addGoal(0, new ChargeAttackCardinalDirectionGoal(this, 2.0F, 12, 100, true, true));
-        this.goalSelector.addGoal(2, new RandomStrollCardinalDirectionsGoal(this, 1.0D));
+        this.goalSelector.addGoal(2, new RandomStrollCardinalDirectionsGoal(this, 1.0D, false));
 
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 10.0D).add(Attributes.MOVEMENT_SPEED, 0.3D).add(Attributes.ATTACK_DAMAGE, 4.0D);
+        return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 7.0D).add(Attributes.MOVEMENT_SPEED, 0.3D).add(Attributes.ATTACK_DAMAGE, 5.0D);
     }
 
     @Override
