@@ -20,7 +20,7 @@ public class HurtParticle extends TextureSheetParticle {
         this.xd *= 0.8;
         this.yd *= 0.8;
         this.zd *= 0.8;
-        this.quadSize *= 0.7F + random.nextFloat();
+        this.quadSize *= 0.4F + random.nextFloat();
         this.lifetime = 160 + random.nextInt(40);
         this.lifetime = Math.max(this.lifetime, 1);
         this.setSpriteFromAge(sprites);

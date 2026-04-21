@@ -19,6 +19,8 @@ public class FleshParticle extends TextureSheetParticle {
         this.gravity = 1.0F;
         this.hasPhysics = true;
         this.lifetime = 160 + random.nextInt(40);
+        this.roll = random.nextFloat() * ((float)Math.PI * 2F);
+        this.oRoll = roll;
     }
 
     @Override
