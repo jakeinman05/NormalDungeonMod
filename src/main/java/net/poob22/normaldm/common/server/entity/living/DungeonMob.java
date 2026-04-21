@@ -1,6 +1,9 @@
 package net.poob22.normaldm.common.server.entity.living;
 
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -12,12 +15,27 @@ import net.poob22.normaldm.common.client.packet.BloodPoolPacket;
 import net.poob22.normaldm.common.client.packet.PacketHandler;
 
 public class DungeonMob extends Monster {
+    public static EntityDataAccessor<Boolean> IN_DUNGEON = SynchedEntityData.defineId(DungeonMob.class, EntityDataSerializers.BOOLEAN);
     SimpleParticleType particle;
     int deathParticleAmount;
     int hurtParticleAmount;
 
     protected DungeonMob(EntityType<? extends Monster> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
+    }
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(IN_DUNGEON, false);
+    }
+
+    public void setInDungeon(boolean inDungeon) {
+        this.entityData.set(IN_DUNGEON, inDungeon);
+    }
+
+    public boolean isInDungeon() {
+        return this.entityData.get(IN_DUNGEON);
     }
 
     public void setParticleType(SimpleParticleType pType) {
@@ -74,5 +92,13 @@ public class DungeonMob extends Monster {
         double offsetZ = (box.maxZ - box.minZ) / 2;
         int amount = type ? getDeathParticleAmount() : getHurtParticleAmount();
         ((ServerLevel)this.level()).sendParticles(getParticleType(), this.getX(), this.getY(), this.getZ(), amount, offsetX, offsetY, offsetZ, 0.1D);
+    }
+
+    @Override
+    public void checkDespawn() {
+        if(this.isInDungeon()) {
+            return;
+        }
+        super.checkDespawn();
     }
 }
