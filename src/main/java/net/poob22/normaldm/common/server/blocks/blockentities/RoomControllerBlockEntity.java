@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.AABB;
 import net.poob22.normaldm.NormalDungeonMod;
+import net.poob22.normaldm.common.server.entity.living.DungeonMob;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -116,17 +117,18 @@ public class RoomControllerBlockEntity extends BlockEntity {
             for(UUID id : EnemiesInRoom) {
                 ServerLevel l = (ServerLevel) level;
                 Entity e = l.getEntity(id);
-                if(e != null) e.kill();
+                if(e != null) e.remove(Entity.RemovalReason.DISCARDED);
             }
             unlockDoors(level);
         }
     }
 
     public void getEnemiesInRoom(Level level) {
-        List<Monster> Enemies = level.getEntitiesOfClass(Monster.class, getRoomBounds());
+        List<DungeonMob> Enemies = level.getEntitiesOfClass(DungeonMob.class, getRoomBounds());
 
-        for(Monster e : Enemies) {
+        for(DungeonMob e : Enemies) {
             UUID id = e.getUUID();
+            e.setInDungeon(true);
             EnemiesInRoom.add(id);
         }
 
@@ -137,7 +139,16 @@ public class RoomControllerBlockEntity extends BlockEntity {
         if (!EnemiesInRoom.isEmpty()) {
             EnemiesInRoom.removeIf(id -> {
                 Entity e = level.getEntity(id);
-                return e == null || !e.isAlive();
+                if(e instanceof DungeonMob) {
+                    if(!e.isAlive() || !roomBounds.intersects(e.getBoundingBox())) {
+                        ((DungeonMob) e).setInDungeon(false);
+                        NormalDungeonMod.LOGGER.info("Enemy either died or left room bounds, will not be added back to the room");
+                        return true;
+                    }
+                    return false;
+                } else {
+                    return true;
+                }
             });
         }
     }
