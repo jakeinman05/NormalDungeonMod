@@ -67,10 +67,9 @@ public class RandomStrollCardinalDirectionsGoal extends Goal {
                 checkDamage();
         }
 
-        if(moveInDirectionTime <= 0 || isBlocked(moveDir) || mob.getNavigation().isDone()) {
+        if(moveInDirectionTime <= 0 || isBlocked(moveDir) || mob.getNavigation().isDone() || mob.getRandom().nextInt(100) == 0) {
             pickNewDirection();
         } else {
-            //moveForward();
             moveInDirectionTime--;
         }
 
