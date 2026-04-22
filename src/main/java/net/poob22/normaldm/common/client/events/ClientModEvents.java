@@ -27,6 +27,9 @@ public class ClientModEvents {
         for(DungeonMobDefinition<?> def : DungeonMobRegistry.MOBS) {
             registerRenderer(def);
         }
+
+        // other entities
+
     }
 
     @SubscribeEvent
@@ -34,6 +37,9 @@ public class ClientModEvents {
         for(DungeonMobDefinition<?> def : DungeonMobRegistry.MOBS) {
             event.registerLayerDefinition(def.layerLocation, def.layerDefinition);
         }
+
+        // other entities
+
     }
 
     @SuppressWarnings("unchecked")

@@ -25,6 +25,6 @@ public class MaggotEntity extends DungeonMob {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.3F).add(Attributes.MAX_HEALTH, 6.0F).add(Attributes.ATTACK_DAMAGE, 2.0F);
+        return Monster.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.3F).add(Attributes.MAX_HEALTH, 2.0F).add(Attributes.ATTACK_DAMAGE, 2.0F);
     }
 }
