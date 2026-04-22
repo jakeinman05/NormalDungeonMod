@@ -22,7 +22,7 @@ public class DungeonMobDefinition<T extends Mob> {
     public final ModelLayerLocation layerLocation;
     public final Supplier<LayerDefinition> layerDefinition;
 
-    public final EntityRendererProvider<T> renderer;
+    public final EntityRendererProvider<? extends T> renderer;
 
     public DungeonMobDefinition(String id, EntityType.EntityFactory<T> factory, MobCategory category, float width, float height, Supplier<AttributeSupplier.Builder> attributes, ModelLayerLocation layerLocation, Supplier<LayerDefinition> layerDefinition, EntityRendererProvider<T> renderer) {
         this.id = id;

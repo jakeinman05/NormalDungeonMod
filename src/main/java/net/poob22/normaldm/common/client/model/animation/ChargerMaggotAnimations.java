@@ -1,4 +1,4 @@
-package net.poob22.normaldm.common.server.entity.animation;
+package net.poob22.normaldm.common.client.model.animation;
 
 import net.minecraft.client.animation.AnimationChannel;
 import net.minecraft.client.animation.AnimationDefinition;

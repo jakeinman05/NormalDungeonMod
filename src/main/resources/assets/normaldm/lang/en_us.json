@@ -1,3 +1,6 @@
 {
-  "entity.normaldm.charger_maggot": "Charger Maggot"
+  "entity.normaldm.charger_maggot": "Charger Maggot",
+  "entity.normaldm.maggot": "Maggot",
+  "entity.normaldm.flesh_guy": "Flesh Guy",
+  "entity.normaldm.flesh_blob": "Flesh Blob"
 }

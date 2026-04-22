@@ -38,8 +38,6 @@ public class BloodPoolParticle extends TextureSheetParticle {
 
         float progress = (float)this.age / (float)this.lifetime;
         this.alpha = 1.0F - (progress * progress);
-
-
     }
 
     @Override
