@@ -1,4 +1,15 @@
 {
+  "block.normaldm.plywood": "Plywood",
+  "block.normaldm.cellar_wall": "Cellar Wall",
+  "block.normaldm.cellar_wall_drain": "Cellar Wall Drain",
+  "block.normaldm.cellar_wall_cracked": "Cracked Cellar Wall",
+  "block.normaldm.cellar_wall_mossy": "Mossy Cellar Wall",
+  "block.normaldm.cellar_ceiling": "Cellar Ceiling",
+  "block.normaldm.cellar_ceiling_ripped": "Ripped Cellar Ceiling",
+  "block.normaldm.cellar_ceiling_moldy": "Moldy Cellar Ceiling",
+  "block.normaldm.cellar_ceiling_flesh_torn": "Flesh Torn Cellar Ceiling",
+  "block.normaldm.flesh_block": "Flesh Block",
+
   "entity.normaldm.charger_maggot": "Charger Maggot",
   "entity.normaldm.maggot": "Maggot",
   "entity.normaldm.flesh_guy": "Flesh Guy",

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "": [
+      {"model": "normaldm:block/cellar_ceiling_moldy"},
+      {"model": "normaldm:block/cellar_ceiling_moldy", "y": 90},
+      {"model": "normaldm:block/cellar_ceiling_moldy", "y": 180},
+      {"model": "normaldm:block/cellar_ceiling_moldy", "y": 270}
+    ]
+  }
+}

@@ -47,6 +47,6 @@ public class MaggotModel<T extends MaggotEntity> extends HierarchicalModel<T> {
 	@Override
 	public void setupAnim(T pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-		this.animateWalk(ChargerMaggotAnimations.squirm, pLimbSwing, pLimbSwingAmount, 1.0F, 1.0F);
+		this.animateWalk(ChargerMaggotAnimations.squirm, pLimbSwing, pLimbSwingAmount, 2.67F, 2.0F);
 	}
 }
