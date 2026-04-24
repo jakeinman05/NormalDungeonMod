@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "normaldm:block/cellar_wall_mossy"
+    }
+  }
+}
