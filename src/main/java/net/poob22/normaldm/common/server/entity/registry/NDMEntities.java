@@ -1,6 +1,7 @@
 package net.poob22.normaldm.common.server.entity.registry;
 
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -22,9 +23,15 @@ public class NDMEntities {
 
     public static void RegisterAll() {
         for(DungeonMobDefinition<?> def : DungeonMobRegistry.MOBS) {
-            RegistryObject<EntityType<?>> reg = ENTITY_TYPES.register(def.id, () -> EntityType.Builder.of(def.factory, def.mobCategory).sized(def.width, def.height).build(def.id));
-            ENTITY_MAP.put(def.id, reg);
+            registerSingle(def);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends Mob> void registerSingle(DungeonMobDefinition<T> def) {
+        RegistryObject<EntityType<T>> reg = ENTITY_TYPES.register(def.id, () -> EntityType.Builder.of(def.factory, def.mobCategory).sized(def.width, def.height).build(def.id));
+        def.entityType = reg;
+        ENTITY_MAP.put(def.id, (RegistryObject<EntityType<?>>)(RegistryObject<?>) reg);
     }
 
     public static EntityType<?> get(String id) {
