@@ -32,6 +32,7 @@ public class DungeonMobSpawner extends BlockEntity {
                 mob.setPos(this.getBlockPos().getX(), this.getBlockPos().getY(), this.getBlockPos().getZ());
                 //maybe add some particles here
                 level.addFreshEntity(mob);
+                level.destroyBlock(this.getBlockPos(), false);
             }
         }
     }
