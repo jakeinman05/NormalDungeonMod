@@ -1,6 +1,10 @@
 package net.poob22.normaldm.common.server.blocks;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -11,6 +15,7 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.poob22.normaldm.common.server.blocks.blockentities.NDMBlockEntities;
@@ -31,6 +36,23 @@ public class RoomControllerBlock extends BaseEntityBlock {
     @Override
     public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> entity) {
         return createTickerHelper(entity, NDMBlockEntities.ROOM_CONTROLLER.get(), RoomControllerBlockEntity::tick);
+    }
+
+    @Override
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+        if(level.isClientSide) {
+            if(blockEntity instanceof RoomControllerBlockEntity roomController) {
+                player.sendSystemMessage(Component.literal("Room State on Clientside: " + roomController.getRoomState()));
+            }
+        }
+        if(!level.isClientSide) {
+            if(blockEntity instanceof RoomControllerBlockEntity roomController) {
+                player.sendSystemMessage(Component.literal("Room State on Server: " + roomController.getRoomState()));
+            }
+        }
+
+        return super.use(state, level, pos, player, interactionHand, blockHitResult);
     }
 
     @Override
