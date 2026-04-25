@@ -7,6 +7,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.server.entity.definition.DungeonMobDefinition;
 import net.poob22.normaldm.common.server.entity.projectile.FleshShotEntity;
 
