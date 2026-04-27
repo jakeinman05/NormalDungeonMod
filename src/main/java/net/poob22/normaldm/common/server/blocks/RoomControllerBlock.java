@@ -18,6 +18,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.poob22.normaldm.NormalDungeonMod;
+import net.poob22.normaldm.common.client.events.RoomBBRenderer;
 import net.poob22.normaldm.common.server.blocks.blockentities.NDMBlockEntities;
 import net.poob22.normaldm.common.server.blocks.blockentities.RoomControllerBlockEntity;
 import org.jetbrains.annotations.NotNull;
@@ -41,18 +43,14 @@ public class RoomControllerBlock extends BaseEntityBlock {
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         BlockEntity blockEntity = level.getBlockEntity(pos);
-        if(level.isClientSide) {
-            if(blockEntity instanceof RoomControllerBlockEntity roomController) {
-                player.sendSystemMessage(Component.literal("Room State on Clientside: " + roomController.getRoomState()));
-            }
-        }
-        if(!level.isClientSide) {
-            if(blockEntity instanceof RoomControllerBlockEntity roomController) {
-                player.sendSystemMessage(Component.literal("Room State on Server: " + roomController.getRoomState()));
+        if(level.isClientSide && player.isShiftKeyDown()) {
+            if(blockEntity instanceof RoomControllerBlockEntity) {
+                RoomBBRenderer.toggle(pos);
+                return InteractionResult.SUCCESS;
             }
         }
 
-        return super.use(state, level, pos, player, interactionHand, blockHitResult);
+        return InteractionResult.CONSUME;
     }
 
     @Override
