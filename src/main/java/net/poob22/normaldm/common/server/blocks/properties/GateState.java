@@ -17,11 +17,11 @@ public enum GateState implements StringRepresentable {
     @Override
     public @NotNull String getSerializedName() {
         return switch (this) {
-            case CLOSED -> "CLOSED";
-            case OPEN -> "OPEN";
-            case OPENING -> "OPENING";
-            case LOCKED -> "LOCKED";
-            default -> "UNKNOWN";
+            case CLOSED -> "closed";
+            case OPEN -> "open";
+            case OPENING -> "opening";
+            case LOCKED -> "locked";
+            default -> "null";
         };
     }
 }
