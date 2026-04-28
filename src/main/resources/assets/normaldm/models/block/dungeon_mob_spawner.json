@@ -1,6 +1,6 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/carpet",
   "textures": {
-    "all": "normaldm:block/dungeon_mob_spawner"
+    "wool": "normaldm:block/dungeon_mob_spawner_bottom"
   }
 }

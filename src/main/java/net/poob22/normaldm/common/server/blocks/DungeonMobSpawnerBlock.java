@@ -28,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class DungeonMobSpawnerBlock extends BaseEntityBlock {
     public DungeonMobSpawnerBlock() {
-        super(Properties.of().strength(100.0F).sound(SoundType.STONE));
+        super(Properties.of().strength(100.0F).sound(SoundType.STONE).noOcclusion().noCollission());
     }
 
     @Override
@@ -39,13 +39,11 @@ public class DungeonMobSpawnerBlock extends BaseEntityBlock {
     @Override
     public InteractionResult use(@NotNull BlockState state, Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand interactionHand, @NotNull BlockHitResult blockHitResult) {
         if(!level.isClientSide) {
-            NormalDungeonMod.LOGGER.info("use attempt");
             BlockEntity blockEntity = level.getBlockEntity(pos);
             ItemStack handItem = player.getItemInHand(interactionHand);
             if(blockEntity instanceof DungeonMobSpawner spawner && !player.isShiftKeyDown()) {
                 if(!handItem.isEmpty() && handItem.getItem() instanceof DungeonMobSpawnEgg egg) {
                     EntityType<DungeonMob> type = egg.getType();
-                    NormalDungeonMod.LOGGER.info("type: " + type);
                     if(type != null) {
                         spawner.setMobToSpawn(type);
                         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARROW_HIT_PLAYER, SoundSource.PLAYERS, 1.0F, 1.0F);

@@ -1,5 +1,7 @@
 package net.poob22.normaldm.common.client.events;
 
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.resources.ResourceLocation;
@@ -17,6 +19,7 @@ import net.poob22.normaldm.common.client.particles.FleshParticle;
 import net.poob22.normaldm.common.client.particles.HurtParticle;
 import net.poob22.normaldm.common.client.particles.NDMParticles;
 import net.poob22.normaldm.common.client.render.entity.BaseProjectileRenderer;
+import net.poob22.normaldm.common.server.blocks.NDMBlocks;
 import net.poob22.normaldm.common.server.entity.definition.DungeonMobDefinition;
 import net.poob22.normaldm.common.server.entity.registry.DungeonMobRegistry;
 import net.poob22.normaldm.common.server.entity.registry.DungeonMobs;
@@ -34,6 +37,8 @@ public class ClientModEvents {
 
         // other entities
         EntityRenderers.register(NDMEntities.FLESH_SHOT.get(), (ctx) -> new BaseProjectileRenderer<>(ctx, new FleshShotModel<>(ctx.bakeLayer(DungeonMobs.FLESH_SHOT_LAYER)), ResourceLocation.fromNamespaceAndPath(MODID, "textures/entity/flesh_shot.png")));
+
+        event.enqueueWork(() -> ItemBlockRenderTypes.setRenderLayer(NDMBlocks.DUNGEON_MOB_SPAWNER_BLOCK.get(), RenderType.translucent()));
     }
 
     @SubscribeEvent
