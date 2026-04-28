@@ -27,11 +27,16 @@ public class DungeonMobSpawner extends BlockEntity {
         Level level = this.getLevel();
 
         if(level != null) {
-            DungeonMob mob = getMobToSpawn().create(level);
-            if(mob != null) {
-                mob.setPos(this.getBlockPos().getX(), this.getBlockPos().getY(), this.getBlockPos().getZ());
-                //maybe add some particles here
-                level.addFreshEntity(mob);
+            if(getMobToSpawn() != null) {
+                DungeonMob mob = getMobToSpawn().create(level);
+                if(mob != null) {
+                    mob.setPos(this.getBlockPos().getX(), this.getBlockPos().getY(), this.getBlockPos().getZ());
+                    //maybe add some particles here
+                    level.addFreshEntity(mob);
+                    level.destroyBlock(this.getBlockPos(), false);
+                }
+            } else {
+                NormalDungeonMod.LOGGER.warn("Spawner unable to spawn mob at " + this.getBlockPos() + " because entity type is null");
                 level.destroyBlock(this.getBlockPos(), false);
             }
         }
