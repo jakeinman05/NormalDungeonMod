@@ -16,7 +16,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
@@ -24,7 +26,11 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.poob22.normaldm.common.server.blocks.properties.GateState;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class DungeonGateBlock extends Block {
@@ -32,9 +38,17 @@ public class DungeonGateBlock extends Block {
     public static final EnumProperty<GateState> STATE = EnumProperty.create("state", GateState.class);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
-    public DungeonGateBlock(Properties pProperties) {
-        super(pProperties);
+    protected static final VoxelShape NS_SHAPE = Block.box(0.0D, 0.0D, 5.0D, 16.0D, 16.0D, 11.0D);
+    protected static final VoxelShape EW_SHAPE = Block.box(5.0D, 0.0D, 0.0D, 11.0D, 16.0D, 16.0D);
+
+    public DungeonGateBlock() {
+        super(Properties.of().strength(100.0F).sound(SoundType.WOOD));
         this.registerDefaultState(this.stateDefinition.any().setValue(HALF, DoubleBlockHalf.LOWER).setValue(STATE, GateState.CLOSED).setValue(FACING, Direction.NORTH));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.@NotNull Builder<Block, BlockState> builder) {
+        builder.add(HALF, STATE, FACING);
     }
 
     @Override
@@ -76,7 +90,7 @@ public class DungeonGateBlock extends Block {
 
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-        level.setBlock(pos.above(), state.setValue(HALF, DoubleBlockHalf.UPPER), 3);
+        level.setBlock(pos.above(), state.setValue(HALF, DoubleBlockHalf.UPPER).setValue(FACING, state.getValue(FACING)), 3);
     }
 
     @Override
@@ -90,7 +104,12 @@ public class DungeonGateBlock extends Block {
 
     @Override
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext ctx) {
-        return this.defaultBlockState().setValue(FACING, ctx.getNearestLookingDirection().getOpposite());
+        BlockPos clickedPos = ctx.getClickedPos();
+        Level level = ctx.getLevel();
+        if(clickedPos.getY() < level.getMaxBuildHeight() - 1 && level.getBlockState(clickedPos.above()).canBeReplaced()) {
+            return this.defaultBlockState().setValue(FACING, ctx.getHorizontalDirection().getOpposite()).setValue(HALF, DoubleBlockHalf.LOWER);
+        }
+        return null;
     }
 
     @Override
@@ -106,6 +125,15 @@ public class DungeonGateBlock extends Block {
                     level.levelEvent(player, 2001, blockpos, Block.getId(blockstate));
                 }
             }
+            if (doubleblockhalf == DoubleBlockHalf.LOWER) {
+                BlockPos blockpos = pos.above();
+                BlockState blockstate = level.getBlockState(blockpos);
+                if (blockstate.is(state.getBlock()) && blockstate.getValue(HALF) == DoubleBlockHalf.UPPER) {
+                    BlockState blockstate1 = blockstate.getFluidState().is(Fluids.WATER) ? Blocks.WATER.defaultBlockState() : Blocks.AIR.defaultBlockState();
+                    level.setBlock(blockpos, blockstate1, 35);
+                    level.levelEvent(player, 2001, blockpos, Block.getId(blockstate));
+                }
+            }
         }
         super.playerWillDestroy(level, pos, state, player);
     }
@@ -113,5 +141,15 @@ public class DungeonGateBlock extends Block {
     @Override
     public boolean isPathfindable(BlockState pState, BlockGetter pLevel, BlockPos pPos, PathComputationType pType) {
         return false;
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState state, BlockGetter getter, BlockPos pos, CollisionContext ctx) {
+        GateState gateState = state.getValue(STATE);
+        if(gateState == GateState.OPEN) {
+            return Shapes.empty();
+        }
+        Direction direction = state.getValue(FACING);
+        return (direction == Direction.NORTH || direction == Direction.SOUTH) ? NS_SHAPE : EW_SHAPE;
     }
 }
