@@ -7,6 +7,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.util.function.Supplier;
 
@@ -24,6 +25,8 @@ public class DungeonMobDefinition<T extends Mob> {
 
     public final EntityRendererProvider<? extends T> renderer;
 
+    public RegistryObject<EntityType<T>> entityType;
+
     public DungeonMobDefinition(String id, EntityType.EntityFactory<T> factory, MobCategory category, float width, float height, Supplier<AttributeSupplier.Builder> attributes, ModelLayerLocation layerLocation, Supplier<LayerDefinition> layerDefinition, EntityRendererProvider<T> renderer) {
         this.id = id;
         this.factory = factory;
@@ -34,5 +37,6 @@ public class DungeonMobDefinition<T extends Mob> {
         this.layerLocation = layerLocation;
         this.layerDefinition = layerDefinition;
         this.renderer = renderer;
+        this.entityType = null;
     }
 }

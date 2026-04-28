@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "normaldm:block/dungeon_mob_spawner"
+    }
+  }
+}

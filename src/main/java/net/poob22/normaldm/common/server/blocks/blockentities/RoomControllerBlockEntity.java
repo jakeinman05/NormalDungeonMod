@@ -11,7 +11,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DoorBlock;
@@ -20,6 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.AABB;
 import net.poob22.normaldm.NormalDungeonMod;
+import net.poob22.normaldm.common.server.blocks.DungeonMobSpawnerBlock;
 import net.poob22.normaldm.common.server.entity.living.DungeonMob;
 import org.slf4j.Logger;
 
@@ -27,10 +27,12 @@ import java.util.*;
 
 public class RoomControllerBlockEntity extends BlockEntity {
     Logger LOG = NormalDungeonMod.LOGGER;
+    public boolean showBounds = false;
 
     public int tickCount;
-    AABB roomBounds = new AABB(this.getBlockPos()).inflate(10);
-    AABB pRoomBounds = roomBounds.deflate(1);
+    private static final int CHECK_INTERVAL = 10;
+    AABB roomBounds;
+    AABB playerRoomBounds;
 
     public enum RoomState {
         DORMANT,
@@ -52,19 +54,14 @@ public class RoomControllerBlockEntity extends BlockEntity {
 
     public static void tick(Level level, BlockPos pos, BlockState state, RoomControllerBlockEntity entity) {
         entity.tickCount++;
-        //NormalDungeonMod.LOGGER.info(entity.tickCount + " ticks");
-        if(!level.isClientSide) {
-            if(entity.tickCount % 10 == 0){
-                //NormalDungeonMod.LOGGER.info("check");
+        entity.initBounds();
 
+        if(!level.isClientSide) {
+            if(entity.tickCount % CHECK_INTERVAL == 0){
                 switch(entity.state) {
                     case DORMANT:
-                        NormalDungeonMod.LOGGER.info("Room is Dormant, checking for players...");
-                        entity.getPlayersInRoom(level);
-
-                        if(!entity.PlayersInRoom.isEmpty()) {
-                            entity.activateRoom(level);
-                        }
+                        //NormalDungeonMod.LOGGER.info("Room is Dormant, checking for players...");
+                        entity.dormantState(level);
                         break;
 
                     case ACTIVE:
@@ -81,49 +78,98 @@ public class RoomControllerBlockEntity extends BlockEntity {
         }
     }
 
+    private void initBounds() {
+        if(roomBounds == null) {
+            roomBounds = new AABB(this.getBlockPos()).inflate(10);
+            playerRoomBounds = roomBounds.deflate(1);
+        }
+    }
+
+    /// STATE METHODS ///
+
+    public void dormantState(Level level) {
+        getPlayersInRoom(level);
+        if(!PlayersInRoom.isEmpty()) {
+            setState(RoomState.ACTIVE);
+        }
+    }
+
     public void activateRoom(Level level) {
         if(!level.isClientSide) {
-            getEnemiesInRoom(level); // remove when spawnEnemies implemented
-
             for(Player player : PlayersInRoom){
                 player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 40));
             }
-
             lockDoors(level);
+            spawnEnemies();
+            ServerLevel l = (ServerLevel)level;
+            checkEnemiesInRoom(l);
 
-            state = RoomState.ACTIVE;
             LOG.info("ROOM HAS BEEN ACTIVATED");
-
-            // spawnEnemies()
         }
     }
 
     public void checkClearRoom(Level level) {
         checkEnemiesInRoom((ServerLevel) level);
 
+        // room cleared
         if(EnemiesInRoom.isEmpty()){
-            unlockDoors(level);
-            state = RoomState.CLEARED;
-            LOG.info("ROOM HAS BEEN CLEARED");
+            setState(RoomState.CLEARED);
         }
+    }
+
+    private void clearRoom(Level level) {
+        unlockDoors(level);
+        level.playSound(null, this.getBlockPos(), SoundEvents.WITHER_DEATH, SoundSource.BLOCKS, 1.0f, 1.0f);
+        // other feedback responses
+
+        LOG.info("ROOM HAS BEEN CLEARED");
     }
 
     public void checkFailRoom() {
         checkPlayersInRoom();
         if (PlayersInRoom.isEmpty()) {
-            state = RoomState.FAILED;
+            setState(RoomState.FAILED);
             LOG.info("ROOM HAS BEEN FAILED");
-
-            for(UUID id : EnemiesInRoom) {
-                ServerLevel l = (ServerLevel) level;
-                Entity e = l.getEntity(id);
-                if(e != null) e.remove(Entity.RemovalReason.DISCARDED);
-            }
-            unlockDoors(level);
         }
     }
 
-    public void getEnemiesInRoom(Level level) {
+    private void failRoom(Level level) {
+        for(UUID id : EnemiesInRoom) {
+            ServerLevel l = (ServerLevel) level;
+            Entity e = l.getEntity(id);
+            if(e != null) e.remove(Entity.RemovalReason.DISCARDED);
+        }
+        unlockDoors(level);
+    }
+
+    private void setState(RoomState newState) {
+        if(state == newState) return;
+
+        this.state = newState;
+
+        setChanged();
+
+        if(level != null) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+
+        onStateChanged(newState);
+    }
+
+    private void onStateChanged(RoomState newState) {
+        if(level != null) {
+            switch(newState) {
+                case ACTIVE -> activateRoom(level);
+                case CLEARED -> clearRoom(level);
+                case FAILED -> failRoom(level);
+                default -> {}
+            }
+        }
+    }
+
+    /// UTIL METHODS ///
+
+    public void getSpawnedEnemiesInRoom(Level level) {
         List<DungeonMob> Enemies = level.getEntitiesOfClass(DungeonMob.class, getRoomBounds());
 
         for(DungeonMob e : Enemies) {
@@ -151,6 +197,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
                 }
             });
         }
+        getSpawnedEnemiesInRoom(level);
     }
 
     public void getPlayersInRoom(Level level) {
@@ -163,12 +210,86 @@ public class RoomControllerBlockEntity extends BlockEntity {
         PlayersInRoom.removeIf(e -> e == null || !e.getBoundingBox().intersects(getRoomBounds()) || !e.isAlive() || e.isSpectator() || e.isCreative());
     }
 
+    private void setRoomBounds(AABB aabb) {
+        roomBounds = aabb;
+    }
+    public AABB getRoomBounds() {
+        return roomBounds;
+    }
+    private void setPlayerRoomBounds(AABB aabb) {
+        playerRoomBounds = aabb;
+    }
+    public AABB getPlayerRoomBounds() {
+        return playerRoomBounds;
+    }
+    public RoomState getRoomState() {
+        return state;
+    }
+    private void setRoomState(RoomState state) {
+        this.state = state;
+    }
+
+    private void lockDoors(Level level) {
+        for(Player player : PlayersInRoom){
+            player.sendSystemMessage(Component.literal("Doors have been 'locked'"));
+        }
+
+        DoorsInRoom.clear();
+        BlockPos min = this.getBlockPos().offset(-10, -5, -10);
+        BlockPos max = this.getBlockPos().offset(10, 5, 10);
+        for(BlockPos pos : BlockPos.betweenClosed(min, max)){
+            BlockState state = level.getBlockState(pos);
+            if(state.getBlock() instanceof DoorBlock door) {
+                door.setOpen(null, level, state, pos, false);
+                if(state.getValue(DoorBlock.HALF) == DoubleBlockHalf.LOWER) {
+                    LOG.info("Door found at " + pos);
+                    BlockPos immutable = pos.immutable();
+                    DoorsInRoom.add(immutable);
+                    LOCKED_DOORS.add(immutable);
+                }
+            }
+        }
+
+        LOG.info(LOCKED_DOORS.size() + " doors have been locked");
+    }
+
+    private void unlockDoors(Level level) {
+        for(Player player : PlayersInRoom){
+            player.sendSystemMessage(Component.literal("Doors have been 'unlocked'"));
+        }
+
+        LOCKED_DOORS.removeAll(DoorsInRoom);
+        DoorsInRoom.clear();
+
+        // going to have to add particles later using packets (for chest spawn)
+    }
+
+    private void spawnEnemies() {
+        BlockPos min = this.getBlockPos().offset(-10, -5, -10);
+        BlockPos max = this.getBlockPos().offset(10, 5, 10);
+
+        if(this.level != null && !this.level.isClientSide){
+            for(BlockPos pos : BlockPos.betweenClosed(min, max)) {
+                if(this.level.getBlockState(pos).getBlock() instanceof DungeonMobSpawnerBlock) {
+                    BlockEntity blockEntity = level.getBlockEntity(pos);
+                    if(blockEntity instanceof DungeonMobSpawner spawner) {
+                        NormalDungeonMod.LOGGER.info("Spawning DungeonMobSpawner at " + pos + " | Spawned entity: " + spawner.getMobToSpawn());
+                        spawner.spawnMob();
+                    }
+                }
+            }
+        }
+    }
+
+    /// NBT HELPERS ///
+
     @Override
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
         // save room state
         RoomState s = state;
         tag.putInt("roomState", s.ordinal());
+        NormalDungeonMod.LOGGER.info("Saving Room State Ordinal: " + s.ordinal() + ", " + RoomState.values()[s.ordinal()]);
 
         saveUUIDSet(tag, "enemies", EnemiesInRoom);
         saveBlockPosSet(tag, "doorPos", DoorsInRoom);
@@ -235,63 +356,5 @@ public class RoomControllerBlockEntity extends BlockEntity {
                 set.add(pos);
             }
         }
-    }
-
-    // don't know if these are needed but i have them
-    private void setRoomBounds(AABB aabb) {
-        roomBounds = aabb;
-    }
-    public AABB getRoomBounds() {
-        return roomBounds;
-    }
-    private void setPlayerRoomBounds(AABB aabb) {
-        pRoomBounds = aabb;
-    }
-    public AABB getPlayerRoomBounds() {
-        return pRoomBounds;
-    }
-
-    private void lockDoors(Level level) {
-        for(Player player : PlayersInRoom){
-            player.sendSystemMessage(Component.literal("Doors have been 'locked'"));
-        }
-
-        DoorsInRoom.clear();
-        BlockPos min = this.getBlockPos().offset(-10, -5, -10);
-        BlockPos max = this.getBlockPos().offset(10, 5, 10);
-        LOG.info("min: " + min + " max: " + max);
-        for(BlockPos pos : BlockPos.betweenClosed(min, max)){
-            BlockState state = level.getBlockState(pos);
-            if(state.getBlock() instanceof DoorBlock door) {
-                door.setOpen(null, level, state, pos, false);
-                if(state.getValue(DoorBlock.HALF) == DoubleBlockHalf.LOWER) {
-                    LOG.info("Door found at " + pos);
-                    BlockPos immutable = pos.immutable();
-                    DoorsInRoom.add(immutable);
-                    LOCKED_DOORS.add(immutable);
-                }
-            }
-        }
-
-        LOG.info(LOCKED_DOORS.size() + " doors have been locked");
-    }
-
-    private void unlockDoors(Level level) {
-        for(Player player : PlayersInRoom){
-            player.sendSystemMessage(Component.literal("Doors have been 'unlocked'"));
-        }
-
-        LOCKED_DOORS.removeAll(DoorsInRoom);
-        DoorsInRoom.clear();
-
-        level.playSound(null, this.getBlockPos(), SoundEvents.WITHER_DEATH, SoundSource.BLOCKS, 1.0f, 1.0f);
-
-        // gonna have to add particles later using packets
-    }
-
-    private void spawnEnemies() {
-        //check roomBounds for instances of MobSpawnBlock (or whatever i call them) and activate them
-        // (they will have an activate function that spawns the mob and removes the block)
-        // add all enemies spawned into hashset.
     }
 }

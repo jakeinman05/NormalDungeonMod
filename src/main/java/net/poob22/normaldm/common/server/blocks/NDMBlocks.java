@@ -19,6 +19,7 @@ public class NDMBlocks {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, NormalDungeonMod.MODID);
 
     public static final RegistryObject<Block> ROOM_CONTROLLER_BLOCK = registerBlockWithItem("room_controller", RoomControllerBlock::new);
+    public static final RegistryObject<Block> DUNGEON_MOB_SPAWNER_BLOCK = registerBlockWithItem("dungeon_mob_spawner", DungeonMobSpawnerBlock::new);
     public static final RegistryObject<Block> PLYWOOD = registerBlockWithItem("plywood", () -> new Block(BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS)));
     public static final RegistryObject<Block> CELLAR_WALL = registerBlockWithItem("cellar_wall", () -> new Block(BlockBehaviour.Properties.copy(Blocks.STONE)));
     public static final RegistryObject<Block> CELLAR_WALL_DRAIN = registerBlockWithItem("cellar_wall_drain", () -> new Block(BlockBehaviour.Properties.copy(Blocks.STONE)));

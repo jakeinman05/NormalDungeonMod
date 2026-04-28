@@ -10,6 +10,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.poob22.normaldm.NormalDungeonMod;
+import net.poob22.normaldm.common.server.entity.registry.DungeonMobs;
 import net.poob22.normaldm.common.server.entity.registry.NDMEntities;
 
 public class FleshGuyEntity extends DungeonMob {
@@ -40,7 +41,7 @@ public class FleshGuyEntity extends DungeonMob {
     }
 
     private void spawnFleshBlob() {
-        EntityType<?> type = NDMEntities.get("flesh_blob");
+        EntityType<?> type = DungeonMobs.FLESH_BLOB.entityType.get();
         FleshBlobEntity blob = (FleshBlobEntity) type.create(this.level());
         if(blob != null) {
             blob.setRespawnTimer(120);
