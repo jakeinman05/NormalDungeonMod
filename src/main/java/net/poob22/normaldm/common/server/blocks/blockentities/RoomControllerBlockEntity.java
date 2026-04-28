@@ -101,7 +101,8 @@ public class RoomControllerBlockEntity extends BlockEntity {
             }
             lockDoors(level);
             spawnEnemies();
-            getSpawnedEnemiesInRoom(level);
+            ServerLevel l = (ServerLevel)level;
+            checkEnemiesInRoom(l);
 
             LOG.info("ROOM HAS BEEN ACTIVATED");
         }
@@ -196,6 +197,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
                 }
             });
         }
+        getSpawnedEnemiesInRoom(level);
     }
 
     public void getPlayersInRoom(Level level) {
