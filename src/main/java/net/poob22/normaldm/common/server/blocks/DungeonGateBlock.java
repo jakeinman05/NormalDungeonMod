@@ -19,10 +19,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.*;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
@@ -38,18 +35,19 @@ public class DungeonGateBlock extends Block {
     public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
     public static final EnumProperty<GateState> STATE = EnumProperty.create("state", GateState.class);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final IntegerProperty FRAMES = IntegerProperty.create("frames", 0, 6);
 
     protected static final VoxelShape NS_SHAPE = Block.box(0.0D, 0.0D, 5.0D, 16.0D, 16.0D, 11.0D);
     protected static final VoxelShape EW_SHAPE = Block.box(5.0D, 0.0D, 0.0D, 11.0D, 16.0D, 16.0D);
 
     public DungeonGateBlock() {
         super(Properties.of().strength(100.0F).sound(SoundType.WOOD));
-        this.registerDefaultState(this.stateDefinition.any().setValue(HALF, DoubleBlockHalf.LOWER).setValue(STATE, GateState.CLOSED).setValue(FACING, Direction.NORTH));
+        this.registerDefaultState(this.stateDefinition.any().setValue(HALF, DoubleBlockHalf.LOWER).setValue(STATE, GateState.CLOSED).setValue(FACING, Direction.NORTH).setValue(FRAMES, 0));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.@NotNull Builder<Block, BlockState> builder) {
-        builder.add(HALF, STATE, FACING);
+        builder.add(HALF, STATE, FACING, FRAMES);
     }
 
     @Override
@@ -67,16 +65,42 @@ public class DungeonGateBlock extends Block {
 //            case OPENING:
 //                return InteractionResult.CONSUME;
             case CLOSED:
-                this.setGateState(level, pos, state, GateState.LOCKED);
+                this.setGateState(level, pos, state, GateState.OPENING);
                 NormalDungeonMod.LOGGER.info("Gate is now " + this.getGateState(level, pos));
-                return InteractionResult.CONSUME;
+                level.scheduleTick(pos, this, 10);
+                return InteractionResult.sidedSuccess(level.isClientSide);
             case LOCKED:
                 this.setGateState(level, pos, state, GateState.CLOSED);
                 NormalDungeonMod.LOGGER.info("Gate is now " + this.getGateState(level, pos));
-                return InteractionResult.CONSUME;
+                return InteractionResult.sidedSuccess(level.isClientSide);
+            case OPENING:
+                this.setGateState(level, pos, state, GateState.LOCKED);
+                NormalDungeonMod.LOGGER.info("Gate is now " + this.getGateState(level, pos));
+                return InteractionResult.sidedSuccess(level.isClientSide);
 
             default: return InteractionResult.PASS;
         }
+    }
+
+    @Override
+    public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        if(state.getValue(STATE) == GateState.OPENING) {
+            int currentFrame = state.getValue(FRAMES);
+            int[] times = {10, 7, 5, 2, 2, 2, 40};
+
+            if(currentFrame < 6) {
+                int nextFrame = currentFrame + 1;
+                updateAnimationState(level, pos, state, state.setValue(FRAMES, nextFrame));
+                level.scheduleTick(pos, this, times[nextFrame]);
+
+            } else {
+                updateAnimationState(level, pos, state, state.setValue(FRAMES, 0).setValue(STATE, GateState.OPEN));
+            }
+        } else if(state.getValue(FRAMES) != 0) {
+            updateAnimationState(level, pos, state, state.setValue(FRAMES, 0));
+        }
+
+        super.tick(state, level, pos, random);
     }
 
     public GateState getGateState(Level level, BlockPos pos) {
@@ -97,9 +121,18 @@ public class DungeonGateBlock extends Block {
         if(partnerState.is(this)) {
             level.setBlock(partnerPos, partnerState.setValue(STATE, newState), 3);
         }
+    }
 
-        if(newState == GateState.OPENING) {
-            level.scheduleTick(pos, this, 20); // figure out what this does
+    private void updateAnimationState(Level level, BlockPos pos, BlockState oldState, BlockState newState) {
+        DoubleBlockHalf half = newState.getValue(HALF);
+        BlockPos partnerPos = (half == DoubleBlockHalf.LOWER) ? pos.above() : pos.below();
+        BlockState partnerState = level.getBlockState(partnerPos);
+
+        level.setBlock(pos, newState, 3);
+        level.sendBlockUpdated(pos, oldState, newState, 3);
+        if(partnerState.is(this)) {
+            level.setBlock(partnerPos, partnerState.setValue(STATE, newState.getValue(STATE)).setValue(FRAMES, newState.getValue(FRAMES)), 3);
+            level.sendBlockUpdated(pos, oldState, newState, 3);
         }
     }
 
