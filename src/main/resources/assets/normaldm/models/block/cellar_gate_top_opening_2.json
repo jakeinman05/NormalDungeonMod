@@ -1,0 +1,21 @@
+{
+  "ambientocclusion": false,
+  "textures": {
+    "gate": "normaldm:block/cellar_gate_opening_top_2",
+    "particle": "#gate"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 5],
+      "to": [16, 16, 11],
+      "faces": {
+        "north": { "uv": [0, 0, 16, 16], "texture": "#gate"},
+        "south": { "uv": [0, 0, 16, 16], "texture": "#gate"},
+        "up": { "uv": [0, 5, 16, 11], "texture": "#gate"},
+        "down": { "uv": [0, 5, 16, 11], "texture": "#gate"},
+        "east": { "uv": [5, 0, 11, 16], "texture": "#gate"},
+        "west": { "uv": [5, 0, 11, 16], "texture": "#gate"}
+      }
+    }
+  ]
+}
