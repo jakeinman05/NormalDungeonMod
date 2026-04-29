@@ -1,13 +1,23 @@
 {
   "variants": {
-    "facing=north,half=lower,state=closed": { "model": "normaldm:block/cellar_gate_bottom_closed" },
-    "facing=south,half=lower,state=closed": { "model": "normaldm:block/cellar_gate_bottom_closed", "y": 180 },
-    "facing=east,half=lower,state=closed": { "model": "normaldm:block/cellar_gate_bottom_closed", "y": 90 },
-    "facing=west,half=lower,state=closed": { "model": "normaldm:block/cellar_gate_bottom_closed", "y": 270 },
+    "facing=north,half=lower,state=closed": { "model": "normaldm:block/cellar_gate_bottom" },
+    "facing=south,half=lower,state=closed": { "model": "normaldm:block/cellar_gate_bottom", "y": 180 },
+    "facing=east,half=lower,state=closed": { "model": "normaldm:block/cellar_gate_bottom", "y": 90 },
+    "facing=west,half=lower,state=closed": { "model": "normaldm:block/cellar_gate_bottom", "y": 270 },
 
     "facing=north,half=upper,state=closed": { "model": "normaldm:block/cellar_gate_top_closed" },
     "facing=south,half=upper,state=closed": { "model": "normaldm:block/cellar_gate_top_closed", "y": 180 },
     "facing=east,half=upper,state=closed": { "model": "normaldm:block/cellar_gate_top_closed", "y": 90 },
-    "facing=west,half=upper,state=closed": { "model": "normaldm:block/cellar_gate_top_closed", "y": 270 }
+    "facing=west,half=upper,state=closed": { "model": "normaldm:block/cellar_gate_top_closed", "y": 270 },
+
+    "facing=north,half=lower,state=locked": { "model": "normaldm:block/cellar_gate_bottom" },
+    "facing=south,half=lower,state=locked": { "model": "normaldm:block/cellar_gate_bottom", "y": 180 },
+    "facing=east,half=lower,state=locked": { "model": "normaldm:block/cellar_gate_bottom", "y": 90 },
+    "facing=west,half=lower,state=locked": { "model": "normaldm:block/cellar_gate_bottom", "y": 270 },
+
+    "facing=north,half=upper,state=locked": { "model": "normaldm:block/cellar_gate_top_locked" },
+    "facing=south,half=upper,state=locked": { "model": "normaldm:block/cellar_gate_top_locked", "y": 180 },
+    "facing=east,half=upper,state=locked": { "model": "normaldm:block/cellar_gate_top_locked", "y": 90 },
+    "facing=west,half=upper,state=locked": { "model": "normaldm:block/cellar_gate_top_locked", "y": 270 }
   }
 }
