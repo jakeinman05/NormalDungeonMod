@@ -29,6 +29,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.server.blocks.properties.GateState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -55,22 +56,36 @@ public class DungeonGateBlock extends Block {
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         GateState currentState = state.getValue(STATE);
         switch(currentState) {
-            case CLOSED: // switch to opening and consume
-                this.setGateState(level, pos, state, GateState.OPENING);
-                return InteractionResult.sidedSuccess(level.isClientSide);
-            case LOCKED: // just consume
-                if(level.isClientSide) {
-                    player.sendSystemMessage(Component.literal("Gate is Locked"));
-                }
-
+//            case CLOSED: // switch to opening and consume
+//                this.setGateState(level, pos, state, GateState.OPENING);
+//                return InteractionResult.sidedSuccess(level.isClientSide);
+//            case LOCKED: // just consume
+//                if(level.isClientSide) {
+//                    player.sendSystemMessage(Component.literal("Gate is Locked"));
+//                }
+//                return InteractionResult.CONSUME;
+//            case OPENING:
+//                return InteractionResult.CONSUME;
+            case CLOSED:
+                this.setGateState(level, pos, state, GateState.LOCKED);
+                NormalDungeonMod.LOGGER.info("Gate is now " + this.getGateState(level, pos));
+                return InteractionResult.CONSUME;
+            case LOCKED:
+                this.setGateState(level, pos, state, GateState.CLOSED);
+                NormalDungeonMod.LOGGER.info("Gate is now " + this.getGateState(level, pos));
                 return InteractionResult.CONSUME;
 
             default: return InteractionResult.PASS;
         }
     }
 
-    public GateState getGateState(Level level) {
-        return this.defaultBlockState().getValue(STATE);
+    public GateState getGateState(Level level, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+        if(state.getBlock() instanceof DungeonGateBlock) {
+            return state.getValue(STATE);
+        }
+        NormalDungeonMod.LOGGER.error("Pos at {} is attempting to return the GateState of a non-DungeonGate block", pos);
+        return GateState.CLOSED;
     }
 
     public void setGateState(Level level, BlockPos pos, BlockState state, GateState newState) {
@@ -80,7 +95,7 @@ public class DungeonGateBlock extends Block {
         level.setBlock(pos, state.setValue(STATE, newState), 3);
         BlockState partnerState = level.getBlockState(partnerPos);
         if(partnerState.is(this)) {
-            level.setBlock(partnerPos, state.setValue(STATE, newState), 3);
+            level.setBlock(partnerPos, partnerState.setValue(STATE, newState), 3);
         }
 
         if(newState == GateState.OPENING) {
@@ -114,7 +129,7 @@ public class DungeonGateBlock extends Block {
 
     @Override
     public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
-        if(!level.isClientSide && player.isCreative()) {
+        if(!level.isClientSide) {
             DoubleBlockHalf doubleblockhalf = state.getValue(HALF);
             if (doubleblockhalf == DoubleBlockHalf.UPPER) {
                 BlockPos blockpos = pos.below();
