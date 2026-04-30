@@ -27,6 +27,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.poob22.normaldm.NormalDungeonMod;
+import net.poob22.normaldm.common.client.particles.NDMParticles;
 import net.poob22.normaldm.common.server.blocks.properties.GateState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,50 +37,38 @@ public class DungeonGateBlock extends Block {
     public static final EnumProperty<GateState> STATE = EnumProperty.create("state", GateState.class);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final IntegerProperty FRAMES = IntegerProperty.create("frames", 0, 6);
+    public static final BooleanProperty HAS_BEEN_OPENED = BooleanProperty.create("opened");
 
     protected static final VoxelShape NS_SHAPE = Block.box(0.0D, 0.0D, 5.0D, 16.0D, 16.0D, 11.0D);
     protected static final VoxelShape EW_SHAPE = Block.box(5.0D, 0.0D, 0.0D, 11.0D, 16.0D, 16.0D);
 
     public DungeonGateBlock() {
         super(Properties.of().strength(100.0F).sound(SoundType.WOOD));
-        this.registerDefaultState(this.stateDefinition.any().setValue(HALF, DoubleBlockHalf.LOWER).setValue(STATE, GateState.CLOSED).setValue(FACING, Direction.NORTH).setValue(FRAMES, 0));
+        this.registerDefaultState(this.stateDefinition.any().setValue(HALF, DoubleBlockHalf.LOWER).setValue(STATE, GateState.CLOSED).setValue(FACING, Direction.NORTH).setValue(FRAMES, 0).setValue(HAS_BEEN_OPENED, false));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.@NotNull Builder<Block, BlockState> builder) {
-        builder.add(HALF, STATE, FACING, FRAMES);
+        builder.add(HALF, STATE, FACING, FRAMES, HAS_BEEN_OPENED);
     }
 
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         GateState currentState = state.getValue(STATE);
-        switch(currentState) {
-//            case CLOSED: // switch to opening and consume
-//                this.setGateState(level, pos, state, GateState.OPENING);
-//                return InteractionResult.sidedSuccess(level.isClientSide);
-//            case LOCKED: // just consume
-//                if(level.isClientSide) {
-//                    player.sendSystemMessage(Component.literal("Gate is Locked"));
-//                }
-//                return InteractionResult.CONSUME;
-//            case OPENING:
-//                return InteractionResult.CONSUME;
-            case CLOSED:
+        return switch (currentState) {
+            case CLOSED -> {
                 this.setGateState(level, pos, state, GateState.OPENING);
-                NormalDungeonMod.LOGGER.info("Gate is now " + this.getGateState(level, pos));
-                level.scheduleTick(pos, this, 10);
-                return InteractionResult.sidedSuccess(level.isClientSide);
-            case LOCKED:
-                this.setGateState(level, pos, state, GateState.CLOSED);
-                NormalDungeonMod.LOGGER.info("Gate is now " + this.getGateState(level, pos));
-                return InteractionResult.sidedSuccess(level.isClientSide);
-            case OPENING:
-                this.setGateState(level, pos, state, GateState.LOCKED);
-                NormalDungeonMod.LOGGER.info("Gate is now " + this.getGateState(level, pos));
-                return InteractionResult.sidedSuccess(level.isClientSide);
-
-            default: return InteractionResult.PASS;
-        }
+                yield InteractionResult.sidedSuccess(level.isClientSide);
+            }
+            case LOCKED -> {
+                if (level.isClientSide) {
+                    player.sendSystemMessage(Component.literal("Gate is Locked"));
+                }
+                yield InteractionResult.CONSUME;
+            }
+            case OPENING -> InteractionResult.CONSUME;
+            default -> InteractionResult.PASS;
+        };
     }
 
     @Override
@@ -94,6 +83,7 @@ public class DungeonGateBlock extends Block {
                 level.scheduleTick(pos, this, times[nextFrame]);
 
             } else {
+                spawnDestroyParticles(level, state, pos, random);
                 updateAnimationState(level, pos, state, state.setValue(FRAMES, 0).setValue(STATE, GateState.OPEN));
             }
         } else if(state.getValue(FRAMES) != 0) {
@@ -102,6 +92,8 @@ public class DungeonGateBlock extends Block {
 
         super.tick(state, level, pos, random);
     }
+
+    ///  UTIL METHODS
 
     public GateState getGateState(Level level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
@@ -121,6 +113,34 @@ public class DungeonGateBlock extends Block {
         if(partnerState.is(this)) {
             level.setBlock(partnerPos, partnerState.setValue(STATE, newState), 3);
         }
+        if(newState == GateState.OPENING) {
+            level.scheduleTick(pos, this, 10);
+            setHasBeenOpened(level, pos, state);
+        }
+        if(state.getValue(STATE) == GateState.LOCKED && newState == GateState.CLOSED && getHasBeenOpened(state)) {
+            setGateState(level, pos, state, GateState.OPENING);
+        }
+    }
+
+    protected void setHasBeenOpened(Level level, BlockPos pos, BlockState state) {
+        if(!state.getValue(HAS_BEEN_OPENED)) { // only if previously unopened
+            DoubleBlockHalf half = state.getValue(HALF);
+            BlockPos partnerPos = (half == DoubleBlockHalf.LOWER) ? pos.above() : pos.below();
+
+            level.setBlock(pos, state.setValue(HAS_BEEN_OPENED, true), 3);
+            BlockState partnerState = level.getBlockState(partnerPos);
+            if(partnerState.is(this)) {
+                level.setBlock(partnerPos, partnerState.setValue(HAS_BEEN_OPENED, true), 3);
+            }
+        }
+    }
+
+    public boolean getHasBeenOpened(BlockState state) {
+        return state.getValue(HAS_BEEN_OPENED);
+    }
+
+    public static boolean isLowerHalf(BlockState state) {
+        return state.hasProperty(HALF) && state.getValue(HALF) == DoubleBlockHalf.LOWER;
     }
 
     private void updateAnimationState(Level level, BlockPos pos, BlockState oldState, BlockState newState) {
@@ -135,6 +155,31 @@ public class DungeonGateBlock extends Block {
             level.sendBlockUpdated(pos, oldState, newState, 3);
         }
     }
+
+    protected void spawnDestroyParticles(ServerLevel level, BlockState state, BlockPos pos, RandomSource random) {
+        VoxelShape voxelShape = this.getVoxelShape(state);
+        int yShift = (state.getValue(HALF) == DoubleBlockHalf.UPPER) ? 1 : -1;
+        double xCenter = pos.getX() + voxelShape.bounds().getCenter().x;
+        double yCenter = pos.getY() + voxelShape.bounds().getCenter().y;
+        double zCenter = pos.getZ() + voxelShape.bounds().getCenter().z;
+        NormalDungeonMod.LOGGER.info("{}, {}, {}", xCenter, yCenter, zCenter);
+        level.sendParticles(NDMParticles.FLESH_PARTICLE.get(),
+                xCenter, yCenter, zCenter,
+                18,
+                (random.nextDouble() - 0.5) * 0.8,
+                (random.nextDouble() - 0.5) * 0.8,
+                (random.nextDouble() - 0.5) * 0.8,
+                1.0D);
+        level.sendParticles(NDMParticles.FLESH_PARTICLE.get(),
+                xCenter, yCenter - yShift, zCenter,
+                18,
+                (random.nextDouble() - 0.5) * 0.8,
+                (random.nextDouble() - 0.5) * 0.8,
+                (random.nextDouble() - 0.5) * 0.8,
+                1.0D);
+    }
+
+    /// BLOCK OVERRIDES
 
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
@@ -191,13 +236,17 @@ public class DungeonGateBlock extends Block {
         return false;
     }
 
-    @Override
-    public VoxelShape getShape(BlockState state, BlockGetter getter, BlockPos pos, CollisionContext ctx) {
+    private VoxelShape getVoxelShape(BlockState state) {
         GateState gateState = state.getValue(STATE);
         if(gateState == GateState.OPEN) {
             return Shapes.empty();
         }
         Direction direction = state.getValue(FACING);
         return (direction == Direction.NORTH || direction == Direction.SOUTH) ? NS_SHAPE : EW_SHAPE;
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState state, BlockGetter getter, BlockPos pos, CollisionContext ctx) {
+        return getVoxelShape(state);
     }
 }
