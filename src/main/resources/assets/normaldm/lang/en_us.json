@@ -11,6 +11,7 @@
   "block.normaldm.flesh_block": "Flesh Block",
   "block.normaldm.room_controller": "Room Controller",
   "block.normaldm.dungeon_mob_spawner": "Dungeon Mob Spawner",
+  "block.normaldm.cellar_gate": "Cellar Gate",
 
   "entity.normaldm.charger_maggot": "Charger Maggot",
   "entity.normaldm.maggot": "Maggot",
