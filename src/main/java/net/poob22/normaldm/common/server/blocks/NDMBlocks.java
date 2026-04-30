@@ -30,6 +30,7 @@ public class NDMBlocks {
     public static final RegistryObject<Block> CELLAR_CEILING_MOLDY = registerBlockWithItem("cellar_ceiling_moldy", () -> new Block(BlockBehaviour.Properties.copy(Blocks.STONE)));
     public static final RegistryObject<Block> CELLAR_CEILING_FLESH_TORN = registerBlockWithItem("cellar_ceiling_flesh_torn", () -> new Block(BlockBehaviour.Properties.copy(Blocks.STONE)));
     public static final RegistryObject<Block> FLESH_BLOCK = registerBlockWithItem("flesh_block", () -> new Block(BlockBehaviour.Properties.copy(Blocks.SCULK)));
+    public static final RegistryObject<Block> CELLAR_GATE = registerBlockWithItem("cellar_gate", DungeonGateBlock::new);
 
 
     private static <T extends Block> RegistryObject<T> registerBlockWithItem(String name, Supplier<T> block) {

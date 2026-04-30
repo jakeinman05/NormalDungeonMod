@@ -76,7 +76,8 @@ public class RandomStrollCardinalDirectionsGoal extends Goal {
         if(lastBlockPos != null && lastBlockPos.equals(mob.blockPosition())) {
             stillTimer--;
             if(stillTimer <= 0) {
-                pickNewDirection();
+                List<Direction> opposite = pickOppositeDirection();
+                moveDir = opposite.get(0);
             }
         } else {
             stillTimer = 10;
@@ -98,9 +99,14 @@ public class RandomStrollCardinalDirectionsGoal extends Goal {
         mob.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), speedMod);
     }
 
+    private List<Direction> pickOppositeDirection() {
+        return Arrays.stream(ALL_DIRECTIONS).filter(d -> d == moveDir.getOpposite()).toList();
+    }
+
     private boolean isBlocked(Direction d) {
         BlockPos next = mob.blockPosition().relative(d);
-        return !mob.level().getBlockState(next).isAir() || !mob.level().getBlockState(next.relative(d)).isAir();
+        return !mob.level().getBlockState(next).isAir();
+        // || !mob.level().getBlockState(next.relative(d)).isAir()
     }
 
     private void checkDamage() {

@@ -38,7 +38,10 @@ public class ClientModEvents {
         // other entities
         EntityRenderers.register(NDMEntities.FLESH_SHOT.get(), (ctx) -> new BaseProjectileRenderer<>(ctx, new FleshShotModel<>(ctx.bakeLayer(DungeonMobs.FLESH_SHOT_LAYER)), ResourceLocation.fromNamespaceAndPath(MODID, "textures/entity/flesh_shot.png")));
 
-        event.enqueueWork(() -> ItemBlockRenderTypes.setRenderLayer(NDMBlocks.DUNGEON_MOB_SPAWNER_BLOCK.get(), RenderType.translucent()));
+        event.enqueueWork(() -> {
+            ItemBlockRenderTypes.setRenderLayer(NDMBlocks.DUNGEON_MOB_SPAWNER_BLOCK.get(), RenderType.translucent());
+            ItemBlockRenderTypes.setRenderLayer(NDMBlocks.CELLAR_GATE.get(), RenderType.cutout());
+        });
     }
 
     @SubscribeEvent
