@@ -104,34 +104,23 @@ public class DungeonGateBlock extends Block {
         return GateState.CLOSED;
     }
 
-    public void setGateState(Level level, BlockPos pos, BlockState state, GateState newState) {
+    public void setGateState(Level level, BlockPos pos, BlockState state, GateState gateState) {
         DoubleBlockHalf half = state.getValue(HALF);
         BlockPos partnerPos = (half == DoubleBlockHalf.LOWER) ? pos.above() : pos.below();
+        boolean opened = gateState == GateState.OPENING;
+        BlockState newState = (opened && !state.getValue(HAS_BEEN_OPENED)) ? state.setValue(STATE, gateState).setValue(HAS_BEEN_OPENED, true) : state.setValue(STATE, gateState);
 
-        level.setBlock(pos, state.setValue(STATE, newState), 3);
+        level.setBlock(pos, newState, 3);
         BlockState partnerState = level.getBlockState(partnerPos);
+        BlockState newPartnerState = (opened && !partnerState.getValue(HAS_BEEN_OPENED)) ? partnerState.setValue(STATE, gateState).setValue(HAS_BEEN_OPENED, true) : partnerState.setValue(STATE, gateState);
         if(partnerState.is(this)) {
-            level.setBlock(partnerPos, partnerState.setValue(STATE, newState), 3);
+            level.setBlock(partnerPos, newPartnerState, 3);
         }
-        if(newState == GateState.OPENING) {
+        if(gateState == GateState.OPENING) {
             level.scheduleTick(pos, this, 10);
-            setHasBeenOpened(level, pos, state);
         }
-        if(state.getValue(STATE) == GateState.LOCKED && newState == GateState.CLOSED && getHasBeenOpened(state)) {
+        if(state.getValue(STATE) == GateState.LOCKED && gateState == GateState.CLOSED && getHasBeenOpened(state)) {
             setGateState(level, pos, state, GateState.OPENING);
-        }
-    }
-
-    protected void setHasBeenOpened(Level level, BlockPos pos, BlockState state) {
-        if(!state.getValue(HAS_BEEN_OPENED)) { // only if previously unopened
-            DoubleBlockHalf half = state.getValue(HALF);
-            BlockPos partnerPos = (half == DoubleBlockHalf.LOWER) ? pos.above() : pos.below();
-
-            level.setBlock(pos, state.setValue(HAS_BEEN_OPENED, true), 3);
-            BlockState partnerState = level.getBlockState(partnerPos);
-            if(partnerState.is(this)) {
-                level.setBlock(partnerPos, partnerState.setValue(HAS_BEEN_OPENED, true), 3);
-            }
         }
     }
 
