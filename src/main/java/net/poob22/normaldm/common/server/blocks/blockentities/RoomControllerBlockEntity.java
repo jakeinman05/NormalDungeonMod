@@ -19,6 +19,8 @@ import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.server.blocks.DungeonGateBlock;
 import net.poob22.normaldm.common.server.blocks.DungeonMobSpawnerBlock;
 import net.poob22.normaldm.common.server.blocks.properties.GateState;
+import net.poob22.normaldm.common.server.blocks.properties.RoomDefinition;
+import net.poob22.normaldm.common.server.blocks.properties.RoomDefinitions;
 import net.poob22.normaldm.common.server.entity.living.DungeonMob;
 import org.slf4j.Logger;
 
@@ -32,6 +34,9 @@ public class RoomControllerBlockEntity extends BlockEntity {
     private static final int GATE_CHECK_INTERVAL = 60;
     AABB roomBounds;
     AABB playerRoomBounds;
+
+    // default room type
+    public RoomDefinition RoomType = RoomDefinitions.SMALL;
 
     public enum RoomState {
         DORMANT,
@@ -78,11 +83,9 @@ public class RoomControllerBlockEntity extends BlockEntity {
         }
     }
 
-    private void initBounds() {
-        if(roomBounds == null) {
-            roomBounds = new AABB(this.getBlockPos()).inflate(10);
-            playerRoomBounds = roomBounds.deflate(1.25);
-        }
+    public void initBounds() {
+        roomBounds = RoomType.createRoomBounds(this.getBlockPos(), false);
+        playerRoomBounds = RoomType.createRoomBounds(this.getBlockPos(), true);
     }
 
     /// STATE METHODS ///
