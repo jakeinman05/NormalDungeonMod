@@ -7,7 +7,8 @@ public enum RoomType implements StringRepresentable {
     SMALL,
     SMALL_HALLWAY,
     MEDIUM,
-    LARGE;
+    LARGE,
+    L_SHAPED;
 
 
     @Override
@@ -17,6 +18,7 @@ public enum RoomType implements StringRepresentable {
             case SMALL_HALLWAY -> "small_hallway";
             case MEDIUM -> "medium";
             case LARGE -> "large";
+            case L_SHAPED -> "l_shaped";
         };
     }
 }
