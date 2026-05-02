@@ -17,13 +17,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.server.blocks.DungeonGateBlock;
 import net.poob22.normaldm.common.server.blocks.DungeonMobSpawnerBlock;
 import net.poob22.normaldm.common.server.blocks.properties.GateState;
 import net.poob22.normaldm.common.server.blocks.properties.RoomDefinition;
 import net.poob22.normaldm.common.server.blocks.properties.RoomDefinitions;
+import net.poob22.normaldm.common.server.blocks.properties.RoomVolume;
 import net.poob22.normaldm.common.server.entity.living.DungeonMob;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,8 +37,8 @@ public class RoomControllerBlockEntity extends BlockEntity {
     public int tickCount;
     private static final int CHECK_INTERVAL = 10;
     private static final int GATE_CHECK_INTERVAL = 60;
-    List<AABB> roomBounds;
-    List<AABB> playerRoomBounds;
+    List<RoomVolume> roomBounds;
+    List<RoomVolume> playerRoomBounds;
 
     // default room type
     public RoomDefinition RoomLayout = RoomDefinitions.SMALL;
@@ -81,16 +81,12 @@ public class RoomControllerBlockEntity extends BlockEntity {
                     case FAILED:
                 }
             }
-
-            if(entity.tickCount % GATE_CHECK_INTERVAL == 0){
-                entity.getGatesInRoom(level);
-            }
         }
     }
 
     public void initBounds() {
-        roomBounds = RoomLayout.createRoomBounds(this.getBlockPos(), false);
-        playerRoomBounds = RoomLayout.createRoomBounds(this.getBlockPos(), true);
+        roomBounds = RoomLayout.getVolumes();
+        playerRoomBounds = RoomLayout.getVolumes();
     }
 
     /// STATE METHODS ///
@@ -107,6 +103,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
             for(Player player : PlayersInRoom){
                 player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 40));
             }
+            getGatesInRoom(level);
             lockGates(level);
             spawnEnemies();
             ServerLevel l = (ServerLevel)level;
@@ -175,8 +172,8 @@ public class RoomControllerBlockEntity extends BlockEntity {
 
     public void getSpawnedEnemiesInRoom(Level level) {
         List<DungeonMob> Enemies = new ArrayList<>();
-        for(AABB box : roomBounds) {
-            Enemies.add((DungeonMob) level.getEntitiesOfClass(DungeonMob.class, box));
+        for(RoomVolume v : roomBounds) {
+            Enemies.addAll(level.getEntitiesOfClass(DungeonMob.class, v.toAABB(this.getBlockPos(), false)));
         }
 
         for(DungeonMob e : Enemies) {
@@ -193,9 +190,12 @@ public class RoomControllerBlockEntity extends BlockEntity {
             EnemiesInRoom.removeIf(id -> {
                 Entity e = level.getEntity(id);
                 if(e instanceof DungeonMob) {
-                    boolean flag = true;
-                    for(AABB box : roomBounds) {
-                        flag = box.intersects(e.getBoundingBox());
+                    boolean flag = false;
+                    for(RoomVolume v : roomBounds) {
+                        if (v.toAABB(this.getBlockPos(), false).intersects(e.getBoundingBox())) {
+                            flag = true;
+                            break;
+                        }
                     }
                     if(!e.isAlive() || !flag) {
                         ((DungeonMob) e).setInDungeon(false);
@@ -212,9 +212,9 @@ public class RoomControllerBlockEntity extends BlockEntity {
     }
 
     public void getPlayersInRoom(Level level) {
-        List<Player> p = new ArrayList<>();
-        for(AABB box : playerRoomBounds) {
-            p.addAll(level.getEntitiesOfClass(Player.class, box, player -> player.isAlive() && !player.isSpectator() && !player.isCreative() && player.isAlive()));
+        Set<Player> p = new HashSet<>();
+        for(RoomVolume v : playerRoomBounds) {
+            p.addAll(level.getEntitiesOfClass(Player.class, v.toAABB(this.getBlockPos(), true), player -> player.isAlive() && !player.isSpectator() && !player.isCreative() && player.isAlive()));
         }
         PlayersInRoom.clear();
         PlayersInRoom.addAll(p);
@@ -225,18 +225,18 @@ public class RoomControllerBlockEntity extends BlockEntity {
     }
 
     protected boolean isPlayerInVolumes(Player player) {
-        for(AABB box : roomBounds) {
-            if(box.intersects(player.getBoundingBox())) {
+        for(RoomVolume v : roomBounds) {
+            if(v.toAABB(this.getBlockPos(), true).intersects(player.getBoundingBox())) {
                 return true;
             }
         }
         return false;
     }
 
-    public List<AABB> getRoomBounds() {
+    public List<RoomVolume> getRoomBounds() {
         return roomBounds;
     }
-    public List<AABB> getPlayerRoomBounds() {
+    public List<RoomVolume> getPlayerRoomBounds() {
         return playerRoomBounds;
     }
     public RoomState getRoomState() {
@@ -275,32 +275,39 @@ public class RoomControllerBlockEntity extends BlockEntity {
         GatesInRoom.clear();
 
         BlockPos origin = this.getBlockPos();
-        for()
-        BlockPos min = origin.offset(this.RoomLayout.getMinOfVolumes());
-        BlockPos max = origin.offset(this.RoomLayout.getMaxOfVolumes());
-        for(BlockPos pos : BlockPos.betweenClosed(min, max)){
-            BlockState state = level.getBlockState(pos);
-            if(state.getBlock() instanceof DungeonGateBlock gate) {
-                if(DungeonGateBlock.isLowerHalf(state)) {
-                    GatesInRoom.add(pos.immutable());
+
+        for(RoomVolume v : roomBounds) {
+            BlockPos min = origin.offset(v.min);
+            BlockPos max = origin.offset(v.max);
+
+            for(BlockPos pos : BlockPos.betweenClosed(min, max)){
+                BlockState state = level.getBlockState(pos);
+                if(state.getBlock() instanceof DungeonGateBlock gate) {
+                    if(DungeonGateBlock.isLowerHalf(state)) {
+                        GatesInRoom.add(pos.immutable());
+                    }
                 }
             }
         }
+
         NormalDungeonMod.LOGGER.info("Gates in Room: {}", GatesInRoom.size());
     }
 
     private void spawnEnemies() {
         BlockPos origin = this.getBlockPos();
-        BlockPos min = origin.offset(this.RoomLayout.getMinOfVolumes());
-        BlockPos max = origin.offset(this.RoomLayout.getMaxOfVolumes());
 
         if(this.level != null && !this.level.isClientSide){
-            for(BlockPos pos : BlockPos.betweenClosed(min, max)) {
-                if(this.level.getBlockState(pos).getBlock() instanceof DungeonMobSpawnerBlock) {
-                    BlockEntity blockEntity = level.getBlockEntity(pos);
-                    if(blockEntity instanceof DungeonMobSpawner spawner) {
-                        NormalDungeonMod.LOGGER.info("Spawning DungeonMobSpawner at " + pos + " | Spawned entity: " + spawner.getMobToSpawn());
-                        spawner.spawnMob();
+            for(RoomVolume v : roomBounds) {
+                BlockPos min = origin.offset(v.min);
+                BlockPos max = origin.offset(v.max);
+
+                for(BlockPos pos : BlockPos.betweenClosed(min, max)) {
+                    if(this.level.getBlockState(pos).getBlock() instanceof DungeonMobSpawnerBlock) {
+                        BlockEntity blockEntity = level.getBlockEntity(pos);
+                        if(blockEntity instanceof DungeonMobSpawner spawner) {
+                            NormalDungeonMod.LOGGER.info("Spawning DungeonMobSpawner at " + pos + " | Spawned entity: " + spawner.getMobToSpawn());
+                            spawner.spawnMob();
+                        }
                     }
                 }
             }
