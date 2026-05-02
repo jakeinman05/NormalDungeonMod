@@ -4,6 +4,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -22,6 +25,8 @@ import net.poob22.normaldm.common.server.blocks.properties.GateState;
 import net.poob22.normaldm.common.server.blocks.properties.RoomDefinition;
 import net.poob22.normaldm.common.server.blocks.properties.RoomDefinitions;
 import net.poob22.normaldm.common.server.entity.living.DungeonMob;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -36,7 +41,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
     AABB playerRoomBounds;
 
     // default room type
-    public RoomDefinition RoomType = RoomDefinitions.SMALL;
+    public RoomDefinition RoomLayout = RoomDefinitions.SMALL;
 
     public enum RoomState {
         DORMANT,
@@ -84,8 +89,8 @@ public class RoomControllerBlockEntity extends BlockEntity {
     }
 
     public void initBounds() {
-        roomBounds = RoomType.createRoomBounds(this.getBlockPos(), false);
-        playerRoomBounds = RoomType.createRoomBounds(this.getBlockPos(), true);
+        roomBounds = RoomLayout.createRoomBounds(this.getBlockPos(), false);
+        playerRoomBounds = RoomLayout.createRoomBounds(this.getBlockPos(), true);
     }
 
     /// STATE METHODS ///
@@ -219,6 +224,13 @@ public class RoomControllerBlockEntity extends BlockEntity {
         return state;
     }
 
+    public void setRoomLayout(RoomDefinition type) {
+        this.RoomLayout = type;
+        setChanged();
+        if(level != null)
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+    }
+
     private void lockGates(Level level) {
         for(BlockPos pos : GatesInRoom) {
             BlockState state = level.getBlockState(pos);
@@ -241,25 +253,26 @@ public class RoomControllerBlockEntity extends BlockEntity {
     }
 
     private void getGatesInRoom(Level level) {
-        BlockPos min = this.getBlockPos().offset(-10, -5, -10);
-        BlockPos max = this.getBlockPos().offset(10, 5, 10);
+        GatesInRoom.clear();
+
+        BlockPos origin = this.getBlockPos();
+        BlockPos min = origin.offset(this.RoomLayout.getMin());
+        BlockPos max = origin.offset(this.RoomLayout.getMax());
         for(BlockPos pos : BlockPos.betweenClosed(min, max)){
             BlockState state = level.getBlockState(pos);
-            boolean isGate = state.getBlock() instanceof DungeonGateBlock gate;
-            if(isGate) {
+            if(state.getBlock() instanceof DungeonGateBlock gate) {
                 if(DungeonGateBlock.isLowerHalf(state)) {
                     GatesInRoom.add(pos.immutable());
                 }
             }
-            else {
-                GatesInRoom.remove(pos);
-            }
         }
+        NormalDungeonMod.LOGGER.info("Gates in Room: {}", GatesInRoom.size());
     }
 
     private void spawnEnemies() {
-        BlockPos min = this.getBlockPos().offset(-10, -5, -10);
-        BlockPos max = this.getBlockPos().offset(10, 5, 10);
+        BlockPos origin = this.getBlockPos();
+        BlockPos min = origin.offset(this.RoomLayout.getMin());
+        BlockPos max = origin.offset(this.RoomLayout.getMax());
 
         if(this.level != null && !this.level.isClientSide){
             for(BlockPos pos : BlockPos.betweenClosed(min, max)) {
@@ -282,7 +295,9 @@ public class RoomControllerBlockEntity extends BlockEntity {
         // save room state
         RoomState s = state;
         tag.putInt("roomState", s.ordinal());
-        //NormalDungeonMod.LOGGER.info("Saving Room State Ordinal: " + s.ordinal() + ", " + RoomState.values()[s.ordinal()]);
+        if(this.RoomLayout != null) {
+            tag.putString("roomType", RoomLayout.toString());
+        }
 
         saveUUIDSet(tag, "enemies", EnemiesInRoom);
         saveBlockPosSet(tag, "gatePos", GatesInRoom);
@@ -320,6 +335,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
             LOG.error("Invalid Room State Loaded...Reverting To DORMANT");
             state = RoomState.DORMANT;
         }
+        this.setRoomLayout(RoomDefinitions.get(tag.getString("roomType")));
 
         loadUUIDSet(tag, "enemies", EnemiesInRoom);
         loadBlockPosSet(tag, "gatePos", GatesInRoom);
@@ -348,5 +364,15 @@ public class RoomControllerBlockEntity extends BlockEntity {
                 set.add(pos);
             }
         }
+    }
+
+    @Override
+    public @NotNull CompoundTag getUpdateTag() {
+        return saveWithoutMetadata();
+    }
+
+    @Override
+    public @Nullable Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 }
