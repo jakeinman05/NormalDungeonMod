@@ -63,8 +63,10 @@ public class RoomBBRenderer {
             if(blockEntity instanceof RoomControllerBlockEntity roomController) {
                 AABB box = roomController.getRoomBounds();
                 AABB playerBox = roomController.getPlayerRoomBounds();
-                LevelRenderer.renderLineBox(poseStack, builder, box, 1.0f, 0.0f, 0.0f, 1.0f);
-                LevelRenderer.renderLineBox(poseStack, builder, playerBox, 0.0f, 0.0f, 1.0f, 1.0f);
+                if(box != null && playerBox != null) {
+                    LevelRenderer.renderLineBox(poseStack, builder, box, 1.0f, 0.0f, 0.0f, 1.0f);
+                    LevelRenderer.renderLineBox(poseStack, builder, playerBox, 0.0f, 0.0f, 1.0f, 1.0f);
+                }
             }
         }
 
