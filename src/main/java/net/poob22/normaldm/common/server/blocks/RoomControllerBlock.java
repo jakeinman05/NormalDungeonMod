@@ -47,31 +47,34 @@ public class RoomControllerBlock extends BaseEntityBlock {
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         BlockEntity blockEntity = level.getBlockEntity(pos);
         ItemStack itemStack = player.getItemInHand(interactionHand);
-        if(level.isClientSide) {
+        if(!level.isClientSide) {
             if(itemStack.getItem() instanceof DungeonWandItem && blockEntity instanceof RoomControllerBlockEntity roomController) {
-                NormalDungeonMod.LOGGER.info("bam1");
-                 if(!player.isShiftKeyDown()) {
-                    NormalDungeonMod.LOGGER.info("bam3");
-                    cycleRoomType(roomController);
+                NormalDungeonMod.LOGGER.info("server");
+                if(!player.isShiftKeyDown()) {
+                    cycleRoomType(roomController, player);
+                    return InteractionResult.SUCCESS;
                 }
-            } if(itemStack.isEmpty()) {
+            }
+        }
+
+        if(level.isClientSide) {
+            if(itemStack.isEmpty()) {
                 if(player.isShiftKeyDown()) {
-                    NormalDungeonMod.LOGGER.info("bam2");
+                    NormalDungeonMod.LOGGER.info("client");
                     RoomBBRenderer.toggle(pos);
                     return InteractionResult.SUCCESS;
                 }
             }
         }
 
-        return InteractionResult.CONSUME;
+        return InteractionResult.SUCCESS;
     }
 
-    public void cycleRoomType(RoomControllerBlockEntity rc) {
-        int index = RoomDefinitions.ROOM_TYPES.indexOf(rc.RoomType);
+    public void cycleRoomType(RoomControllerBlockEntity rc, Player player) {
+        int index = RoomDefinitions.ROOM_TYPES.indexOf(rc.RoomLayout);
         index = (index + 1) % RoomDefinitions.ROOM_TYPES.size();
-        rc.RoomType = RoomDefinitions.ROOM_TYPES.get(index);
-        NormalDungeonMod.LOGGER.info("Room Type: " + rc.RoomType.toString());
-        //rc.initBounds();
+        rc.setRoomLayout(RoomDefinitions.ROOM_TYPES.get(index));
+        player.sendSystemMessage(Component.literal("Room Type: " + rc.RoomLayout.toString()));
     }
 
     @Override
