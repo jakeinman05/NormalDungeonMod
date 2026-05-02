@@ -2,7 +2,6 @@ package net.poob22.normaldm.common.server.blocks.properties;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 public class RoomDefinition {
@@ -31,6 +30,14 @@ public class RoomDefinition {
                 box.maxZ + max.getZ()
         );
         return playerBounds ? bBox.deflate(1.25) : bBox;
+    }
+
+    public BlockPos getMin() {
+        return min;
+    }
+
+    public BlockPos getMax() {
+        return max;
     }
 
     public String toString() {
