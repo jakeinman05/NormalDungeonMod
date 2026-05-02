@@ -37,8 +37,8 @@ public class RoomControllerBlockEntity extends BlockEntity {
     public int tickCount;
     private static final int CHECK_INTERVAL = 10;
     private static final int GATE_CHECK_INTERVAL = 60;
-    AABB roomBounds;
-    AABB playerRoomBounds;
+    List<AABB> roomBounds;
+    List<AABB> playerRoomBounds;
 
     // default room type
     public RoomDefinition RoomLayout = RoomDefinitions.SMALL;
@@ -174,7 +174,10 @@ public class RoomControllerBlockEntity extends BlockEntity {
     /// UTIL METHODS ///
 
     public void getSpawnedEnemiesInRoom(Level level) {
-        List<DungeonMob> Enemies = level.getEntitiesOfClass(DungeonMob.class, getRoomBounds());
+        List<DungeonMob> Enemies = new ArrayList<>();
+        for(AABB box : roomBounds) {
+            Enemies.add((DungeonMob) level.getEntitiesOfClass(DungeonMob.class, box));
+        }
 
         for(DungeonMob e : Enemies) {
             UUID id = e.getUUID();
@@ -190,7 +193,11 @@ public class RoomControllerBlockEntity extends BlockEntity {
             EnemiesInRoom.removeIf(id -> {
                 Entity e = level.getEntity(id);
                 if(e instanceof DungeonMob) {
-                    if(!e.isAlive() || !roomBounds.intersects(e.getBoundingBox())) {
+                    boolean flag = true;
+                    for(AABB box : roomBounds) {
+                        flag = box.intersects(e.getBoundingBox());
+                    }
+                    if(!e.isAlive() || !flag) {
                         ((DungeonMob) e).setInDungeon(false);
                         NormalDungeonMod.LOGGER.info("Enemy either died or left room bounds, will not be added back to the room");
                         return true;
@@ -205,19 +212,31 @@ public class RoomControllerBlockEntity extends BlockEntity {
     }
 
     public void getPlayersInRoom(Level level) {
-        List<Player> p = level.getEntitiesOfClass(Player.class, getPlayerRoomBounds(), player -> !player.isSpectator() && !player.isCreative() && player.isAlive());
+        List<Player> p = new ArrayList<>();
+        for(AABB box : playerRoomBounds) {
+            p.addAll(level.getEntitiesOfClass(Player.class, box, player -> player.isAlive() && !player.isSpectator() && !player.isCreative() && player.isAlive()));
+        }
         PlayersInRoom.clear();
         PlayersInRoom.addAll(p);
     }
 
     private void checkPlayersInRoom() {
-        PlayersInRoom.removeIf(e -> e == null || !e.getBoundingBox().intersects(getRoomBounds()) || !e.isAlive() || e.isSpectator() || e.isCreative());
+        PlayersInRoom.removeIf(e -> e == null || !isPlayerInVolumes(e) || !e.isAlive() || e.isSpectator() || e.isCreative());
     }
 
-    public AABB getRoomBounds() {
+    protected boolean isPlayerInVolumes(Player player) {
+        for(AABB box : roomBounds) {
+            if(box.intersects(player.getBoundingBox())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public List<AABB> getRoomBounds() {
         return roomBounds;
     }
-    public AABB getPlayerRoomBounds() {
+    public List<AABB> getPlayerRoomBounds() {
         return playerRoomBounds;
     }
     public RoomState getRoomState() {
@@ -256,8 +275,9 @@ public class RoomControllerBlockEntity extends BlockEntity {
         GatesInRoom.clear();
 
         BlockPos origin = this.getBlockPos();
-        BlockPos min = origin.offset(this.RoomLayout.getMin());
-        BlockPos max = origin.offset(this.RoomLayout.getMax());
+        for()
+        BlockPos min = origin.offset(this.RoomLayout.getMinOfVolumes());
+        BlockPos max = origin.offset(this.RoomLayout.getMaxOfVolumes());
         for(BlockPos pos : BlockPos.betweenClosed(min, max)){
             BlockState state = level.getBlockState(pos);
             if(state.getBlock() instanceof DungeonGateBlock gate) {
@@ -271,8 +291,8 @@ public class RoomControllerBlockEntity extends BlockEntity {
 
     private void spawnEnemies() {
         BlockPos origin = this.getBlockPos();
-        BlockPos min = origin.offset(this.RoomLayout.getMin());
-        BlockPos max = origin.offset(this.RoomLayout.getMax());
+        BlockPos min = origin.offset(this.RoomLayout.getMinOfVolumes());
+        BlockPos max = origin.offset(this.RoomLayout.getMaxOfVolumes());
 
         if(this.level != null && !this.level.isClientSide){
             for(BlockPos pos : BlockPos.betweenClosed(min, max)) {

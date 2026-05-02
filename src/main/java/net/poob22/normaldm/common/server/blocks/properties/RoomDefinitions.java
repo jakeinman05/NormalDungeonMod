@@ -1,11 +1,11 @@
 package net.poob22.normaldm.common.server.blocks.properties;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.AABB;
 import net.poob22.normaldm.NormalDungeonMod;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class RoomDefinitions {
     public static final List<RoomDefinition> ROOM_TYPES = new ArrayList<RoomDefinition>();
@@ -13,9 +13,8 @@ public class RoomDefinitions {
     public static final RoomDefinition SMALL = register(
             new RoomDefinition(
                     "small",
-                    new BlockPos(-5, 1, -5),
-                    new BlockPos(5, 7, 5),
-                    RoomType.SMALL
+                    RoomType.SMALL,
+                    new RoomVolume(new BlockPos(-5, 1, -5), new BlockPos(5, 7, 5))
             )
     );
 

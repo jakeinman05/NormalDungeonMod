@@ -43,7 +43,7 @@ public class RoomBBRenderer {
         Minecraft mc = Minecraft.getInstance();
         Level level = mc.level;
         if(level == null) {
-            NormalDungeonMod.LOGGER.error("Level is null");
+            NormalDungeonMod.LOGGER.warn("Level is null, unable to render room boundaries!");
             return;
         }
 
