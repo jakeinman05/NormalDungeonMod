@@ -48,6 +48,15 @@ public class RoomDefinitions {
             )
     );
 
+    public static final RoomDefinition SMALL_L_SHAPED = register(
+            new RoomDefinition(
+                    "small_l_shaped",
+                    RoomType.L_SHAPED,
+                    new RoomVolume(new BlockPos(-11, 1, -3), new BlockPos(5, 7, 4)),
+                    new RoomVolume(new BlockPos(-4, 1, -8), new BlockPos(5, 7, 4))
+            )
+    );
+
     public static RoomDefinition get(String roomType){
         for(RoomDefinition room : ROOM_TYPES){
             if(Objects.equals(room.toString(), roomType)){
