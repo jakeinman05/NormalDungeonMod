@@ -19,7 +19,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.client.events.RoomBBRenderer;
 import net.poob22.normaldm.common.server.blocks.blockentities.NDMBlockEntities;
 import net.poob22.normaldm.common.server.blocks.blockentities.RoomControllerBlockEntity;
@@ -49,7 +48,6 @@ public class RoomControllerBlock extends BaseEntityBlock {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         if(!level.isClientSide) {
             if(itemStack.getItem() instanceof DungeonWandItem && blockEntity instanceof RoomControllerBlockEntity roomController) {
-                NormalDungeonMod.LOGGER.info("server");
                 if(!player.isShiftKeyDown()) {
                     cycleRoomType(roomController, player);
                     return InteractionResult.SUCCESS;
@@ -60,7 +58,6 @@ public class RoomControllerBlock extends BaseEntityBlock {
         if(level.isClientSide) {
             if(itemStack.isEmpty()) {
                 if(player.isShiftKeyDown()) {
-                    NormalDungeonMod.LOGGER.info("client");
                     RoomBBRenderer.toggle(pos);
                     return InteractionResult.SUCCESS;
                 }
