@@ -5,6 +5,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -18,10 +19,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.client.events.RoomBBRenderer;
 import net.poob22.normaldm.common.server.blocks.blockentities.NDMBlockEntities;
 import net.poob22.normaldm.common.server.blocks.blockentities.RoomControllerBlockEntity;
+import net.poob22.normaldm.common.server.blocks.properties.RoomDefinitions;
+import net.poob22.normaldm.common.server.items.DungeonWandItem;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,14 +45,33 @@ public class RoomControllerBlock extends BaseEntityBlock {
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         BlockEntity blockEntity = level.getBlockEntity(pos);
-        if(level.isClientSide && player.isShiftKeyDown()) {
-            if(blockEntity instanceof RoomControllerBlockEntity) {
-                RoomBBRenderer.toggle(pos);
-                return InteractionResult.SUCCESS;
+        ItemStack itemStack = player.getItemInHand(interactionHand);
+        if(!level.isClientSide) {
+            if(itemStack.getItem() instanceof DungeonWandItem && blockEntity instanceof RoomControllerBlockEntity roomController) {
+                if(!player.isShiftKeyDown()) {
+                    cycleRoomType(roomController, player);
+                    return InteractionResult.SUCCESS;
+                }
             }
         }
 
-        return InteractionResult.CONSUME;
+        if(level.isClientSide) {
+            if(itemStack.isEmpty()) {
+                if(player.isShiftKeyDown()) {
+                    RoomBBRenderer.toggle(pos);
+                    return InteractionResult.SUCCESS;
+                }
+            }
+        }
+
+        return InteractionResult.SUCCESS;
+    }
+
+    public void cycleRoomType(RoomControllerBlockEntity rc, Player player) {
+        int index = RoomDefinitions.ROOM_TYPES.indexOf(rc.RoomLayout);
+        index = (index + 1) % RoomDefinitions.ROOM_TYPES.size();
+        rc.setRoomLayout(RoomDefinitions.ROOM_TYPES.get(index));
+        player.sendSystemMessage(Component.literal("Room Type: " + rc.RoomLayout.toString()));
     }
 
     @Override

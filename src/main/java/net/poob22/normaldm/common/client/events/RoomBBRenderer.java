@@ -18,8 +18,10 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.server.blocks.blockentities.RoomControllerBlockEntity;
+import net.poob22.normaldm.common.server.blocks.properties.RoomVolume;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
@@ -43,7 +45,7 @@ public class RoomBBRenderer {
         Minecraft mc = Minecraft.getInstance();
         Level level = mc.level;
         if(level == null) {
-            NormalDungeonMod.LOGGER.error("Level is null");
+            NormalDungeonMod.LOGGER.warn("Level is null, unable to render room boundaries!");
             return;
         }
 
@@ -61,10 +63,18 @@ public class RoomBBRenderer {
             BlockEntity blockEntity = level.getBlockEntity(pos);
 
             if(blockEntity instanceof RoomControllerBlockEntity roomController) {
-                AABB box = roomController.getRoomBounds();
-                AABB playerBox = roomController.getPlayerRoomBounds();
-                LevelRenderer.renderLineBox(poseStack, builder, box, 1.0f, 0.0f, 0.0f, 1.0f);
-                LevelRenderer.renderLineBox(poseStack, builder, playerBox, 0.0f, 0.0f, 1.0f, 1.0f);
+                List<RoomVolume> roomBounds = roomController.getRoomBounds();
+
+                if(roomBounds != null) {
+                    for(RoomVolume v : roomBounds) {
+                        AABB box = v.toAABB(roomController.getBlockPos(), false);
+                        AABB playerBox = v.toAABB(roomController.getBlockPos(), true);
+                        if(box != null && playerBox != null) {
+                            LevelRenderer.renderLineBox(poseStack, builder, box, 1.0f, 0.0f, 0.0f, 1.0f);
+                            LevelRenderer.renderLineBox(poseStack, builder, playerBox, 0.0f, 0.0f, 1.0f, 1.0f);
+                        }
+                    }
+                }
             }
         }
 

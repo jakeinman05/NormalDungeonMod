@@ -4,6 +4,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -14,12 +17,16 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.server.blocks.DungeonGateBlock;
 import net.poob22.normaldm.common.server.blocks.DungeonMobSpawnerBlock;
 import net.poob22.normaldm.common.server.blocks.properties.GateState;
+import net.poob22.normaldm.common.server.blocks.properties.RoomDefinition;
+import net.poob22.normaldm.common.server.blocks.properties.RoomDefinitions;
+import net.poob22.normaldm.common.server.blocks.properties.RoomVolume;
 import net.poob22.normaldm.common.server.entity.living.DungeonMob;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -30,8 +37,10 @@ public class RoomControllerBlockEntity extends BlockEntity {
     public int tickCount;
     private static final int CHECK_INTERVAL = 10;
     private static final int GATE_CHECK_INTERVAL = 60;
-    AABB roomBounds;
-    AABB playerRoomBounds;
+    List<RoomVolume> roomBounds;
+
+    // default room type
+    public RoomDefinition RoomLayout = RoomDefinitions.SMALL;
 
     public enum RoomState {
         DORMANT,
@@ -52,7 +61,10 @@ public class RoomControllerBlockEntity extends BlockEntity {
 
     public static void tick(Level level, BlockPos pos, BlockState state, RoomControllerBlockEntity entity) {
         entity.tickCount++;
-        entity.initBounds();
+
+        if(entity.roomBounds == null) {
+            entity.initBounds();
+        }
 
         if(!level.isClientSide) {
             if(entity.tickCount % CHECK_INTERVAL == 0){
@@ -71,18 +83,11 @@ public class RoomControllerBlockEntity extends BlockEntity {
                     case FAILED:
                 }
             }
-
-            if(entity.tickCount % GATE_CHECK_INTERVAL == 0){
-                entity.getGatesInRoom(level);
-            }
         }
     }
 
-    private void initBounds() {
-        if(roomBounds == null) {
-            roomBounds = new AABB(this.getBlockPos()).inflate(10);
-            playerRoomBounds = roomBounds.deflate(1.25);
-        }
+    public void initBounds() {
+        roomBounds = RoomLayout.getVolumes();
     }
 
     /// STATE METHODS ///
@@ -99,6 +104,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
             for(Player player : PlayersInRoom){
                 player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 40));
             }
+            getGatesInRoom(level);
             lockGates(level);
             spawnEnemies();
             ServerLevel l = (ServerLevel)level;
@@ -166,7 +172,10 @@ public class RoomControllerBlockEntity extends BlockEntity {
     /// UTIL METHODS ///
 
     public void getSpawnedEnemiesInRoom(Level level) {
-        List<DungeonMob> Enemies = level.getEntitiesOfClass(DungeonMob.class, getRoomBounds());
+        List<DungeonMob> Enemies = new ArrayList<>();
+        for(RoomVolume v : roomBounds) {
+            Enemies.addAll(level.getEntitiesOfClass(DungeonMob.class, v.toAABB(this.getBlockPos(), false)));
+        }
 
         for(DungeonMob e : Enemies) {
             UUID id = e.getUUID();
@@ -182,7 +191,14 @@ public class RoomControllerBlockEntity extends BlockEntity {
             EnemiesInRoom.removeIf(id -> {
                 Entity e = level.getEntity(id);
                 if(e instanceof DungeonMob) {
-                    if(!e.isAlive() || !roomBounds.intersects(e.getBoundingBox())) {
+                    boolean flag = false;
+                    for(RoomVolume v : roomBounds) {
+                        if (v.toAABB(this.getBlockPos(), false).intersects(e.getBoundingBox())) {
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if(!e.isAlive() || !flag) {
                         ((DungeonMob) e).setInDungeon(false);
                         NormalDungeonMod.LOGGER.info("Enemy either died or left room bounds, will not be added back to the room");
                         return true;
@@ -197,23 +213,40 @@ public class RoomControllerBlockEntity extends BlockEntity {
     }
 
     public void getPlayersInRoom(Level level) {
-        List<Player> p = level.getEntitiesOfClass(Player.class, getPlayerRoomBounds(), player -> !player.isSpectator() && !player.isCreative() && player.isAlive());
+        Set<Player> p = new HashSet<>();
+        for(RoomVolume v : roomBounds) {
+            p.addAll(level.getEntitiesOfClass(Player.class, v.toAABB(this.getBlockPos(), true), player -> player.isAlive() && !player.isSpectator() && !player.isCreative() && player.isAlive()));
+        }
         PlayersInRoom.clear();
         PlayersInRoom.addAll(p);
     }
 
     private void checkPlayersInRoom() {
-        PlayersInRoom.removeIf(e -> e == null || !e.getBoundingBox().intersects(getRoomBounds()) || !e.isAlive() || e.isSpectator() || e.isCreative());
+        PlayersInRoom.removeIf(e -> e == null || !isPlayerInVolumes(e) || !e.isAlive() || e.isSpectator() || e.isCreative());
     }
 
-    public AABB getRoomBounds() {
-        return roomBounds;
+    protected boolean isPlayerInVolumes(Player player) {
+        for(RoomVolume v : roomBounds) {
+            if(v.toAABB(this.getBlockPos(), true).intersects(player.getBoundingBox())) {
+                return true;
+            }
+        }
+        return false;
     }
-    public AABB getPlayerRoomBounds() {
-        return playerRoomBounds;
+
+    public List<RoomVolume> getRoomBounds() {
+        return roomBounds;
     }
     public RoomState getRoomState() {
         return state;
+    }
+
+    public void setRoomLayout(RoomDefinition type) {
+        this.RoomLayout = type;
+        setChanged();
+        if(level != null)
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        initBounds();
     }
 
     private void lockGates(Level level) {
@@ -238,33 +271,41 @@ public class RoomControllerBlockEntity extends BlockEntity {
     }
 
     private void getGatesInRoom(Level level) {
-        BlockPos min = this.getBlockPos().offset(-10, -5, -10);
-        BlockPos max = this.getBlockPos().offset(10, 5, 10);
-        for(BlockPos pos : BlockPos.betweenClosed(min, max)){
-            BlockState state = level.getBlockState(pos);
-            boolean isGate = state.getBlock() instanceof DungeonGateBlock gate;
-            if(isGate) {
-                if(DungeonGateBlock.isLowerHalf(state)) {
-                    GatesInRoom.add(pos.immutable());
+        GatesInRoom.clear();
+
+        BlockPos origin = this.getBlockPos();
+
+        for(RoomVolume v : roomBounds) {
+            BlockPos min = origin.offset(v.min);
+            BlockPos max = origin.offset(v.max);
+
+            for(BlockPos pos : BlockPos.betweenClosed(min, max)){
+                BlockState state = level.getBlockState(pos);
+                if(state.getBlock() instanceof DungeonGateBlock gate) {
+                    if(DungeonGateBlock.isLowerHalf(state)) {
+                        GatesInRoom.add(pos.immutable());
+                    }
                 }
             }
-            else {
-                GatesInRoom.remove(pos);
-            }
         }
+
+        NormalDungeonMod.LOGGER.info("Gates in Room: {}", GatesInRoom.size());
     }
 
     private void spawnEnemies() {
-        BlockPos min = this.getBlockPos().offset(-10, -5, -10);
-        BlockPos max = this.getBlockPos().offset(10, 5, 10);
+        BlockPos origin = this.getBlockPos();
 
         if(this.level != null && !this.level.isClientSide){
-            for(BlockPos pos : BlockPos.betweenClosed(min, max)) {
-                if(this.level.getBlockState(pos).getBlock() instanceof DungeonMobSpawnerBlock) {
-                    BlockEntity blockEntity = level.getBlockEntity(pos);
-                    if(blockEntity instanceof DungeonMobSpawner spawner) {
-                        NormalDungeonMod.LOGGER.info("Spawning DungeonMobSpawner at " + pos + " | Spawned entity: " + spawner.getMobToSpawn());
-                        spawner.spawnMob();
+            for(RoomVolume v : roomBounds) {
+                BlockPos min = origin.offset(v.min);
+                BlockPos max = origin.offset(v.max);
+
+                for(BlockPos pos : BlockPos.betweenClosed(min, max)) {
+                    if(this.level.getBlockState(pos).getBlock() instanceof DungeonMobSpawnerBlock) {
+                        BlockEntity blockEntity = level.getBlockEntity(pos);
+                        if(blockEntity instanceof DungeonMobSpawner spawner) {
+                            spawner.spawnMob();
+                        }
                     }
                 }
             }
@@ -279,7 +320,9 @@ public class RoomControllerBlockEntity extends BlockEntity {
         // save room state
         RoomState s = state;
         tag.putInt("roomState", s.ordinal());
-        //NormalDungeonMod.LOGGER.info("Saving Room State Ordinal: " + s.ordinal() + ", " + RoomState.values()[s.ordinal()]);
+        if(this.RoomLayout != null) {
+            tag.putString("roomType", RoomLayout.toString());
+        }
 
         saveUUIDSet(tag, "enemies", EnemiesInRoom);
         saveBlockPosSet(tag, "gatePos", GatesInRoom);
@@ -317,6 +360,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
             LOG.error("Invalid Room State Loaded...Reverting To DORMANT");
             state = RoomState.DORMANT;
         }
+        this.setRoomLayout(RoomDefinitions.get(tag.getString("roomType")));
 
         loadUUIDSet(tag, "enemies", EnemiesInRoom);
         loadBlockPosSet(tag, "gatePos", GatesInRoom);
@@ -345,5 +389,15 @@ public class RoomControllerBlockEntity extends BlockEntity {
                 set.add(pos);
             }
         }
+    }
+
+    @Override
+    public @NotNull CompoundTag getUpdateTag() {
+        return saveWithoutMetadata();
+    }
+
+    @Override
+    public @Nullable Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 }
