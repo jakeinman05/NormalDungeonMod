@@ -13,17 +13,19 @@ public class RoomVolume {
     }
 
     public AABB toAABB(BlockPos origin, boolean isPlayerBound) {
-        BlockPos a = origin.offset(this.min);
-        BlockPos b = origin.offset(this.max);
+        double ox = origin.getX();
+        double oy = origin.getY();
+        double oz = origin.getZ();
 
-        AABB box = new AABB(
-                Math.min(a.getX(), b.getX()),
-                Math.min(a.getY(), b.getY()),
-                Math.min(a.getZ(), b.getZ()),
-                Math.max(a.getX(), b.getX()),
-                Math.max(a.getY(), b.getY()),
-                Math.max(a.getZ(), b.getZ())
-        );
+        double minX = ox + this.min.getX();
+        double minY = oy + this.min.getY();
+        double minZ = oz + this.min.getZ();
+
+        double maxX = ox + this.max.getX() + 1;
+        double maxY = oy + this.max.getY();
+        double maxZ = oz + this.max.getZ() + 1;
+
+        AABB box = new AABB(minX, minY, minZ, maxX, maxY, maxZ);
 
         return isPlayerBound ? box.deflate(1.25D) : box;
     }
