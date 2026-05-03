@@ -38,7 +38,6 @@ public class RoomControllerBlockEntity extends BlockEntity {
     private static final int CHECK_INTERVAL = 10;
     private static final int GATE_CHECK_INTERVAL = 60;
     List<RoomVolume> roomBounds;
-    List<RoomVolume> playerRoomBounds;
 
     // default room type
     public RoomDefinition RoomLayout = RoomDefinitions.SMALL;
@@ -62,7 +61,10 @@ public class RoomControllerBlockEntity extends BlockEntity {
 
     public static void tick(Level level, BlockPos pos, BlockState state, RoomControllerBlockEntity entity) {
         entity.tickCount++;
-        entity.initBounds();
+
+        if(entity.roomBounds == null) {
+            entity.initBounds();
+        }
 
         if(!level.isClientSide) {
             if(entity.tickCount % CHECK_INTERVAL == 0){
@@ -86,7 +88,6 @@ public class RoomControllerBlockEntity extends BlockEntity {
 
     public void initBounds() {
         roomBounds = RoomLayout.getVolumes();
-        playerRoomBounds = RoomLayout.getVolumes();
     }
 
     /// STATE METHODS ///
@@ -213,7 +214,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
 
     public void getPlayersInRoom(Level level) {
         Set<Player> p = new HashSet<>();
-        for(RoomVolume v : playerRoomBounds) {
+        for(RoomVolume v : roomBounds) {
             p.addAll(level.getEntitiesOfClass(Player.class, v.toAABB(this.getBlockPos(), true), player -> player.isAlive() && !player.isSpectator() && !player.isCreative() && player.isAlive()));
         }
         PlayersInRoom.clear();
@@ -236,9 +237,6 @@ public class RoomControllerBlockEntity extends BlockEntity {
     public List<RoomVolume> getRoomBounds() {
         return roomBounds;
     }
-    public List<RoomVolume> getPlayerRoomBounds() {
-        return playerRoomBounds;
-    }
     public RoomState getRoomState() {
         return state;
     }
@@ -248,6 +246,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
         setChanged();
         if(level != null)
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        initBounds();
     }
 
     private void lockGates(Level level) {
@@ -305,7 +304,6 @@ public class RoomControllerBlockEntity extends BlockEntity {
                     if(this.level.getBlockState(pos).getBlock() instanceof DungeonMobSpawnerBlock) {
                         BlockEntity blockEntity = level.getBlockEntity(pos);
                         if(blockEntity instanceof DungeonMobSpawner spawner) {
-                            NormalDungeonMod.LOGGER.info("Spawning DungeonMobSpawner at " + pos + " | Spawned entity: " + spawner.getMobToSpawn());
                             spawner.spawnMob();
                         }
                     }
