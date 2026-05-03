@@ -4,7 +4,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -39,7 +38,7 @@ public class DungeonMobSpawner extends BlockEntity {
             if(getMobToSpawn() != null) {
                 DungeonMob mob = getMobToSpawn().create(level);
                 if(mob != null) {
-                    mob.setPos(this.getBlockPos().getX(), this.getBlockPos().getY(), this.getBlockPos().getZ());
+                    mob.setPos(this.getBlockPos().getX() + 0.5, this.getBlockPos().getY(), this.getBlockPos().getZ() + 0.5);
                     //maybe add some particles here
                     level.addFreshEntity(mob);
                     level.destroyBlock(this.getBlockPos(), false);
