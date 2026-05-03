@@ -36,7 +36,6 @@ public class RoomControllerBlockEntity extends BlockEntity {
 
     public int tickCount;
     private static final int CHECK_INTERVAL = 10;
-    private static final int GATE_CHECK_INTERVAL = 60;
     List<RoomVolume> roomBounds;
 
     // default room type
