@@ -19,7 +19,7 @@ public class SnotShotEntity extends BaseShotEntity {
     protected void onHitEntity(@NotNull EntityHitResult result) {
         Entity entity = result.getEntity();
         if(entity instanceof LivingEntity livingEntity) {
-            livingEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 5, 1, false, false, false));
+            livingEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 10, 1, false, false, false));
         }
         super.onHitEntity(result);
     }
