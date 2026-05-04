@@ -27,13 +27,13 @@ public class BarrelNoseEntity extends DungeonMob implements IShootingMob, IReloa
 
     public final AnimationState shoot = new AnimationState();
 
-    private static final int DEFAULT_RELOAD_TIME = 100;
-    private int reloadTime = 60;
+    private static final int DEFAULT_RELOAD_TIME = 80;
+    private int reloadTime = 50;
 
     public BarrelNoseEntity(EntityType<? extends Monster> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.setHurtParticleAmount(10);
-        this.setDeathParticleAmount(18);
+        this.setDeathParticleAmount(22);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class BarrelNoseEntity extends DungeonMob implements IShootingMob, IReloa
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(0, new RetreatAndShootGoal<>(this, 0.7F, 5.0D));
+        this.goalSelector.addGoal(0, new RetreatAndShootGoal<>(this, 0.9F, 5.0D));
 
         this.targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, Player.class, false));
     }
