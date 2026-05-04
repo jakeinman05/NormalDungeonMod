@@ -21,7 +21,7 @@ public class ChargerMaggotEntity extends DungeonMob implements IChargingMob {
 
     public ChargerMaggotEntity(EntityType<? extends Monster> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-        this.setDeathParticleAmount(20);
+        this.setDeathParticleAmount(12);
         this.setHurtParticleAmount(8);
     }
 
@@ -43,11 +43,11 @@ public class ChargerMaggotEntity extends DungeonMob implements IChargingMob {
         this.goalSelector.addGoal(0, new ChargeAttackCardinalDirectionGoal(this, 2.0F, 12, 100, true, true));
         this.goalSelector.addGoal(2, new RandomStrollCardinalDirectionsGoal(this, 1.0D, false));
 
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, false));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 4.0D).add(Attributes.MOVEMENT_SPEED, 0.3D).add(Attributes.ATTACK_DAMAGE, 5.0D);
+        return DungeonMob.createDungeonMobAttributes().add(Attributes.MAX_HEALTH, 4.0D).add(Attributes.MOVEMENT_SPEED, 0.3D).add(Attributes.ATTACK_DAMAGE, 5.0D);
     }
 
     @Override
