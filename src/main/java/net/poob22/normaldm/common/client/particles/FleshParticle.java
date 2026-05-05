@@ -10,9 +10,9 @@ public class FleshParticle extends TextureSheetParticle {
 
     protected FleshParticle(ClientLevel pLevel, double pX, double pY, double pZ) {
         super(pLevel, pX, pY, pZ, 0.0F, 0.0F, 0.0F);
-        this.xd *= 0.8F;
+        this.xd *= 1.3F;
         this.yd *= 0.8F;
-        this.zd *= 0.8F;
+        this.zd *= 1.3F;
         this.speedUpWhenYMotionIsBlocked = true;
         this.quadSize *= 0.7F + random.nextFloat();
         this.friction = 0.96F;
@@ -25,6 +25,12 @@ public class FleshParticle extends TextureSheetParticle {
 
     @Override
     public void tick() {
+        if(this.onGround) {
+            this.yd *= -0.5;
+            this.xd *= 0.7;
+            this.zd *= 0.7;
+        }
+
         super.tick();
     }
 
