@@ -120,7 +120,7 @@ public class ChargeAttackCardinalDirectionGoal extends Goal {
         Vec3 move = new Vec3(chargeDir.getStepX() * speed, mob.onGround() ? 0 : mob.getDeltaMovement().y, chargeDir.getStepZ() * speed);
         mob.setDeltaMovement(move);
 
-        if(AiUtil.checkDamage(this.mob, this.target)) {
+        if(AiUtil.checkDamage(this.mob, this.target, 0.3D)) {
             chargingMob.entityHitReaction();
             this.stopCharge = true;
         }

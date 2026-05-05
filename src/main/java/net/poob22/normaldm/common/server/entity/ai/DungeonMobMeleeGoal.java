@@ -33,7 +33,7 @@ public class DungeonMobMeleeGoal extends Goal {
             this.mob.getNavigation().moveTo(target, 1.0D);
 
             if(target.isAlive() && attackCooldown <= 0) {
-                if(AiUtil.checkDamage(mob, target)) {
+                if(AiUtil.checkDamage(mob, target, 0)) {
                     this.attackCooldown = ATTACK_COOLDOWN_TIMER;
                 }
             }
