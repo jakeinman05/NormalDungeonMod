@@ -13,6 +13,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.poob22.normaldm.common.client.particles.NDMParticles;
+import net.poob22.normaldm.common.server.entity.living.DungeonMob;
 import org.jetbrains.annotations.NotNull;
 
 public class BaseShotEntity extends Projectile {
@@ -53,9 +54,11 @@ public class BaseShotEntity extends Projectile {
     protected void onHitEntity(@NotNull EntityHitResult result) {
         super.onHitEntity(result);
         Entity hitEntity = result.getEntity();
-        hitEntity.hurt(hitEntity.damageSources().mobProjectile(this, (LivingEntity)this.getOwner()), 4.0F);
-        this.doHitParticles();
-        this.discard();
+        if(!(hitEntity instanceof DungeonMob)) {
+            hitEntity.hurt(hitEntity.damageSources().mobProjectile(this, (LivingEntity)this.getOwner()), 1.0F);
+            this.doHitParticles();
+            this.discard();
+        }
     }
 
     private void doHitParticles() {
