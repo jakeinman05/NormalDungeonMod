@@ -9,6 +9,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.poob22.normaldm.common.server.entity.ai.AiUtil;
+import net.poob22.normaldm.common.server.entity.ai.DungeonMobMeleeGoal;
 import net.poob22.normaldm.common.server.entity.registry.DungeonMobs;
 
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ public class FleshGuyEntity extends DungeonMob {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(0, new MeleeAttackGoal(this, 1.0D, false));
+        this.goalSelector.addGoal(0, new DungeonMobMeleeGoal(this));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, false));
     }
 
