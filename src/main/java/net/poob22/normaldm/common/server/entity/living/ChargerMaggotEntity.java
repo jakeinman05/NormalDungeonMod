@@ -40,14 +40,14 @@ public class ChargerMaggotEntity extends DungeonMob implements IChargingMob {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(0, new ChargeAttackCardinalDirectionGoal(this, 2.0F, 12, 100, true, true));
+        this.goalSelector.addGoal(0, new ChargeAttackCardinalDirectionGoal(this, 2.0F, 20, 40, false, true));
         this.goalSelector.addGoal(2, new RandomStrollCardinalDirectionsGoal(this, 1.0D, false));
 
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, false));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return DungeonMob.createDungeonMobAttributes().add(Attributes.MAX_HEALTH, 4.0D).add(Attributes.MOVEMENT_SPEED, 0.3D).add(Attributes.ATTACK_DAMAGE, 5.0D);
+        return DungeonMob.createDungeonMobAttributes().add(Attributes.MAX_HEALTH, 4.0D).add(Attributes.MOVEMENT_SPEED, 0.3D).add(Attributes.ATTACK_DAMAGE, 1.0D);
     }
 
     @Override
