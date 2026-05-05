@@ -5,7 +5,9 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.AnimationState;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -25,10 +27,11 @@ public class BarrelNoseEntity extends DungeonMob implements IShootingMob, IReloa
     private static final EntityDataAccessor<Boolean> SHOOTING = SynchedEntityData.defineId(BarrelNoseEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> RELOAD_TIME = SynchedEntityData.defineId(BarrelNoseEntity.class, EntityDataSerializers.INT);
 
-    public final AnimationState shoot = new AnimationState();
+    public final AnimationState ShootAnimationState = new AnimationState();
 
     private static final int DEFAULT_RELOAD_TIME = 80;
     private int reloadTime = 50;
+    public int attackTicks = 10;
 
     public BarrelNoseEntity(EntityType<? extends Monster> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -59,7 +62,8 @@ public class BarrelNoseEntity extends DungeonMob implements IShootingMob, IReloa
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(0, new RetreatAndShootGoal<>(this, 0.9F, 5.0D));
+        //this.goalSelector.addGoal(0, new RetreatAndShootGoal<>(this, 0.9F, 5.0D));
+        this.goalSelector.addGoal(0, new BarrelNoseShootGoal(this, 0.9F, 5.0D));
 
         this.targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, Player.class, false));
     }
@@ -69,18 +73,50 @@ public class BarrelNoseEntity extends DungeonMob implements IShootingMob, IReloa
     }
 
     @Override
+    protected float getStandingEyeHeight(@NotNull Pose pPose, @NotNull EntityDimensions pDimensions) {
+        return this.getBbHeight() - ((float) 5/16);
+    }
+
+    @Override
     public void tick() {
         if(!isReloaded()) {
             reloadTime -= 1;
-            //NormalDungeonMod.LOGGER.info("BarrelNoseEntity: reloading " + reloadTime);
             if(reloadTime <= 0) {
-                //NormalDungeonMod.LOGGER.info("BarrelNoseEntity: reload complete");
                 setReloaded(true);
                 reloadTime = DEFAULT_RELOAD_TIME;
             }
         }
 
+        if(getShooting()) {
+            attackTicks--;
+
+            if(attackTicks <= 0) {
+                setShooting(false);
+                attackTicks = 10;
+            }
+        }
+
         super.tick();
+    }
+
+    @Override
+    public void handleEntityEvent(byte pId) {
+        if(pId == 4) {
+            this.ShootAnimationState.start(this.tickCount);
+        }
+        super.handleEntityEvent(pId);
+    }
+
+    public void setShooting(boolean b) {
+        this.entityData.set(SHOOTING, b);
+    }
+
+    private boolean getShooting() {
+        return this.entityData.get(SHOOTING);
+    }
+
+    public int getAttackTicks() {
+        return this.attackTicks;
     }
 
     @Override
@@ -104,4 +140,57 @@ public class BarrelNoseEntity extends DungeonMob implements IShootingMob, IReloa
     }
 
     /// create a static class overriding the RetreatAndShootGoal to add states for animation
+    static class BarrelNoseShootGoal extends RetreatAndShootGoal<BarrelNoseEntity> {
+
+        public BarrelNoseShootGoal(BarrelNoseEntity mob, float shotVelocity, double retreatDistance) {
+            super(mob, shotVelocity, retreatDistance);
+        }
+
+        @Override
+        public void tick() {
+            if(!this.mob.level().isClientSide()) {
+                // fleeing
+                if(this.mob.tickCount % this.IS_AWAY_CHECK_INTERVAL == 0) {
+                    if(this.mob.distanceTo(this.target) < this.retreatDistance) {
+                        setIsAway(false);
+                        fleeFromTarget();
+                    } else {
+                        setIsAway(true);
+                    }
+                }
+
+                if(isAway()) {
+                    this.mob.getLookControl().setLookAt(this.target);
+                    this.waitToShootTimer++;
+
+                    if(waitToShootTimer % 30 == 0) {
+                        if(canShoot()) {
+                            this.mob.setShooting(true);
+                            this.mob.level().broadcastEntityEvent(this.mob, (byte)4);
+                        }
+                    }
+                    if(!this.mob.hasLineOfSight(this.target))
+                        reposition();
+                    else {
+                        this.checkLineOfSightTimer++;
+                        if(checkLineOfSightTimer % 4 == 0) {
+                            this.mob.getNavigation().stop();
+                        }
+                    }
+                }
+                if(this.mob.attackTicks % 6 == 0) {
+                    if(shootProjectile()) {
+                        this.mob.setReloaded(false);
+                    }
+                }
+            }
+        }
+
+        @Override
+        protected boolean canShoot() {
+            if(!mob.getShooting())
+                return super.canShoot();
+            return false;
+        }
+    }
 }
