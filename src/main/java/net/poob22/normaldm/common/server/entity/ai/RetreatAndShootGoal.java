@@ -11,19 +11,18 @@ import net.poob22.normaldm.common.server.entity.living.DungeonMob;
 import net.poob22.normaldm.common.server.entity.projectile.BaseShotEntity;
 
 public class RetreatAndShootGoal<T extends DungeonMob & IShootingMob> extends Goal {
-    int IS_AWAY_CHECK_INTERVAL = 5;
+    protected int IS_AWAY_CHECK_INTERVAL = 3;
 
-    private final T mob;
-    Player target;
-    double retreatDistance;
+    protected final T mob;
+    protected Player target;
+    protected double retreatDistance;
     float shotVelocity;
     boolean needsReload = false;
 
     boolean isAway = false;
 
-    int tooCloseTimer = 0;
-    int checkLineOfSightTimer = 0;
-    int waitToShootTimer = 0;
+    protected int checkLineOfSightTimer = 0;
+    protected int waitToShootTimer = 0;
 
     public RetreatAndShootGoal(T mob, float shotVelocity, double retreatDistance) {
         this.mob = mob;
@@ -60,19 +59,9 @@ public class RetreatAndShootGoal<T extends DungeonMob & IShootingMob> extends Go
             // fleeing
             if(this.mob.tickCount % IS_AWAY_CHECK_INTERVAL == 0) {
                 if(this.mob.distanceTo(this.target) < this.retreatDistance) {
-                    tooCloseTimer++;
-
-                    if(tooCloseTimer % 2 == 0) {
-                        setIsAway(false);
-                        if(this.mob.getNavigation().isDone()) {
-                            NormalDungeonMod.LOGGER.info("attempting to retreat");
-                            fleeFromTarget();
-                        }
-                    } else {
-                        NormalDungeonMod.LOGGER.info("close timer: " + tooCloseTimer);
-                    }
+                    setIsAway(false);
+                    fleeFromTarget();
                 } else {
-                    //NormalDungeonMod.LOGGER.info("is away");
                     setIsAway(true);
                 }
             }
@@ -84,7 +73,6 @@ public class RetreatAndShootGoal<T extends DungeonMob & IShootingMob> extends Go
                 if(waitToShootTimer % 30 == 0) {
                     if(canShoot()) {
                         if(shootProjectile()) {
-                            NormalDungeonMod.LOGGER.info("BAM");
                             if(this.mob instanceof IReloadingMob bob) {
                                 bob.setReloaded(false);
                             }
@@ -95,9 +83,7 @@ public class RetreatAndShootGoal<T extends DungeonMob & IShootingMob> extends Go
                     reposition();
                 else {
                     checkLineOfSightTimer++;
-                    NormalDungeonMod.LOGGER.info("los timer: " + checkLineOfSightTimer);
                     if(checkLineOfSightTimer % 4 == 0) {
-                        NormalDungeonMod.LOGGER.info("In line of sight");
                         this.mob.getNavigation().stop();
                     }
                 }
@@ -107,17 +93,21 @@ public class RetreatAndShootGoal<T extends DungeonMob & IShootingMob> extends Go
         super.tick();
     }
 
-    private boolean canShoot() {
+    protected boolean canShoot() {
         if(isAway() && mob.hasLineOfSight(this.target)) {
-            if(needsReload && mob instanceof IReloadingMob) {
-                return ((IReloadingMob) mob).isReloaded();
+            Vec3 toPlayer = this.target.position().subtract(this.mob.position()).normalize();
+            double d0 = this.mob.getViewVector(1.0F).dot(toPlayer);
+            if(d0 > 0.9) {
+                if(needsReload && mob instanceof IReloadingMob) {
+                    return ((IReloadingMob) mob).isReloaded();
+                }
+                return true;
             }
-            return true;
         }
         return false;
     }
 
-    private boolean shootProjectile() {
+    protected boolean shootProjectile() {
         if(mob.level().isClientSide()) return false;
 
         BaseShotEntity projectile = mob.createProjectile();
@@ -131,31 +121,31 @@ public class RetreatAndShootGoal<T extends DungeonMob & IShootingMob> extends Go
         return mob.level().addFreshEntity(projectile);
     }
 
-    private void reposition() {
-        //Vec3 towardsTarget = this.target.getDeltaMovement();
+    protected void reposition() {
         this.mob.getNavigation().moveTo(target, 1.0D);
     }
 
-    private void fleeFromTarget() {
+    protected void fleeFromTarget() {
         if(this.target != null && this.target.isAlive()) {
-            Vec3 targetVec = DefaultRandomPos.getPos(this.mob, (int )this.retreatDistance * 2, 3);
-            if(this.mob.getRandom().nextInt(2) == 0) {
-                targetVec = DefaultRandomPos.getPosAway(this.mob, (int) retreatDistance * 2, 4, target.getDeltaMovement());
+            Vec3 targetVec;
+            if(mob.distanceTo(this.target) < 1.0) {
+                targetVec = DefaultRandomPos.getPos(this.mob, (int )this.retreatDistance * 2, 2);
+            }
+            else {
+                targetVec = DefaultRandomPos.getPosAway(this.mob, (int) this.retreatDistance + 4, 2, target.position());
             }
 
             if(targetVec != null) {
                 this.mob.getNavigation().moveTo(targetVec.x, targetVec.y, targetVec.z, 1.0D);
-            } else {
-                NormalDungeonMod.LOGGER.warn("away vec is null");
             }
         }
     }
 
-    private void setIsAway(boolean isAway) {
+    protected void setIsAway(boolean isAway) {
         this.isAway = isAway;
     }
 
-    private boolean isAway() {
+    protected boolean isAway() {
         return isAway;
     }
 }
