@@ -15,7 +15,7 @@ public class FleshGuyEntity extends DungeonMob {
     public FleshGuyEntity(EntityType<? extends Monster> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.setHurtParticleAmount(12);
-        this.setDeathParticleAmount(40);
+        this.setDeathParticleAmount(30);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
