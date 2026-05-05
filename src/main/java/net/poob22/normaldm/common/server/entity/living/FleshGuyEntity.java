@@ -8,14 +8,21 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.poob22.normaldm.NormalDungeonMod;
+import net.poob22.normaldm.common.server.entity.ai.AiUtil;
 import net.poob22.normaldm.common.server.entity.registry.DungeonMobs;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class FleshGuyEntity extends DungeonMob {
+    private final List<EntityType<? extends DungeonMob>> toSpawn = new ArrayList<>();
+
     public FleshGuyEntity(EntityType<? extends Monster> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.setHurtParticleAmount(12);
         this.setDeathParticleAmount(30);
+
+        toSpawn.add(DungeonMobs.FLESH_BLOB.entityType.get());
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -32,19 +39,8 @@ public class FleshGuyEntity extends DungeonMob {
     @Override
     protected void tickDeath() {
         if(!this.level().isClientSide) {
-            NormalDungeonMod.LOGGER.info("Spawn blob");
-            spawnFleshBlob();
+            AiUtil.spawnEnemiesOnDeath(this, toSpawn, false);
         }
         super.tickDeath();
-    }
-
-    private void spawnFleshBlob() {
-        EntityType<?> type = DungeonMobs.FLESH_BLOB.entityType.get();
-        FleshBlobEntity blob = (FleshBlobEntity) type.create(this.level());
-        if(blob != null) {
-            blob.setRespawnTimer(120);
-            blob.setPos(this.getX(), this.getY(), this.getZ());
-            this.level().addFreshEntity(blob);
-        }
     }
 }
