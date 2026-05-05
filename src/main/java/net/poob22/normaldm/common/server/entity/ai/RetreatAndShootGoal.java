@@ -50,7 +50,11 @@ public class RetreatAndShootGoal<T extends DungeonMob & IShootingMob> extends Go
 
     @Override
     public boolean canContinueToUse() {
-        return this.target != null && this.target instanceof Player && this.target.isAlive();
+        if(mob.getTarget() != null) {
+            this.target = (Player) mob.getTarget();
+            return true;
+        }
+        return false;
     }
 
     @Override
