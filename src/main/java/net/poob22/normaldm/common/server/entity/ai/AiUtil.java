@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class AiUtil {
-    public static boolean checkDamage(DungeonMob mob, LivingEntity target) {
-        if(mob.hasLineOfSight(target) && mob.distanceTo(target) <= (mob.getBbWidth() + 0.3F) + target.getBbWidth() + 0.0F) {
+    public static boolean checkDamage(DungeonMob mob, LivingEntity target, double addReach) {
+        if(mob.hasLineOfSight(target) && mob.distanceTo(target) <= (mob.getBbWidth() + addReach) + target.getBbWidth() + 0.1F) {
             return target.hurt(target.damageSources().mobAttack(mob), (float) Objects.requireNonNull(mob.getAttribute(Attributes.ATTACK_DAMAGE)).getValue());
         }
         return false;
