@@ -13,11 +13,8 @@ import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.poob22.normaldm.common.client.model.FleshShotModel;
-import net.poob22.normaldm.common.client.particles.BloodPoolParticle;
-import net.poob22.normaldm.common.client.particles.FleshParticle;
-import net.poob22.normaldm.common.client.particles.HurtParticle;
-import net.poob22.normaldm.common.client.particles.NDMParticles;
+import net.poob22.normaldm.common.client.model.BaseShotModel;
+import net.poob22.normaldm.common.client.particles.*;
 import net.poob22.normaldm.common.client.render.entity.BaseProjectileRenderer;
 import net.poob22.normaldm.common.server.blocks.NDMBlocks;
 import net.poob22.normaldm.common.server.entity.definition.DungeonMobDefinition;
@@ -36,7 +33,8 @@ public class ClientModEvents {
         }
 
         // other entities
-        EntityRenderers.register(NDMEntities.FLESH_SHOT.get(), (ctx) -> new BaseProjectileRenderer<>(ctx, new FleshShotModel<>(ctx.bakeLayer(DungeonMobs.FLESH_SHOT_LAYER)), ResourceLocation.fromNamespaceAndPath(MODID, "textures/entity/flesh_shot.png")));
+        EntityRenderers.register(NDMEntities.FLESH_SHOT.get(), (ctx) -> new BaseProjectileRenderer<>(ctx, new BaseShotModel<>(ctx.bakeLayer(DungeonMobs.BASE_SHOT_LAYER)), ResourceLocation.fromNamespaceAndPath(MODID, "textures/entity/base_shot.png")));
+        EntityRenderers.register(NDMEntities.SNOT_SHOT.get(), (ctx) -> new BaseProjectileRenderer<>(ctx, new BaseShotModel<>(ctx.bakeLayer(DungeonMobs.SNOT_SHOT_LAYER)), ResourceLocation.fromNamespaceAndPath(MODID, "textures/entity/snot_shot.png")));
 
         event.enqueueWork(() -> {
             ItemBlockRenderTypes.setRenderLayer(NDMBlocks.DUNGEON_MOB_SPAWNER_BLOCK.get(), RenderType.translucent());
@@ -51,7 +49,8 @@ public class ClientModEvents {
         }
 
         // other entities
-        event.registerLayerDefinition(DungeonMobs.FLESH_SHOT_LAYER, FleshShotModel::createBodyLayer);
+        event.registerLayerDefinition(DungeonMobs.BASE_SHOT_LAYER, BaseShotModel::createBodyLayer);
+        event.registerLayerDefinition(DungeonMobs.SNOT_SHOT_LAYER,  BaseShotModel::createBodyLayer);
     }
 
     @SuppressWarnings("unchecked")
@@ -64,5 +63,6 @@ public class ClientModEvents {
         event.registerSpriteSet(NDMParticles.BLOOD_POOL.get(), BloodPoolParticle.Factory::new);
         event.registerSpriteSet(NDMParticles.HURT_PARTICLE.get(), HurtParticle.Factory::new);
         event.registerSpriteSet(NDMParticles.FLESH_PARTICLE.get(), FleshParticle.Factory::new);
+        event.registerSpriteSet(NDMParticles.SNOT_PARTICLE.get(), SnotParticle.Factory::new);
     }
 }

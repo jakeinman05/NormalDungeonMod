@@ -9,10 +9,10 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.world.entity.projectile.Projectile;
 import org.jetbrains.annotations.NotNull;
 
-public class FleshShotModel<T extends Projectile> extends EntityModel<T> {
+public class BaseShotModel<T extends Projectile> extends EntityModel<T> {
 	private final ModelPart base;
 
-	public FleshShotModel(ModelPart root) {
+	public BaseShotModel(ModelPart root) {
 		this.base = root.getChild("base");
 	}
 

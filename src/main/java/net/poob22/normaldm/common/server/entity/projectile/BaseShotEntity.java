@@ -1,5 +1,6 @@
 package net.poob22.normaldm.common.server.entity.projectile;
 
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -12,11 +13,15 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.poob22.normaldm.common.client.particles.NDMParticles;
+import net.poob22.normaldm.common.server.entity.living.DungeonMob;
 import org.jetbrains.annotations.NotNull;
 
-public class FleshShotEntity extends Projectile {
-    public FleshShotEntity(EntityType<? extends Projectile> pEntityType, Level pLevel) {
+public class BaseShotEntity extends Projectile {
+    ParticleOptions hitParticle;
+
+    public BaseShotEntity(EntityType<? extends Projectile> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
+        this.setHitParticles(NDMParticles.HURT_PARTICLE.get());
     }
 
     @Override
@@ -49,12 +54,25 @@ public class FleshShotEntity extends Projectile {
     protected void onHitEntity(@NotNull EntityHitResult result) {
         super.onHitEntity(result);
         Entity hitEntity = result.getEntity();
-        hitEntity.hurt(hitEntity.damageSources().mobProjectile(this, (LivingEntity)this.getOwner()), 4.0F);
-        this.discard();
+        if(!(hitEntity instanceof DungeonMob)) {
+            hitEntity.hurt(hitEntity.damageSources().mobProjectile(this, (LivingEntity)this.getOwner()), 1.0F);
+            this.doHitParticles();
+            this.discard();
+        }
     }
 
     private void doHitParticles() {
+        if(!(this.level() instanceof ServerLevel)) return;
+
         ServerLevel level = (ServerLevel) this.level();
-        level.sendParticles(NDMParticles.HURT_PARTICLE.get(), this.getX(), this.getY(), this.getZ(), 4, 0.0F, 0.0F, 0.0F, 0.0F);
+        level.sendParticles(this.getHitParticle(), this.getX(), this.getY(), this.getZ(), 4, 0.0F, 0.0F, 0.0F, 0.0F);
+    }
+
+    public void setHitParticles(ParticleOptions particle) {
+        this.hitParticle = particle;
+    }
+
+    private ParticleOptions getHitParticle() {
+        return this.hitParticle;
     }
 }

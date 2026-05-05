@@ -17,9 +17,11 @@
   "entity.normaldm.maggot": "Maggot",
   "entity.normaldm.flesh_guy": "Flesh Guy",
   "entity.normaldm.flesh_blob": "Flesh Blob",
+  "entity.normaldm.barrel_nose": "Barrel Nose",
 
   "item.normaldm.dungeon_wand": "Dungeon Dev Wand",
   "item.normaldm.maggot_spawn_egg": "Maggot Spawn Egg",
   "item.normaldm.charger_maggot_egg": "Charger Maggot Spawn Egg",
-  "item.normaldm.flesh_guy_egg": "Flesh Guy Spawn Egg"
+  "item.normaldm.flesh_guy_egg": "Flesh Guy Spawn Egg",
+  "item.normaldm.barrel_nose_egg": "Barrel Nose Spawn Egg"
 }

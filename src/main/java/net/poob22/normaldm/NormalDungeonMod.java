@@ -54,6 +54,7 @@ public class NormalDungeonMod
                 output.accept(NDMItems.MAGGOT_SPAWN_EGG.get());
                 output.accept(NDMItems.CHARGER_MAGGOT_SPAWN_EGG.get());
                 output.accept(NDMItems.FLESH_GUY_SPAWN_EGG.get());
+                output.accept(NDMItems.BARREL_NOSE_SPAWN_EGG.get());
                 output.accept(NDMItems.DUNGEON_WAND.get());
             }))
             .build());

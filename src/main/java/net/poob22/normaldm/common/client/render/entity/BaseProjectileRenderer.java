@@ -10,14 +10,14 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.poob22.normaldm.common.client.model.FleshShotModel;
+import net.poob22.normaldm.common.client.model.BaseShotModel;
 import org.jetbrains.annotations.NotNull;
 
 public class BaseProjectileRenderer<T extends Projectile> extends EntityRenderer<T> {
     ResourceLocation TEXTURE;
-    private final FleshShotModel<T> model;
+    private final BaseShotModel<T> model;
 
-    public BaseProjectileRenderer(EntityRendererProvider.Context ctx, FleshShotModel<T> model, ResourceLocation entityTexture) {
+    public BaseProjectileRenderer(EntityRendererProvider.Context ctx, BaseShotModel<T> model, ResourceLocation entityTexture) {
         super(ctx);
         this.TEXTURE = entityTexture;
         this.model = model;
