@@ -115,6 +115,11 @@ public class DungeonMob extends Monster {
     }
 
     @Override
+    public int getExperienceReward() {
+        return this.getRandom().nextInt(4) == 0 ? super.getExperienceReward() : 0;
+    }
+
+    @Override
     public void checkDespawn() {
         if(this.isInDungeon()) {
             return;
