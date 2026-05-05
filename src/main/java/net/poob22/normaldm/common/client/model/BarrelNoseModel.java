@@ -58,10 +58,11 @@ public class BarrelNoseModel<T extends BarrelNoseEntity> extends HierarchicalMod
 	}
 
 	@Override
-	public void setupAnim(@NotNull T pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
+	public void setupAnim(@NotNull T nose, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-		this.applyHeadRotation(pNetHeadYaw, pHeadPitch, pAgeInTicks);
-		this.animateWalk(BarrelNoseAnimations.walk, pLimbSwing, pLimbSwingAmount, 2.0F, 1.0F);
+		this.applyHeadRotation(netHeadYaw, headPitch, ageInTicks);
+		this.animateWalk(BarrelNoseAnimations.walk, limbSwing, limbSwingAmount, 2.0F, 1.0F);
+		this.animate(nose.ShootAnimationState, BarrelNoseAnimations.shoot, ageInTicks, 1.0F);
 	}
 
 	private void applyHeadRotation(float netHeadYaw, float netHeadPitch, float ageInTicks)
