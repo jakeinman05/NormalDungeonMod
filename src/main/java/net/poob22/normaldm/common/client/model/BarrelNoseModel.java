@@ -32,7 +32,7 @@ public class BarrelNoseModel<T extends BarrelNoseEntity> extends HierarchicalMod
 
 		PartDefinition base = partdefinition.addOrReplaceChild("base", CubeListBuilder.create(), PartPose.offset(0.0F, 24.0F, 0.0F));
 
-		PartDefinition head = base.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -5.0F, 0.0F));
+		PartDefinition head = base.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -4.5F, 0.0F));
 
 		PartDefinition nose = head.addOrReplaceChild("nose", CubeListBuilder.create().texOffs(19, 17).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 4.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -3.0F, -4.0F));
 
@@ -40,9 +40,9 @@ public class BarrelNoseModel<T extends BarrelNoseEntity> extends HierarchicalMod
 
 		PartDefinition ready_r1 = nose.addOrReplaceChild("ready_r1", CubeListBuilder.create().texOffs(0, 16).addBox(-7.0F, -1.0F, -1.0F, 7.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, -1.5708F, 0.0F));
 
-		PartDefinition rleg = base.addOrReplaceChild("rleg", CubeListBuilder.create().texOffs(0, 20).addBox(-1.0F, 2.0F, -1.0F, 2.0F, 5.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(-2.0F, -7.0F, 0.0F));
+		PartDefinition rleg = base.addOrReplaceChild("rleg", CubeListBuilder.create().texOffs(0, 20).addBox(-1.0F, -1.0F, -1.0F, 2.0F, 6.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(-2.0F, -5.0F, 0.0F));
 
-		PartDefinition lleg = base.addOrReplaceChild("lleg", CubeListBuilder.create().texOffs(8, 20).addBox(-1.0F, 2.0F, -1.0F, 2.0F, 5.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(2.0F, -7.0F, 0.0F));
+		PartDefinition lleg = base.addOrReplaceChild("lleg", CubeListBuilder.create().texOffs(8, 20).addBox(-1.0F, -1.0F, -1.0F, 2.0F, 6.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(2.0F, -5.0F, 0.0F));
 
 		return LayerDefinition.create(meshdefinition, 32, 32);
 	}
