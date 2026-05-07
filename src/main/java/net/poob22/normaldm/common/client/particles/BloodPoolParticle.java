@@ -20,7 +20,7 @@ public class BloodPoolParticle extends TextureSheetParticle {
         this.zd = 0;
 
         this.quadSize = size;
-        this.lifetime = 600;
+        this.lifetime = 3600;
 
         this.gravity = 0;
         this.hasPhysics = false;
