@@ -7,6 +7,7 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
+import net.poob22.normaldm.common.client.model.animation.BigFellaAnimations;
 import net.poob22.normaldm.common.server.entity.living.BigFellaEntity;
 
 public class BigFellaModel<T extends BigFellaEntity> extends HierarchicalModel<T> {
@@ -62,13 +63,15 @@ public class BigFellaModel<T extends BigFellaEntity> extends HierarchicalModel<T
 	@Override
 	public void setupAnim(T pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-		this.applyHeadRotation(pNetHeadYaw, pHeadPitch, pAgeInTicks);
+		this.applyHeadRotation(pNetHeadYaw);
+		this.animateWalk(BigFellaAnimations.walk, pLimbSwing, pLimbSwingAmount, 2.3F, 3.0F);
+		this.animate(BigFellaEntity.AttackAnimationState, BigFellaAnimations.slam, pAgeInTicks);
 	}
 
-	private void applyHeadRotation(float netHeadYaw, float netHeadPitch, float ageInTicks)
+	private void applyHeadRotation(float netHeadYaw)
 	{
-		netHeadPitch = Mth.clamp(netHeadPitch, -25.0F, 45.0F);
+		netHeadYaw = Mth.clamp(netHeadYaw, -30.0F, 30.0F);
 
-		this.head.xRot = netHeadPitch * ((float)Math.PI / 180F);
+		this.head.yRot = netHeadYaw * ((float)Math.PI / 180F);
 	}
 }
