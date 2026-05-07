@@ -4,14 +4,19 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.poob22.normaldm.common.server.entity.living.DungeonMob;
 
+import java.util.EnumSet;
+
 public class DungeonMobMeleeGoal extends Goal {
     private static final int ATTACK_COOLDOWN_TIMER = 15;
 
-    DungeonMob mob;
+    private final DungeonMob mob;
+    private final double speedMod;
     protected int attackCooldown;
 
-    public DungeonMobMeleeGoal(DungeonMob mob) {
+    public DungeonMobMeleeGoal(DungeonMob mob, double speedModifier) {
+        this.setFlags(EnumSet.of(Goal.Flag.MOVE));
         this.mob = mob;
+        this.speedMod = speedModifier;
     }
 
     @Override
@@ -21,16 +26,20 @@ public class DungeonMobMeleeGoal extends Goal {
 
     @Override
     public boolean canContinueToUse() {
-        return super.canContinueToUse();
+        return mob.getTarget() != null && mob.getTarget().isAlive();
     }
 
     @Override
     public void tick() {
+        LivingEntity target = mob.getTarget();
+        if(target == null) return;
+
+        this.mob.getLookControl().setLookAt(target);
+
         if(this.attackCooldown > 0) this.attackCooldown--;
 
-        if(!this.mob.level().isClientSide() && this.mob.getTarget() != null) {
-            LivingEntity target = this.mob.getTarget();
-            this.mob.getNavigation().moveTo(target, 1.0D);
+        if(!this.mob.level().isClientSide()) {
+            this.mob.getNavigation().moveTo(target, speedMod);
 
             if(target.isAlive() && attackCooldown <= 0) {
                 if(AiUtil.checkDamage(mob, target, 0)) {
