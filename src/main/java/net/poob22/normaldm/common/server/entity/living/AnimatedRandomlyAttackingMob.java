@@ -10,18 +10,18 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class AbstractRandomlyAttackingMob extends DungeonMob {
-    protected static final EntityDataAccessor<Boolean> ATTACKING = SynchedEntityData.defineId(AbstractRandomlyAttackingMob.class, EntityDataSerializers.BOOLEAN);
-    public static final AnimationState AttackAnimationState = new AnimationState();
+public abstract class AnimatedRandomlyAttackingMob extends DungeonMob {
+    protected static final EntityDataAccessor<Boolean> ATTACKING = SynchedEntityData.defineId(AnimatedRandomlyAttackingMob.class, EntityDataSerializers.BOOLEAN);
+    public final AnimationState AttackAnimationState = new AnimationState();
 
     protected int DEFAULT_ATTACK_INTERVAL;
     protected int DEFAULT_ATTACK_TICKS;
 
-    protected int attackTicks;
+    protected int attackTicks; // how long attack lasts
     protected int attackInterval; // how long to wait before trying to attack again
-    protected int attackOnTick;
+    protected int attackOnTick; // when to perform attack during animation
 
-    protected AbstractRandomlyAttackingMob(EntityType<? extends Monster> pEntityType, Level pLevel) {
+    protected AnimatedRandomlyAttackingMob(EntityType<? extends Monster> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
     }
 
@@ -64,7 +64,7 @@ public abstract class AbstractRandomlyAttackingMob extends DungeonMob {
     @Override
     public void handleEntityEvent(byte pId) {
         if(pId == 4) {
-            AttackAnimationState.start(this.tickCount);
+            this.getAnimationState().start(this.tickCount);
         }
         super.handleEntityEvent(pId);
     }
@@ -85,10 +85,6 @@ public abstract class AbstractRandomlyAttackingMob extends DungeonMob {
 
     public boolean shouldPerformAttack() {
         return this.attackTicks > 0 && this.attackTicks % this.attackOnTick == 0;
-    }
-
-    public void resetAttackInterval() {
-        this.attackInterval = DEFAULT_ATTACK_INTERVAL;
     }
 
     public void setAttackInterval(int interval) {
@@ -113,5 +109,18 @@ public abstract class AbstractRandomlyAttackingMob extends DungeonMob {
 
     public void setAttacking(boolean attacking) {
         this.entityData.set(ATTACKING, attacking);
+    }
+
+    public AnimationState getAnimationState() {
+        return this.AttackAnimationState;
+    }
+
+    /// these MUST be called after setting defaults
+    public void resetAttackTicks() {
+        setAttackTicks(DEFAULT_ATTACK_TICKS);
+    }
+
+    public void resetAttackInterval() {
+        setAttackInterval(DEFAULT_ATTACK_INTERVAL);
     }
 }
