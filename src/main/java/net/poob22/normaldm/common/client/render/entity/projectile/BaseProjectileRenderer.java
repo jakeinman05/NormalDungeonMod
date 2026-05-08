@@ -1,4 +1,4 @@
-package net.poob22.normaldm.common.client.render.entity;
+package net.poob22.normaldm.common.client.render.entity.projectile;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
