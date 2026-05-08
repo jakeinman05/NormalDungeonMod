@@ -5,6 +5,8 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -12,6 +14,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.poob22.normaldm.common.client.packet.BloodPoolPacket;
 import net.poob22.normaldm.common.client.packet.PacketHandler;
 import net.poob22.normaldm.common.client.particles.NDMParticles;
@@ -106,12 +109,32 @@ public class DungeonMob extends Monster {
 
     public void sendParticles(byte type) {
         AABB box = this.getBoundingBox();
-        double offsetX = (box.maxX - box.minX) / 2;
-        double offsetY = (box.maxY - box.minY) / 3;
-        double offsetZ = (box.maxZ - box.minZ) / 2;
+        Vec3 centerBox = box.getCenter();
+
         SimpleParticleType particleType = type == 1 ? getDeathParticleType() : getHurtParticleType();
         int amount = type == 1 ? getDeathParticleAmount() : getHurtParticleAmount();
-        ((ServerLevel)this.level()).sendParticles(particleType, this.getX(), this.getY() + 0.5, this.getZ(), amount, offsetX, offsetY, offsetZ, 4.0D);
+
+        RandomSource rand = this.level().getRandom();
+
+        for(int i = 0; i < amount; i++) {
+            double x = Mth.lerp(rand.nextDouble(), box.minX, box.maxX);
+            double y = Mth.lerp(rand.nextDouble(), box.minY, box.maxY);
+            double z = Mth.lerp(rand.nextDouble(), box.minZ, box.maxZ);
+
+            Vec3 vec3 = new Vec3(x, y, z);
+            Vec3 d = vec3.subtract(centerBox).normalize();
+
+            if(d.lengthSqr() < 1e-6) {
+                d = new Vec3(0, 1, 0);
+            }
+
+            double speed = 0.2 + rand.nextDouble() * 0.4;
+            Vec3 v = d.scale(speed);
+            v = v.add((rand.nextDouble() - 0.5) * 0.1, (rand.nextDouble() - 0.5) * 0.1, (rand.nextDouble() - 0.5) * 0.1);
+
+            ((ServerLevel)this.level()).sendParticles(particleType, x, y, z, 0, v.x, v.y, v.z, 1.0D);
+        }
+
     }
 
     @Override

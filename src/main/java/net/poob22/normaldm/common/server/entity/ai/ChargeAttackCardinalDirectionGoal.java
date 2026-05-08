@@ -120,7 +120,7 @@ public class ChargeAttackCardinalDirectionGoal extends Goal {
         Vec3 move = new Vec3(chargeDir.getStepX() * speed, mob.onGround() ? 0 : mob.getDeltaMovement().y, chargeDir.getStepZ() * speed);
         mob.setDeltaMovement(move);
 
-        if(checkDamage()) {
+        if(AiUtil.checkDamage(this.mob, this.target, 0.3D)) {
             chargingMob.entityHitReaction();
             this.stopCharge = true;
         }
@@ -142,13 +142,6 @@ public class ChargeAttackCardinalDirectionGoal extends Goal {
 
         HitResult hit = mob.level().clip(new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mob));
         return hit.getType() == HitResult.Type.MISS ? end : hit.getLocation();
-    }
-
-    private boolean checkDamage() {
-        if(mob.hasLineOfSight(target) && mob.distanceTo(target) <= (mob.getBbWidth() + 0.3F) + target.getBbWidth() + 0.0F) {
-            return target.hurt(target.damageSources().mobAttack(mob), (float) Objects.requireNonNull(mob.getAttribute(Attributes.ATTACK_DAMAGE)).getValue());
-        }
-        return false;
     }
 
     private boolean hitWall() {

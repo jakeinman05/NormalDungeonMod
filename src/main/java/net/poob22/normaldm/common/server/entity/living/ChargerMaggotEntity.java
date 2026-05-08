@@ -21,7 +21,7 @@ public class ChargerMaggotEntity extends DungeonMob implements IChargingMob {
 
     public ChargerMaggotEntity(EntityType<? extends Monster> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-        this.setDeathParticleAmount(12);
+        this.setDeathParticleAmount(6);
         this.setHurtParticleAmount(8);
     }
 

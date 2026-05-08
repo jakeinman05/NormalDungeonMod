@@ -48,15 +48,17 @@ public class BarrelNoseEntity extends DungeonMob implements IShootingMob, IReloa
     }
 
     @Override
-    public void readAdditionalSaveData(@NotNull CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
+    public void addAdditionalSaveData(@NotNull CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
         tag.putInt("reloadTime", this.reloadTime);
+        tag.putBoolean("reloaded", this.entityData.get(RELOADED));
     }
 
     @Override
     public void load(@NotNull CompoundTag tag) {
         super.load(tag);
         this.reloadTime = tag.getInt("reloadTime");
+        this.entityData.set(RELOADED, tag.getBoolean("reloaded"));
     }
 
     @Override
@@ -115,10 +117,6 @@ public class BarrelNoseEntity extends DungeonMob implements IShootingMob, IReloa
         return this.entityData.get(SHOOTING);
     }
 
-    public int getAttackTicks() {
-        return this.attackTicks;
-    }
-
     @Override
     public boolean isReloaded() {
         return this.entityData.get(RELOADED);
@@ -139,7 +137,6 @@ public class BarrelNoseEntity extends DungeonMob implements IShootingMob, IReloa
         return new SnotShotEntity(NDMEntities.SNOT_SHOT.get(), this.level());
     }
 
-    /// create a static class overriding the RetreatAndShootGoal to add states for animation
     static class BarrelNoseShootGoal extends RetreatAndShootGoal<BarrelNoseEntity> {
 
         public BarrelNoseShootGoal(BarrelNoseEntity mob, float shotVelocity, double retreatDistance) {
