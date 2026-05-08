@@ -13,8 +13,10 @@ public class DungeonMobMeleeGoal extends Goal {
     private final double speedMod;
     protected int attackCooldown;
 
+    private int recalculatePath = 0;
+
     public DungeonMobMeleeGoal(DungeonMob mob, double speedModifier) {
-        this.setFlags(EnumSet.of(Goal.Flag.MOVE));
+        this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
         this.mob = mob;
         this.speedMod = speedModifier;
     }
@@ -39,7 +41,12 @@ public class DungeonMobMeleeGoal extends Goal {
         if(this.attackCooldown > 0) this.attackCooldown--;
 
         if(!this.mob.level().isClientSide()) {
-            this.mob.getNavigation().moveTo(target, speedMod);
+            if(recalculatePath > 0) this.recalculatePath--;
+
+            else {
+                recalculatePath = 6;
+                this.mob.getNavigation().moveTo(target, speedMod);
+            }
 
             if(target.isAlive() && attackCooldown <= 0) {
                 if(AiUtil.checkDamage(mob, target, 0)) {
