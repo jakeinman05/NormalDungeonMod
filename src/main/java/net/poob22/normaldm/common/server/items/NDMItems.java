@@ -19,6 +19,7 @@ public class NDMItems {
     public static final RegistryObject<Item> FLESH_GUY_SPAWN_EGG = ITEMS.register("flesh_guy_egg", () -> new DungeonMobSpawnEgg(DungeonMobs.FLESH_GUY.entityType, 0, 0, new Item.Properties()));
     public static final RegistryObject<Item> BARREL_NOSE_SPAWN_EGG = ITEMS.register("barrel_nose_egg", () -> new DungeonMobSpawnEgg(DungeonMobs.BARREL_NOSE.entityType, 0, 0, new Item.Properties()));
     public static final RegistryObject<Item> BIG_FELLA_SPAWN_EGG = ITEMS.register("big_fella_egg", () -> new DungeonMobSpawnEgg(DungeonMobs.BIG_FELLA.entityType, 0, 0, new Item.Properties()));
+    public static final RegistryObject<Item> CRESCENT_SPAWN_EGG = ITEMS.register("crescent_egg", () -> new DungeonMobSpawnEgg(DungeonMobs.CRESCENT.entityType, 0, 0, new Item.Properties()));
 
     public static void register(IEventBus bus) {ITEMS.register(bus);}
 }
