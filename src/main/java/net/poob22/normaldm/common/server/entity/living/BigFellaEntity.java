@@ -15,9 +15,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.poob22.normaldm.common.server.entity.ai.AiUtil;
 import net.poob22.normaldm.common.server.entity.ai.DungeonMobMeleeGoal;
-import net.poob22.normaldm.common.server.entity.ai.RandomlyAttackGoal;
+import net.poob22.normaldm.common.server.entity.ai.RandomlyAnimatedAttackGoal;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -42,7 +41,7 @@ public class BigFellaEntity extends AnimatedRandomlyAttackingMob {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(0, new BigFellaRandomAttackGoal(this, true));
+        this.goalSelector.addGoal(0, new BigFellaRandomAttackGoal(this));
         this.goalSelector.addGoal(1, new DungeonMobMeleeGoal(this, 1.0D));
 
         this.targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, Player.class, false));
@@ -91,9 +90,9 @@ public class BigFellaEntity extends AnimatedRandomlyAttackingMob {
         }
     }
 
-    static class BigFellaRandomAttackGoal extends RandomlyAttackGoal {
-        public BigFellaRandomAttackGoal(AnimatedRandomlyAttackingMob mob, boolean sendAnimation) {
-            super(mob, sendAnimation);
+    static class BigFellaRandomAttackGoal extends RandomlyAnimatedAttackGoal {
+        public BigFellaRandomAttackGoal(AnimatedRandomlyAttackingMob mob) {
+            super(mob);
             setFlags(EnumSet.of(Flag.MOVE));
         }
     }
