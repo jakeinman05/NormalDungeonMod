@@ -1,13 +1,12 @@
 package net.poob22.normaldm.common.server.entity.ai;
 
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.poob22.normaldm.NormalDungeonMod;
-import net.poob22.normaldm.common.server.entity.living.AbstractRandomlyAttackingMob;
+import net.poob22.normaldm.common.server.entity.living.AnimatedRandomlyAttackingMob;
 
-public class RandomlyAttackGoal extends Goal {
-    AbstractRandomlyAttackingMob mob;
+public class RandomlyAnimatedAttackGoal extends Goal {
+    AnimatedRandomlyAttackingMob mob;
 
-    public RandomlyAttackGoal(AbstractRandomlyAttackingMob mob) {
+    public RandomlyAnimatedAttackGoal(AnimatedRandomlyAttackingMob mob) {
         this.mob = mob;
     }
 
@@ -26,7 +25,6 @@ public class RandomlyAttackGoal extends Goal {
 
     @Override
     public void start() {
-        NormalDungeonMod.LOGGER.info("attacking");
         this.mob.setAttacking(true);
         this.mob.level().broadcastEntityEvent(this.mob, (byte)4);
     }
