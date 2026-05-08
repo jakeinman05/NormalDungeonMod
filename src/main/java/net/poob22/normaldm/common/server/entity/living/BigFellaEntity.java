@@ -1,32 +1,36 @@
 package net.poob22.normaldm.common.server.entity.living;
 
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.world.entity.AnimationState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.poob22.normaldm.common.server.entity.ai.AiUtil;
 import net.poob22.normaldm.common.server.entity.ai.DungeonMobMeleeGoal;
 import net.poob22.normaldm.common.server.entity.ai.RandomlyAttackGoal;
 
 import java.util.EnumSet;
 import java.util.List;
 
-public class BigFellaEntity extends AbstractRandomlyAttackingMob {
+public class BigFellaEntity extends AnimatedRandomlyAttackingMob {
 
     public BigFellaEntity(EntityType<? extends Monster> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         setHurtParticleAmount(10);
         setDeathParticleAmount(100);
-        setDefaultAttackTicks(30);
         setAttackOnTick(18);
+        setDefaultAttackTicks(30);
+        resetAttackTicks();
         setDefaultAttackInterval(120);
         resetAttackInterval();
     }
@@ -38,7 +42,7 @@ public class BigFellaEntity extends AbstractRandomlyAttackingMob {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(0, new BigFellaRandomAttackGoal(this));
+        this.goalSelector.addGoal(0, new BigFellaRandomAttackGoal(this, true));
         this.goalSelector.addGoal(1, new DungeonMobMeleeGoal(this, 1.0D));
 
         this.targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, Player.class, false));
@@ -46,16 +50,21 @@ public class BigFellaEntity extends AbstractRandomlyAttackingMob {
 
     @Override
     public void aiStep() {
+        this.yBodyRot = Mth.rotLerp(0.08F, this.yBodyRot, this.getYRot());
+
+        super.aiStep();
+
         if(isAttacking()) {
             this.getNavigation().stop();
         }
-
-        super.aiStep();
     }
 
     @Override
     public void performAttack() {
-        List<LivingEntity> entitiesAround = this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(2));
+        AABB bb = this.getBoundingBox();
+        AABB box = new AABB(bb.minX - 3, bb.minY, bb.minZ - 3, bb.maxX + 3, bb.maxY - 1.6875, bb.maxZ + 3);
+
+        List<LivingEntity> entitiesAround = this.level().getEntitiesOfClass(LivingEntity.class, box);
 
         for(LivingEntity entity : entitiesAround) {
             if(entity instanceof DungeonMob) continue;
@@ -69,11 +78,22 @@ public class BigFellaEntity extends AbstractRandomlyAttackingMob {
                 this.doEnchantDamageEffects(this, entity);
             }
         }
+
+        if(level() instanceof ServerLevel level) {
+            for(int i = -3; i < 3; ++i) {
+                for(int j = -3; j < 3; ++j) {
+                    BlockPos pos = new BlockPos((int)this.getX() + i, (int)this.getY(), (int)this.getZ() + j);
+                    BlockState state = level.getBlockState(pos.below());
+                    BlockParticleOption particle = new BlockParticleOption(ParticleTypes.BLOCK, state);
+                    level.sendParticles(particle, pos.getX(), pos.getY(), pos.getZ(), 5, random.nextDouble(), 0, random.nextDouble(), random.nextDouble());
+                }
+            }
+        }
     }
 
     static class BigFellaRandomAttackGoal extends RandomlyAttackGoal {
-        public BigFellaRandomAttackGoal(AbstractRandomlyAttackingMob mob) {
-            super(mob);
+        public BigFellaRandomAttackGoal(AnimatedRandomlyAttackingMob mob, boolean sendAnimation) {
+            super(mob, sendAnimation);
             setFlags(EnumSet.of(Flag.MOVE));
         }
     }
