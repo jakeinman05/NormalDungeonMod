@@ -71,7 +71,7 @@ public class BarrelNoseEntity extends DungeonMob implements IShootingMob, IReloa
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return DungeonMob.createDungeonMobAttributes().add(Attributes.MAX_HEALTH, 10.0D).add(Attributes.MOVEMENT_SPEED, 0.31D);
+        return DungeonMob.createDungeonMobAttributes().add(Attributes.MAX_HEALTH, 5.0D).add(Attributes.MOVEMENT_SPEED, 0.31D);
     }
 
     @Override

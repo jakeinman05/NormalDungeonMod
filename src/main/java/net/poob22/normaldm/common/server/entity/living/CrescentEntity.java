@@ -25,7 +25,7 @@ public class CrescentEntity extends DungeonMob {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return DungeonMob.createMobAttributes().add(Attributes.MAX_HEALTH, 12.0D).add(Attributes.MOVEMENT_SPEED, 0.27D).add(Attributes.ATTACK_DAMAGE, 1.0D);
+        return DungeonMob.createMobAttributes().add(Attributes.MAX_HEALTH, 5.0D).add(Attributes.MOVEMENT_SPEED, 0.27D).add(Attributes.ATTACK_DAMAGE, 1.0D);
     }
 
     @Override

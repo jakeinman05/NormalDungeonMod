@@ -26,7 +26,7 @@ public class FleshGuyEntity extends DungeonMob {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return DungeonMob.createDungeonMobAttributes().add(Attributes.MAX_HEALTH, 20.0D).add(Attributes.MOVEMENT_SPEED, 0.41).add(Attributes.ATTACK_DAMAGE, 2.0F);
+        return DungeonMob.createDungeonMobAttributes().add(Attributes.MAX_HEALTH, 7.0D).add(Attributes.MOVEMENT_SPEED, 0.41).add(Attributes.ATTACK_DAMAGE, 2.0F);
     }
 
     @Override
