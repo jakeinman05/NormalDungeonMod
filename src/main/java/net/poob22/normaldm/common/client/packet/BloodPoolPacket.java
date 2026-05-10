@@ -13,8 +13,8 @@ import java.util.function.Supplier;
 import static net.poob22.normaldm.common.client.packet.PacketHandler.CHANNEL;
 
 public class BloodPoolPacket {
-    double x, y, z;
-    float size;
+    final double x, y, z;
+    final float size;
 
     public BloodPoolPacket(double x, double y, double z, float size) {
         this.x = x;
