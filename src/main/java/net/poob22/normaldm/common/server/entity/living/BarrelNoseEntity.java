@@ -66,8 +66,6 @@ public class BarrelNoseEntity extends DungeonMob implements IShootingMob, IReloa
         super.registerGoals();
         //this.goalSelector.addGoal(0, new RetreatAndShootGoal<>(this, 0.9F, 5.0D));
         this.goalSelector.addGoal(0, new BarrelNoseShootGoal(this, 0.9F, 5.0D));
-
-        this.targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, Player.class, false));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
