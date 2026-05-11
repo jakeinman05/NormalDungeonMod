@@ -11,7 +11,9 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -26,6 +28,7 @@ public class DungeonMob extends Monster {
     int deathParticleAmount;
     int hurtParticleAmount;
 
+    /// Add an isFriendly property in case of enemies being friendly to players
     protected DungeonMob(EntityType<? extends Monster> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         setHurtParticleType(NDMParticles.HURT_PARTICLE.get());
@@ -42,6 +45,12 @@ public class DungeonMob extends Monster {
 
     public static AttributeSupplier.Builder createDungeonMobAttributes() {
         return Monster.createMonsterAttributes().add(Attributes.FOLLOW_RANGE, 40.0F);
+    }
+
+    @Override
+    protected void registerGoals() {
+        super.registerGoals();
+        this.targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, Player.class, false));
     }
 
     public void setInDungeon(boolean inDungeon) {
