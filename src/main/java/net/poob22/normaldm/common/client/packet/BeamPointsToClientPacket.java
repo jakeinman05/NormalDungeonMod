@@ -59,6 +59,9 @@ public class BeamPointsToClientPacket {
 
             Entity entity = level.getEntity(msg.beamId);
             if(entity instanceof BaseBioluminescentBeamEntity beam) {
+                beam.pointso.clear();
+                beam.pointso.addAll(beam.points);
+
                 beam.clearPoints();
                 beam.setPoints(msg.pointsToClient, msg.pointsToClient.size());
                 beam.setBeamEnd(msg.beamEnd);
