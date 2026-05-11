@@ -3,6 +3,7 @@ package net.poob22.normaldm.common.client.render.entity.projectile;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -12,9 +13,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.client.model.BioluminescentBeamSegmentModel;
 import net.poob22.normaldm.common.server.entity.projectile.BaseBioluminescentBeamEntity;
 import net.poob22.normaldm.common.server.entity.registry.DungeonMobs;
@@ -44,23 +43,38 @@ public class BaseBioLumBeamRenderer extends EntityRenderer<BaseBioluminescentBea
 
     @Override
     public void render(BaseBioluminescentBeamEntity beam, float entityYaw, float partialTick, @NotNull PoseStack poseStack, @NotNull MultiBufferSource buffer, int packedLight) {
-        if(beam.shooter != null && !beam.points.isEmpty()) {
+        if(beam.shooter != null && !beam.points.isEmpty() && !beam.pointso.isEmpty()) {
             int age = beam.tickCount;
             int startIdx = (age/FRAME_TIME) % START_FRAMES.length;
             int middleIdx = (age/FRAME_TIME) % MIDDLE_FRAMES.length;
 
-            for(int i = 1; i < beam.getPointsSize(); i++) {
-                Vec3 start = beam.points.get(i - 1);
-                Vec3 end = beam.points.get(i);
+            for(int i = 1; i < beam.points.size(); i++) {
+                Vec3 start;
+                Vec3 end;
+
+                if(beam.points.size() == beam.pointso.size()) {
+                    Vec3 oldStart = beam.pointso.get(i - 1);
+                    Vec3 newStart = beam.points.get(i - 1);
+                    Vec3 oldEnd = beam.pointso.get(i);
+                    Vec3 newEnd = beam.points.get(i);
+
+                    start = oldStart.lerp(newStart, partialTick);
+                    end = oldEnd.lerp(newEnd, partialTick);
+                } else {
+                    start = beam.points.get(i - 1);
+                    end = beam.points.get(i);
+                }
+
+                Vec3 cameraPos = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+                Vec3 renderStart = start.subtract(cameraPos);
+
                 Vec3 dir = end.subtract(start).normalize();
 
                 float yaw = (float) Mth.atan2(dir.x,  dir.z) * Mth.RAD_TO_DEG;
                 float pitch = (float) Mth.atan2(dir.y, Mth.sqrt((float)( Mth.square(dir.x) + Mth.square(dir.z)))) * Mth.RAD_TO_DEG;
 
-                Vec3 translateTo = start.subtract(beam.points.get(0));
-
                 poseStack.pushPose();
-                poseStack.translate(translateTo.x, translateTo.y, translateTo.z);
+                poseStack.translate(renderStart.x, renderStart.y + 1, renderStart.z);
                 poseStack.mulPose(Axis.YP.rotationDegrees(yaw));
                 poseStack.mulPose(Axis.XP.rotationDegrees(-pitch));
 
@@ -78,8 +92,6 @@ public class BaseBioLumBeamRenderer extends EntityRenderer<BaseBioluminescentBea
                 poseStack.popPose();
             }
         }
-
-        super.render(beam, entityYaw, partialTick, poseStack, buffer, packedLight);
     }
 
     @Override
