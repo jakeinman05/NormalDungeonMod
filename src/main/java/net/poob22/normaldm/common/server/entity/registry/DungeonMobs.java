@@ -31,6 +31,7 @@ public class DungeonMobs {
 
     public static ModelLayerLocation BASE_SHOT_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(MODID, "base_shot"), "main");
     public static ModelLayerLocation SNOT_SHOT_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(MODID, "snot_shot"), "main");
+    public static ModelLayerLocation BEAM_SEGMENT_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(MODID, "biolum_beam_segment"), "main");
 
     //public static final DungeonMobDefinition<ChargerMaggotEntity> CHARGER_MAGGOT = DungeonMobRegistry.register(new DungeonMobDefinition<>("charger_maggot", ChargerMaggotEntity::new, MobCategory.MONSTER, 0.3F, 0.3F, ChargerMaggotEntity::createAttributes, CHARGER_MAGGOT_LAYER, ChargerMaggotModel::createBodyLayer, ctx -> new GenericEntityRenderer<>(ctx, new ChargerMaggotModel<>(ctx.bakeLayer(CHARGER_MAGGOT_LAYER)), 0.3F, ResourceLocation.fromNamespaceAndPath(MODID, "textures/entity/base.png"))));
     public static final DungeonMobDefinition<ChargerMaggotEntity> CHARGER_MAGGOT = DungeonMobRegistry.register(new DungeonMobDefinition<>("charger_maggot", ChargerMaggotEntity::new, MobCategory.MONSTER, 0.4F, 0.3F, ChargerMaggotEntity::createAttributes, CHARGER_MAGGOT_LAYER, ChargerMaggotModel::createBodyLayer, ChargerMaggotRenderer::new));
