@@ -28,10 +28,16 @@ public class PacketHandler {
                 BloodPoolPacket::handle
         );
 
-        // do same thing here for new packets
+        CHANNEL.registerMessage(
+                packetId++,
+                BeamPointsToClientPacket.class,
+                BeamPointsToClientPacket::encode,
+                BeamPointsToClientPacket::decode,
+                BeamPointsToClientPacket::handle
+        );
     }
 
     public static void sendToTracking(Entity entity, Object packet) {
-        CHANNEL.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), packet);
+        CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), packet);
     }
 }
