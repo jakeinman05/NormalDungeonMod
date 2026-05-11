@@ -10,6 +10,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -40,6 +41,7 @@ public class BaseBioluminescentBeamEntity extends Entity {
     public LivingEntity shooter;
     public UUID shooterUuid;
     public List<Vec3> points;
+    public List<Vec3> pointso;
     protected int lifeTime;
 
     protected double segmentRadius = 0.5;
@@ -50,6 +52,7 @@ public class BaseBioluminescentBeamEntity extends Entity {
     public BaseBioluminescentBeamEntity(EntityType<?> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.points = new ArrayList<>();
+        this.pointso = new ArrayList<>();
         this.beamEnd = Vec3.ZERO;
     }
     public BaseBioluminescentBeamEntity(Level level, LivingEntity shooter, int lifeTime, float laserDistance, boolean isStatic) {
@@ -85,15 +88,13 @@ public class BaseBioluminescentBeamEntity extends Entity {
                     }
                 }
 
-                if(this.tickCount % 5 == 0) {
+                if(this.tickCount % 3 == 0) {
                     clearJustHit();
                     if(checkSegmentDamage()) {
-                        if(level() instanceof ServerLevel l) {
+                        if(level() instanceof ServerLevel sl) {
                             for(LivingEntity entity : justHit) {
-                                if(level() instanceof ServerLevel sl) {
-                                    Vec3 entityCenter = entity.getBoundingBox().getCenter();
-                                    sl.sendParticles(ParticleTypes.SMOKE, entityCenter.x, entityCenter.y, entityCenter.z, 5, random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble());
-                                }
+                                Vec3 entityCenter = entity.getBoundingBox().getCenter();
+                                sl.sendParticles(ParticleTypes.SMOKE, entityCenter.x, entityCenter.y, entityCenter.z, 5, random.nextDouble(), random.nextDouble(), random.nextDouble(), 0.0F);
                             }
                         }
                     }
@@ -168,9 +169,11 @@ public class BaseBioluminescentBeamEntity extends Entity {
     }
 
     private void buildStraitBeam() {
-        clearPoints();
         if(!level().isClientSide && this.shooter != null) {
-            Vec3 start = this.shooter.getEyePosition();
+            Vec3 start;
+
+            if(this.shooter instanceof Player) start = this.shooter.getEyePosition().subtract(0, 1, 0);
+            else start = this.shooter.getEyePosition();
             start = start.add(this.shooter.getLookAngle().scale(1.0F));
             Vec3 direction = this.shooter.getLookAngle();
             Vec3 end = start.add(direction.scale(laserDistance));
@@ -180,6 +183,10 @@ public class BaseBioluminescentBeamEntity extends Entity {
 
             this.setBeamEnd(endHit);
 
+            // add old points
+            this.pointso.clear();
+            this.pointso.addAll(this.points);
+            clearPoints();
             for(float i = 0; i < diffLen + 0.75; i += 0.75F){
                 this.addPoint(start.add(direction.scale(i)));
             }
@@ -227,11 +234,6 @@ public class BaseBioluminescentBeamEntity extends Entity {
         }
 
         return false;
-    }
-
-    public void printPoints() {
-        for(Vec3 point : points)
-            NormalDungeonMod.LOGGER.info("Point: " + point);
     }
 
     public void addPoint(Vec3 point) {
