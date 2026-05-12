@@ -108,8 +108,6 @@ public class RoomControllerBlockEntity extends BlockEntity {
             spawnEnemies();
             ServerLevel l = (ServerLevel)level;
             checkEnemiesInRoom(l);
-
-            LOG.info("ROOM HAS BEEN ACTIVATED");
         }
     }
 
@@ -181,8 +179,6 @@ public class RoomControllerBlockEntity extends BlockEntity {
             e.setInDungeon(true);
             EnemiesInRoom.add(id);
         }
-
-        LOG.info(EnemiesInRoom.size() + " Enemies Detected in Room");
     }
 
     private void checkEnemiesInRoom(ServerLevel level) {
@@ -199,7 +195,6 @@ public class RoomControllerBlockEntity extends BlockEntity {
                     }
                     if(!e.isAlive() || !flag) {
                         ((DungeonMob) e).setInDungeon(false);
-                        NormalDungeonMod.LOGGER.info("Enemy either died or left room bounds, will not be added back to the room");
                         return true;
                     }
                     return false;
@@ -287,8 +282,6 @@ public class RoomControllerBlockEntity extends BlockEntity {
                 }
             }
         }
-
-        NormalDungeonMod.LOGGER.info("Gates in Room: {}", GatesInRoom.size());
     }
 
     private void spawnEnemies() {
@@ -363,7 +356,6 @@ public class RoomControllerBlockEntity extends BlockEntity {
 
         loadUUIDSet(tag, "enemies", EnemiesInRoom);
         loadBlockPosSet(tag, "gatePos", GatesInRoom);
-        NormalDungeonMod.LOGGER.info("Loaded {} gates in room", GatesInRoom.size());
     }
 
     private void loadUUIDSet(CompoundTag tag, String key, Set<UUID> set) {
