@@ -19,6 +19,7 @@ import net.minecraft.world.phys.Vec3;
 import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.client.packet.BeamPointsToClientPacket;
 import net.poob22.normaldm.common.client.packet.PacketHandler;
+import net.poob22.normaldm.common.server.entity.definition.LaserType;
 import net.poob22.normaldm.common.server.entity.living.DungeonMob;
 import net.poob22.normaldm.common.server.entity.registry.NDMEntities;
 import org.jetbrains.annotations.NotNull;
@@ -27,9 +28,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class BaseBioluminescentBeamEntity extends Entity {
-    public static final EntityDataAccessor<Integer> SHOOTER_UUID = SynchedEntityData.defineId(BaseBioluminescentBeamEntity.class, EntityDataSerializers.INT);
-    public static final EntityDataAccessor<Integer> POINTS_SIZE = SynchedEntityData.defineId(BaseBioluminescentBeamEntity.class, EntityDataSerializers.INT);
+public class BioluminescentBeamEntity extends Entity {
+    public static final EntityDataAccessor<Integer> SHOOTER_UUID = SynchedEntityData.defineId(BioluminescentBeamEntity.class, EntityDataSerializers.INT);
+    public static final EntityDataAccessor<Integer> POINTS_SIZE = SynchedEntityData.defineId(BioluminescentBeamEntity.class, EntityDataSerializers.INT);
 
     private boolean beamBuilt = false;
     private boolean isStatic = false;
@@ -44,18 +45,19 @@ public class BaseBioluminescentBeamEntity extends Entity {
     public List<Vec3> pointso;
     protected int lifeTime;
 
+    private LaserType type;
     protected double segmentRadius = 0.5;
     protected float laserDistance = 0;
 
     protected List<LivingEntity> justHit = new ArrayList<>();
 
-    public BaseBioluminescentBeamEntity(EntityType<?> pEntityType, Level pLevel) {
+    public BioluminescentBeamEntity(EntityType<?> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.points = new ArrayList<>();
         this.pointso = new ArrayList<>();
         this.beamEnd = Vec3.ZERO;
     }
-    public BaseBioluminescentBeamEntity(Level level, LivingEntity shooter, int lifeTime, float laserDistance, boolean isStatic) {
+    public BioluminescentBeamEntity(Level level, LivingEntity shooter, int lifeTime, float laserDistance, boolean isStatic, LaserType type) {
         this(NDMEntities.BIOLUMINESCENT_BEAM_SEGMENT.get(), level);
         this.shooter = shooter;
         this.shooterUuid = shooter.getUUID();
@@ -63,6 +65,7 @@ public class BaseBioluminescentBeamEntity extends Entity {
 
         // true for entities shooting in one direction without looking around
         this.isStatic = isStatic;
+        this.type = type;
 
         this.lifeTime = lifeTime;
         this.laserDistance = laserDistance;
@@ -77,9 +80,17 @@ public class BaseBioluminescentBeamEntity extends Entity {
 
                 if(firstTickInit) {
                     if(!beamBuilt)
-                        buildStraitBeam();
+                        switch(this.type) {
+                            case STRAIGHT:
+                                buildStraitBeam();
+                                break;
+                            case HOMING:
+                                buildStraitBeam();
+                                break;
+                        }
+
                     if(!points.isEmpty()) {
-                        this.setPos(points.get(0).x, points.get(0).y, points.get(0).z);
+                        this.setPos(points.get(0).x, points.get(0).y - 0.5, points.get(0).z);
                     }
 
                     if(pointsDirty) {
@@ -104,9 +115,11 @@ public class BaseBioluminescentBeamEntity extends Entity {
                     }
                 }
 
-                if(this.lifeTime <= 0) {
+                if(this.shooter == null || !this.shooter.isAlive()) {
                     this.remove(RemovalReason.DISCARDED);
                 }
+            } else {
+                this.remove(RemovalReason.DISCARDED);
             }
         }
 
@@ -174,8 +187,8 @@ public class BaseBioluminescentBeamEntity extends Entity {
 
             if(this.shooter instanceof Player) start = this.shooter.getEyePosition().subtract(0, 1, 0);
             else start = this.shooter.getEyePosition();
-            start = start.add(this.shooter.getLookAngle().scale(1.0F));
-            Vec3 direction = this.shooter.getLookAngle();
+            Vec3 direction = this.shooter.getViewVector(1.0F);
+            start = start.add(direction.scale(1.0F));
             Vec3 end = start.add(direction.scale(laserDistance));
             BlockHitResult hitResult = level().clip(new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this.shooter));
             Vec3 endHit = hitResult.getLocation();
