@@ -44,7 +44,7 @@ public class CrescentModel<T extends CrescentEntity> extends HierarchicalModel<T
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+	public void renderToBuffer(@NotNull PoseStack poseStack, @NotNull VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
 		base.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
 	}
 
@@ -58,6 +58,8 @@ public class CrescentModel<T extends CrescentEntity> extends HierarchicalModel<T
 		this.root().getAllParts().forEach(ModelPart::resetPose);
 		this.applyHeadRotation(pNetHeadYaw, pHeadPitch, pAgeInTicks);
 		this.animateWalk(CrescentAnimations.walk, pLimbSwing, pLimbSwingAmount, 2.0F, 1.0F);
+		this.animate(pEntity.chargingAnimation, CrescentAnimations.charge_up, pAgeInTicks, 1.0F);
+		this.animate(pEntity.shootingAnimation, CrescentAnimations.shooting, pAgeInTicks, 1.0F);
 	}
 
 	private void applyHeadRotation(float netHeadYaw, float netHeadPitch, float ageInTicks)
