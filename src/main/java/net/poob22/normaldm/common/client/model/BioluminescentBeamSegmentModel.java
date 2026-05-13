@@ -6,10 +6,10 @@ import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.poob22.normaldm.common.server.entity.projectile.BaseBioluminescentBeamEntity;
+import net.poob22.normaldm.common.server.entity.projectile.BioluminescentBeamEntity;
 import org.jetbrains.annotations.NotNull;
 
-public class BioluminescentBeamSegmentModel<T extends BaseBioluminescentBeamEntity> extends EntityModel<T> {
+public class BioluminescentBeamSegmentModel<T extends BioluminescentBeamEntity> extends EntityModel<T> {
 	private final ModelPart base;
 
 	public BioluminescentBeamSegmentModel(ModelPart root) {
@@ -26,7 +26,7 @@ public class BioluminescentBeamSegmentModel<T extends BaseBioluminescentBeamEnti
 	}
 
 	@Override
-	public void setupAnim(@NotNull BaseBioluminescentBeamEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+	public void setupAnim(@NotNull BioluminescentBeamEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 
 	}
 
