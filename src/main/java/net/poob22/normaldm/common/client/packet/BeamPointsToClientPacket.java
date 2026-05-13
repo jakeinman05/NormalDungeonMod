@@ -6,7 +6,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkEvent;
-import net.poob22.normaldm.common.server.entity.projectile.BaseBioluminescentBeamEntity;
+import net.poob22.normaldm.common.server.entity.projectile.BioluminescentBeamEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +58,7 @@ public class BeamPointsToClientPacket {
             if(level == null) return;
 
             Entity entity = level.getEntity(msg.beamId);
-            if(entity instanceof BaseBioluminescentBeamEntity beam) {
+            if(entity instanceof BioluminescentBeamEntity beam) {
                 beam.pointso.clear();
                 beam.pointso.addAll(beam.points);
 
