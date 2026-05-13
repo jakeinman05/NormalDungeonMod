@@ -8,36 +8,26 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.poob22.normaldm.NormalDungeonMod;
-import net.poob22.normaldm.common.server.entity.living.DungeonMob;
-import net.poob22.normaldm.common.server.entity.projectile.BaseBioluminescentBeamEntity;
+import net.poob22.normaldm.common.server.entity.living.AnimatedLaserShootingMob;
 
 import java.util.EnumSet;
 import java.util.List;
 
-public class ShootLaserCardinalDirection extends Goal {
-    DungeonMob mob;
+public class ShootLaserCardinalDirectionGoal extends Goal {
+    AnimatedLaserShootingMob mob;
     LivingEntity target;
-    int LASER_TIME;
+
     int SHOT_COOLDOWN;
-    int CHARGE_UP_TIME;
-
-    int charge;
     int shotInterval;
-    Vec3 lookVec;
-    boolean laserActive = false;
 
-    BaseBioluminescentBeamEntity beam;
-    float SHOT_DISTANCE = 50.0F;
+    Vec3 lookVec;
     Direction[] ALL_DIRECTIONS = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
 
-    public ShootLaserCardinalDirection(DungeonMob mob, int laserTime, int shotCooldown, int chargeUpTime) {
+    public ShootLaserCardinalDirectionGoal(AnimatedLaserShootingMob mob, int shotCooldown) {
         this.setFlags(EnumSet.of(Goal.Flag.LOOK, Goal.Flag.MOVE));
 
         this.mob = mob;
-        this.LASER_TIME = laserTime;
         this.SHOT_COOLDOWN = shotCooldown;
-        this.CHARGE_UP_TIME = chargeUpTime;
 
         this.shotInterval = 40;
     }
@@ -67,10 +57,7 @@ public class ShootLaserCardinalDirection extends Goal {
 
     @Override
     public boolean canContinueToUse() {
-        if(laserActive) {
-            return this.beam != null && !this.beam.isRemoved();
-        }
-        return this.mob.getTarget() != null;
+        return this.mob.getTarget() != null && (mob.isCharging() || mob.isShooting());
     }
 
     @Override
@@ -79,7 +66,7 @@ public class ShootLaserCardinalDirection extends Goal {
         mob.getLookControl().setLookAt(lookVec);
         mob.getNavigation().stop();
 
-        this.charge = CHARGE_UP_TIME;
+        mob.setCharging(true);
 
         super.start();
     }
@@ -87,7 +74,6 @@ public class ShootLaserCardinalDirection extends Goal {
     @Override
     public void stop() {
         this.shotInterval = SHOT_COOLDOWN;
-        laserActive = false;
         super.stop();
     }
 
@@ -95,37 +81,15 @@ public class ShootLaserCardinalDirection extends Goal {
     public void tick() {
         this.mob.getLookControl().setLookAt(lookVec);
 
-        if(!this.mob.level().isClientSide()) {
-            if(charge-- <= 0) {
-                if(!laserActive) {
-                    if(shootLaser()) {
-                        NormalDungeonMod.LOGGER.info("Laser shot!");
-                    }
-                    laserActive = true;
-                }
-            } else {
-                System.out.println("\rCharging laser...");
-            }
-        }
-
         super.tick();
     }
 
     private Vec3 getShootVec(Direction direction) {
         Vec3 start = mob.getEyePosition();
         Vec3 dirVec = new Vec3(direction.getStepX(), 0, direction.getStepZ());
-        Vec3 end = start.add(dirVec.scale(SHOT_DISTANCE));
+        Vec3 end = start.add(dirVec.scale(mob.getLaserDistance()));
 
         HitResult hit = mob.level().clip(new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mob));
         return hit.getType() == HitResult.Type.MISS ? end : hit.getLocation();
-    }
-
-    private boolean shootLaser() {
-        if(!mob.level().isClientSide) {
-            this.beam = new BaseBioluminescentBeamEntity(this.mob.level(), this.mob, LASER_TIME, SHOT_DISTANCE, false);
-            this.beam.setPos(mob.getX(), mob.getEyeY(), mob.getZ());
-            return mob.level().addFreshEntity(beam);
-        }
-        return false;
     }
 }
