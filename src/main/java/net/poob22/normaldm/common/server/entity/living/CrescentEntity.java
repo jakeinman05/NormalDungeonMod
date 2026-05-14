@@ -45,6 +45,9 @@ public class CrescentEntity extends AnimatedLaserShootingMob {
     public void aiStep() {
         if(isCharging() || isShooting()) {
             this.getNavigation().stop();
+            this.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(1.0F);
+        } else {
+            this.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(0.0F);
         }
 
         super.aiStep();
