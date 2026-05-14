@@ -53,7 +53,7 @@ public class TallCrescentModel<T extends CrescentEntity> extends HierarchicalMod
 	@Override
 	public void setupAnim(@NotNull T pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-		this.animateWalk(CrescentAnimations.tall_walk, pLimbSwing, pLimbSwingAmount, 4.0F, 1.0F);
+		this.animateWalk(CrescentAnimations.tall_walk, pLimbSwing, pLimbSwingAmount, 2.7F, 10.0F);
 		this.animate(pEntity.chargingAnimation, CrescentAnimations.tall_charge_up, pAgeInTicks, 1.0F);
 		this.animate(pEntity.shootingAnimation, CrescentAnimations.tall_shooting, pAgeInTicks, 1.0F);
 	}
