@@ -26,7 +26,7 @@ public abstract class AnimatedLaserShootingMob extends DungeonMob {
     protected boolean IS_STATIC;
     private int chargeTime = 0;
 
-    BioluminescentBeamEntity beam;
+    public BioluminescentBeamEntity beam;
 
     protected AnimatedLaserShootingMob(EntityType<? extends Monster> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
