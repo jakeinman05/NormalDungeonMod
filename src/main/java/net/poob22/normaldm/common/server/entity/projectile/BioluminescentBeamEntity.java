@@ -221,9 +221,27 @@ public class BioluminescentBeamEntity extends Entity {
                     if(this.shooter instanceof DungeonMob && ent instanceof DungeonMob) continue;
                     if(this.justHit.contains(ent)) continue;
 
-                    Vec3 pos = ent.getBoundingBox().getCenter();
+                    Vec3[] pointsOnEntity = new Vec3[] {
+                            ent.position(),
+                            ent.getEyePosition(),
+                            ent.getBoundingBox().getCenter()
+                    };
+
+                    double minDist = Double.MAX_VALUE;
+                    int indexCount = 0;
+                    int minIdx = 0;
+                    for(Vec3 points : pointsOnEntity) {
+                        if(start.distanceTo(points) < minDist) {
+                            minDist = start.distanceTo(points);
+                            minIdx = indexCount;
+                        }
+                        indexCount++;
+                    }
+                    NormalDungeonMod.LOGGER.info("Nearest point index: " + minIdx);
+
+                    Vec3 nearestPos = pointsOnEntity[minIdx];
                     Vec3 AB = end.subtract(start);
-                    Vec3 AP = pos.subtract(start);
+                    Vec3 AP = nearestPos.subtract(start);
 
                     double dot = AP.dot(AB);
                     double ABMag2 = AB.lengthSqr();
@@ -233,7 +251,7 @@ public class BioluminescentBeamEntity extends Entity {
                     double t = Mth.clamp(proj, 0, 1);
 
                     Vec3 closestPoint = start.add(AB.scale(t));
-                    Vec3 vec = pos.subtract(closestPoint);
+                    Vec3 vec = nearestPos.subtract(closestPoint);
 
                     double totalRadius = ent.getBbWidth()/2 + segmentRadius;
                     if(vec.lengthSqr() < totalRadius * totalRadius) {
