@@ -35,7 +35,7 @@ public class NormalDungeonMod
 
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TAB = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, NormalDungeonMod.MODID);
     public static final RegistryObject<CreativeModeTab> TAB = CREATIVE_MODE_TAB.register("normaldm_tab", () -> CreativeModeTab.builder()
-            .icon(() -> new ItemStack(NDMBlocks.CELLAR_WALL.get()))
+            .icon(() -> new ItemStack(NDMBlocks.CELLAR_GATE.get()))
             .title(Component.literal("Normal Dungeon Mod"))
             .displayItems(((parameters, output) -> {
                 output.accept(NDMBlocks.CELLAR_WALL.get());
@@ -50,12 +50,14 @@ public class NormalDungeonMod
                 output.accept(NDMBlocks.FLESH_BLOCK.get());
                 output.accept(NDMBlocks.CELLAR_GATE.get());
                 output.accept(NDMBlocks.ROOM_CONTROLLER_BLOCK.get());
+                output.accept(NDMItems.DUNGEON_WAND.get());
                 output.accept(NDMBlocks.DUNGEON_MOB_SPAWNER_BLOCK.get());
                 output.accept(NDMItems.MAGGOT_SPAWN_EGG.get());
                 output.accept(NDMItems.CHARGER_MAGGOT_SPAWN_EGG.get());
                 output.accept(NDMItems.FLESH_GUY_SPAWN_EGG.get());
                 output.accept(NDMItems.BARREL_NOSE_SPAWN_EGG.get());
-                output.accept(NDMItems.DUNGEON_WAND.get());
+                output.accept(NDMItems.BIG_FELLA_SPAWN_EGG.get());
+                output.accept(NDMItems.CRESCENT_SPAWN_EGG.get());
             }))
             .build());
 

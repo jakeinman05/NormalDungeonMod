@@ -8,10 +8,8 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.poob22.normaldm.common.client.model.BarrelNoseModel;
-import net.poob22.normaldm.common.client.model.BigFellaModel;
-import net.poob22.normaldm.common.client.model.FleshBlobModel;
-import net.poob22.normaldm.common.client.model.FleshGuyModel;
+import net.poob22.normaldm.common.client.model.*;
+import net.poob22.normaldm.common.client.model.crescent.CrescentModel;
 import net.poob22.normaldm.common.client.model.maggot.ChargerMaggotModel;
 import net.poob22.normaldm.common.client.model.maggot.MaggotModel;
 import net.poob22.normaldm.common.client.render.entity.*;
@@ -30,17 +28,20 @@ public class DungeonMobs {
     public static ModelLayerLocation MAGGOT_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(MODID, "maggot"), "main");
     public static ModelLayerLocation BARREL_NOSE_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(MODID, "barrel_nose"), "main");
     public static ModelLayerLocation BIG_FELLA_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(MODID, "big_fella"), "main");
+    public static ModelLayerLocation CRESCENT_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(MODID, "crescent"), "main");
+    public static ModelLayerLocation TALL_CRESCENT_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(MODID, "tall_crescent"), "main");
 
     public static ModelLayerLocation BASE_SHOT_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(MODID, "base_shot"), "main");
     public static ModelLayerLocation SNOT_SHOT_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(MODID, "snot_shot"), "main");
+    public static ModelLayerLocation BEAM_SEGMENT_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(MODID, "biolum_beam_segment"), "main");
 
-    //public static final DungeonMobDefinition<ChargerMaggotEntity> CHARGER_MAGGOT = DungeonMobRegistry.register(new DungeonMobDefinition<>("charger_maggot", ChargerMaggotEntity::new, MobCategory.MONSTER, 0.3F, 0.3F, ChargerMaggotEntity::createAttributes, CHARGER_MAGGOT_LAYER, ChargerMaggotModel::createBodyLayer, ctx -> new GenericEntityRenderer<>(ctx, new ChargerMaggotModel<>(ctx.bakeLayer(CHARGER_MAGGOT_LAYER)), 0.3F, ResourceLocation.fromNamespaceAndPath(MODID, "textures/entity/base.png"))));
     public static final DungeonMobDefinition<ChargerMaggotEntity> CHARGER_MAGGOT = DungeonMobRegistry.register(new DungeonMobDefinition<>("charger_maggot", ChargerMaggotEntity::new, MobCategory.MONSTER, 0.4F, 0.3F, ChargerMaggotEntity::createAttributes, CHARGER_MAGGOT_LAYER, ChargerMaggotModel::createBodyLayer, ChargerMaggotRenderer::new));
     public static final DungeonMobDefinition<FleshGuyEntity> FLESH_GUY = DungeonMobRegistry.register(new DungeonMobDefinition<>("flesh_guy", FleshGuyEntity::new, MobCategory.MONSTER, 0.6F, 1.5F, FleshGuyEntity::createAttributes, FLESH_GUY_LAYER, FleshGuyModel::createBodyLayer, FleshGuyRenderer::new));
     public static final DungeonMobDefinition<FleshBlobEntity> FLESH_BLOB = DungeonMobRegistry.register(new DungeonMobDefinition<>("flesh_blob", FleshBlobEntity::new, MobCategory.MONSTER, 0.6F, 0.5F, FleshBlobEntity::createAttributes, FLESH_BLOB_LAYER, FleshBlobModel::createBodyLayer, FleshBlobRenderer::new));
     public static final DungeonMobDefinition<MaggotEntity> MAGGOT = DungeonMobRegistry.register(new DungeonMobDefinition<>("maggot", MaggotEntity::new, MobCategory.MONSTER, 0.4F, 0.3F, MaggotEntity::createAttributes, MAGGOT_LAYER, MaggotModel::createBodyLayer, MaggotRenderer::new));
     public static final DungeonMobDefinition<BarrelNoseEntity> BARREL_NOSE = DungeonMobRegistry.register(new DungeonMobDefinition<>("barrel_nose", BarrelNoseEntity::new, MobCategory.MONSTER, 0.55F, 0.8125F, BarrelNoseEntity::createAttributes, BARREL_NOSE_LAYER, BarrelNoseModel::createBodyLayer, BarrelNoseRenderer::new));
     public static final DungeonMobDefinition<BigFellaEntity> BIG_FELLA = DungeonMobRegistry.register(new DungeonMobDefinition<>("big_fella", BigFellaEntity::new, MobCategory.MONSTER, 1.75F, 2.6875F, BigFellaEntity::createAttributes, BIG_FELLA_LAYER, BigFellaModel::createBodyLayer, BigFellaRenderer::new));
+    public static final DungeonMobDefinition<CrescentEntity> CRESCENT = DungeonMobRegistry.register(new DungeonMobDefinition<>("crescent", CrescentEntity::new, MobCategory.MONSTER, 0.625F, 0.85F, CrescentEntity::createAttributes, CRESCENT_LAYER, CrescentModel::createBodyLayer, CrescentRenderer::new));
 
     @SubscribeEvent
     public static void registerEntityAttributes(EntityAttributeCreationEvent event) {

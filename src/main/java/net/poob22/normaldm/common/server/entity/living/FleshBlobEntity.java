@@ -40,7 +40,7 @@ public class FleshBlobEntity extends DungeonMob {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return DungeonMob.createDungeonMobAttributes().add(Attributes.MAX_HEALTH, 20.0D).add(Attributes.KNOCKBACK_RESISTANCE, 2.0D);
+        return DungeonMob.createDungeonMobAttributes().add(Attributes.MAX_HEALTH, 5.0D).add(Attributes.KNOCKBACK_RESISTANCE, 2.0D);
     }
 
     @Override

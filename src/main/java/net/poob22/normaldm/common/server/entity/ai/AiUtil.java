@@ -1,6 +1,5 @@
 package net.poob22.normaldm.common.server.entity.ai;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;

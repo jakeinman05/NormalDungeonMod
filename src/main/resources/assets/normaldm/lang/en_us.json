@@ -19,11 +19,13 @@
   "entity.normaldm.flesh_blob": "Flesh Blob",
   "entity.normaldm.barrel_nose": "Barrel Nose",
   "entity.normaldm.big_fella": "Big Fella",
+  "entity.normaldm.crescent": "Crescent",
 
   "item.normaldm.dungeon_wand": "Dungeon Dev Wand",
   "item.normaldm.maggot_spawn_egg": "Maggot Spawn Egg",
   "item.normaldm.charger_maggot_egg": "Charger Maggot Spawn Egg",
   "item.normaldm.flesh_guy_egg": "Flesh Guy Spawn Egg",
   "item.normaldm.barrel_nose_egg": "Barrel Nose Spawn Egg",
-  "item.normaldm.big_fella_egg": "Big Fella Spawn Egg"
+  "item.normaldm.big_fella_egg": "Big Fella Spawn Egg",
+  "item.normaldm.crescent_egg": "Crescent Spawn Egg"
 }

@@ -14,8 +14,11 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.poob22.normaldm.common.client.model.BaseShotModel;
+import net.poob22.normaldm.common.client.model.BioluminescentBeamSegmentModel;
+import net.poob22.normaldm.common.client.model.crescent.TallCrescentModel;
 import net.poob22.normaldm.common.client.particles.*;
-import net.poob22.normaldm.common.client.render.entity.BaseProjectileRenderer;
+import net.poob22.normaldm.common.client.render.entity.projectile.BaseBioLumBeamRenderer;
+import net.poob22.normaldm.common.client.render.entity.projectile.BaseProjectileRenderer;
 import net.poob22.normaldm.common.server.blocks.NDMBlocks;
 import net.poob22.normaldm.common.server.entity.definition.DungeonMobDefinition;
 import net.poob22.normaldm.common.server.entity.registry.DungeonMobRegistry;
@@ -35,7 +38,9 @@ public class ClientModEvents {
         // other entities
         EntityRenderers.register(NDMEntities.FLESH_SHOT.get(), (ctx) -> new BaseProjectileRenderer<>(ctx, new BaseShotModel<>(ctx.bakeLayer(DungeonMobs.BASE_SHOT_LAYER)), ResourceLocation.fromNamespaceAndPath(MODID, "textures/entity/base_shot.png")));
         EntityRenderers.register(NDMEntities.SNOT_SHOT.get(), (ctx) -> new BaseProjectileRenderer<>(ctx, new BaseShotModel<>(ctx.bakeLayer(DungeonMobs.SNOT_SHOT_LAYER)), ResourceLocation.fromNamespaceAndPath(MODID, "textures/entity/snot_shot.png")));
+        EntityRenderers.register(NDMEntities.BIOLUMINESCENT_BEAM_SEGMENT.get(), BaseBioLumBeamRenderer::new);
 
+        // blocks with specific layering
         event.enqueueWork(() -> {
             ItemBlockRenderTypes.setRenderLayer(NDMBlocks.DUNGEON_MOB_SPAWNER_BLOCK.get(), RenderType.translucent());
             ItemBlockRenderTypes.setRenderLayer(NDMBlocks.CELLAR_GATE.get(), RenderType.cutout());
@@ -48,9 +53,12 @@ public class ClientModEvents {
             event.registerLayerDefinition(def.layerLocation, def.layerDefinition);
         }
 
-        // other entities
+        // other entity layers
         event.registerLayerDefinition(DungeonMobs.BASE_SHOT_LAYER, BaseShotModel::createBodyLayer);
         event.registerLayerDefinition(DungeonMobs.SNOT_SHOT_LAYER,  BaseShotModel::createBodyLayer);
+        event.registerLayerDefinition(DungeonMobs.BEAM_SEGMENT_LAYER, BioluminescentBeamSegmentModel::createBodyLayer);
+
+        event.registerLayerDefinition(DungeonMobs.TALL_CRESCENT_LAYER, TallCrescentModel::createBodyLayer);
     }
 
     @SuppressWarnings("unchecked")
