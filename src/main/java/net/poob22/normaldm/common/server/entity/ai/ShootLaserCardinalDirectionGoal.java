@@ -1,6 +1,7 @@
 package net.poob22.normaldm.common.server.entity.ai;
 
 import net.minecraft.core.Direction;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.player.Player;
@@ -57,7 +58,7 @@ public class ShootLaserCardinalDirectionGoal extends Goal {
 
     @Override
     public boolean canContinueToUse() {
-        return this.mob.getTarget() != null && (mob.isCharging() || mob.isShooting());
+        return this.target != null && this.target.isAlive() && (mob.isCharging() || mob.isShooting());
     }
 
     @Override
@@ -74,6 +75,9 @@ public class ShootLaserCardinalDirectionGoal extends Goal {
     @Override
     public void stop() {
         this.shotInterval = SHOT_COOLDOWN;
+        if(!this.mob.beam.isRemoved()) {
+            this.mob.beam.remove(Entity.RemovalReason.DISCARDED);
+        }
         super.stop();
     }
 
