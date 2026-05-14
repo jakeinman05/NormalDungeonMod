@@ -19,17 +19,23 @@ import net.poob22.normaldm.common.server.entity.projectile.BioluminescentBeamEnt
 import net.poob22.normaldm.common.server.entity.registry.DungeonMobs;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Random;
+
 import static net.poob22.normaldm.NormalDungeonMod.MODID;
 
 public class BaseBioLumBeamRenderer extends EntityRenderer<BioluminescentBeamEntity> {
     private final BioluminescentBeamSegmentModel<BioluminescentBeamEntity> model;
+    private final Random rand = new Random();
 
     private int FRAME_TIME = 1;
     private static final ResourceLocation[] START_FRAMES = new ResourceLocation[] {
-            rl("textures/entity/biolum_beam/beam_start0.png")
+            rl("textures/entity/biolum_beam/beam_start0.png"),
+            rl("textures/entity/biolum_beam/beam_start1.png"),
     };
     private static final ResourceLocation[] MIDDLE_FRAMES = new ResourceLocation[] {
-            rl("textures/entity/biolum_beam/beam_middle0.png")
+            rl("textures/entity/biolum_beam/beam_middle0.png"),
+            rl("textures/entity/biolum_beam/beam_middle1.png"),
+            rl("textures/entity/biolum_beam/beam_middle2.png")
     };
 
     private static ResourceLocation rl(String path) {
@@ -83,8 +89,8 @@ public class BaseBioLumBeamRenderer extends EntityRenderer<BioluminescentBeamEnt
                 poseStack.mulPose(Axis.XP.rotationDegrees(-pitch));
 
                 ResourceLocation texture;
-                if(i == 1) texture = START_FRAMES[startIdx];
-                else texture = MIDDLE_FRAMES[middleIdx];
+                if(i == 1) texture = START_FRAMES[rand.nextInt(START_FRAMES.length)];
+                else texture = MIDDLE_FRAMES[rand.nextInt(MIDDLE_FRAMES.length)];
 
 
                 this.model.setupAnim(beam, partialTick, 0.0F, -0.1F, 0.0F, 0.0F);
