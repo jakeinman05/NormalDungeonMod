@@ -1,4 +1,4 @@
-package net.poob22.normaldm.common.client.model;
+package net.poob22.normaldm.common.client.model.crescent;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
