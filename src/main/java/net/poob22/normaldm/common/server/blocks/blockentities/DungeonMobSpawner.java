@@ -38,6 +38,7 @@ public class DungeonMobSpawner extends BlockEntity {
             if(getMobToSpawn() != null) {
                 DungeonMob mob = getMobToSpawn().create(level);
                 if(mob != null) {
+                    mob.initializeSpawn();
                     mob.setPos(this.getBlockPos().getX() + 0.5, this.getBlockPos().getY(), this.getBlockPos().getZ() + 0.5);
                     //maybe add some particles here
                     level.addFreshEntity(mob);

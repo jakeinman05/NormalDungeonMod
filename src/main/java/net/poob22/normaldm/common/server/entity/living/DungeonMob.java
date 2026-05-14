@@ -158,4 +158,6 @@ public class DungeonMob extends Monster {
         }
         super.checkDespawn();
     }
+
+    public void initializeSpawn() {}
 }
