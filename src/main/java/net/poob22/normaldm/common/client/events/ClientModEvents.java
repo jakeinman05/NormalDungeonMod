@@ -15,6 +15,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.poob22.normaldm.common.client.model.BaseShotModel;
 import net.poob22.normaldm.common.client.model.BioluminescentBeamSegmentModel;
+import net.poob22.normaldm.common.client.model.crescent.TallCrescentModel;
 import net.poob22.normaldm.common.client.particles.*;
 import net.poob22.normaldm.common.client.render.entity.projectile.BaseBioLumBeamRenderer;
 import net.poob22.normaldm.common.client.render.entity.projectile.BaseProjectileRenderer;
@@ -56,6 +57,8 @@ public class ClientModEvents {
         event.registerLayerDefinition(DungeonMobs.BASE_SHOT_LAYER, BaseShotModel::createBodyLayer);
         event.registerLayerDefinition(DungeonMobs.SNOT_SHOT_LAYER,  BaseShotModel::createBodyLayer);
         event.registerLayerDefinition(DungeonMobs.BEAM_SEGMENT_LAYER, BioluminescentBeamSegmentModel::createBodyLayer);
+
+        event.registerLayerDefinition(DungeonMobs.TALL_CRESCENT_LAYER, TallCrescentModel::createBodyLayer);
     }
 
     @SuppressWarnings("unchecked")
