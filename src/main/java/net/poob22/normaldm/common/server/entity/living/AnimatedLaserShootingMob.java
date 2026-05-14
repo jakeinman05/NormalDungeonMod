@@ -8,7 +8,6 @@ import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
-import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.server.entity.definition.LaserType;
 import net.poob22.normaldm.common.server.entity.projectile.BioluminescentBeamEntity;
 import org.jetbrains.annotations.NotNull;
@@ -61,9 +60,7 @@ public abstract class AnimatedLaserShootingMob extends DungeonMob {
                 this.level().broadcastEntityEvent(this, (byte)3);
 
                 chargeTime++;
-                NormalDungeonMod.LOGGER.info("Charging " + chargeTime);
                 if(chargeTime >= CHARGE_UP_DURATION) {
-                    NormalDungeonMod.LOGGER.info("laser shot");
                     this.setShooting(true);
                     this.shootBeam();
                     this.level().broadcastEntityEvent(this, (byte)5);
@@ -75,9 +72,7 @@ public abstract class AnimatedLaserShootingMob extends DungeonMob {
             }
 
             if(isShooting()) {
-                NormalDungeonMod.LOGGER.info("Is shooting");
                 if(this.beam == null || beam.isRemoved()) {
-                    NormalDungeonMod.LOGGER.info("Is not shooting anymore");
                     this.level().broadcastEntityEvent(this, (byte) 6);
                     setShooting(false);
                 }
