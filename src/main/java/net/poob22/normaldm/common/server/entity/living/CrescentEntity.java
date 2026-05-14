@@ -13,6 +13,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.client.particles.NDMParticles;
 import net.poob22.normaldm.common.server.entity.ai.RandomStrollCardinalDirectionsGoal;
 import net.poob22.normaldm.common.server.entity.ai.ShootLaserCardinalDirectionGoal;
@@ -22,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class CrescentEntity extends AnimatedLaserShootingMob {
     public static final EntityDataAccessor<Boolean> TALL = SynchedEntityData.defineId(CrescentEntity.class, EntityDataSerializers.BOOLEAN);
-    private boolean pendingTall;
 
     public CrescentEntity(EntityType<? extends Monster> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -33,8 +33,6 @@ public class CrescentEntity extends AnimatedLaserShootingMob {
         setLaserDistance(50);
         setLaserStatic(false);
         setLaserType(LaserType.STRAIGHT);
-
-        this.pendingTall = random.nextDouble() > 0.3;
     }
 
     @Override
@@ -51,7 +49,7 @@ public class CrescentEntity extends AnimatedLaserShootingMob {
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(TALL, pendingTall);
+        this.entityData.define(TALL, false);
     }
 
     @Override
@@ -73,16 +71,6 @@ public class CrescentEntity extends AnimatedLaserShootingMob {
         if(TALL.equals(key)) {
             this.refreshDimensions();
         }
-    }
-
-    @Override
-    public void tick() {
-        if(this.pendingTall) {
-            setTall(true);
-            pendingTall = false;
-        }
-
-        super.tick();
     }
 
     @Override
@@ -117,9 +105,7 @@ public class CrescentEntity extends AnimatedLaserShootingMob {
     public @Nullable SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor pLevel, @NotNull DifficultyInstance pDifficulty, @NotNull MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
         SpawnGroupData data = super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
 
-        boolean tall = random.nextDouble() > 0.3;
-        this.setTall(tall);
-        this.refreshDimensions();
+        this.initializeSpawn();
 
         return data;
     }
@@ -156,5 +142,13 @@ public class CrescentEntity extends AnimatedLaserShootingMob {
 
             if(this.level() instanceof ServerLevel sl) sl.sendParticles(NDMParticles.FLESH_PARTICLE.get(), this.getX(), this.getY(), this.getZ(), 10, random.nextFloat() - 0.5, random.nextFloat() * 1.25, random.nextFloat() - 0.5, 1.0F);
         }
+    }
+
+    @Override
+    public void initializeSpawn() {
+        this.setTall(random.nextFloat() > 0.3);
+        refreshDimensions();
+
+        super.initializeSpawn();
     }
 }
