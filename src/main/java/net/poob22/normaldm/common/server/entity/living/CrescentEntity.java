@@ -41,7 +41,7 @@ public class CrescentEntity extends AnimatedLaserShootingMob {
     protected void registerGoals() {
         super.registerGoals();
         this.goalSelector.addGoal(0, new ShootLaserCardinalDirectionGoal(this, 20));
-        this.goalSelector.addGoal(1, new RandomStrollCardinalDirectionsGoal(this, 1.0D, false));
+        this.goalSelector.addGoal(1, new RandomStrollCardinalDirectionsGoal(this, 1.0D, 250, false));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
