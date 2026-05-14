@@ -28,12 +28,14 @@ public class RandomStrollCardinalDirectionsGoal extends Goal {
 
     int stillTimer = 10;
     BlockPos lastBlockPos;
+    int randomInterval;
 
-    public RandomStrollCardinalDirectionsGoal(PathfinderMob mob, double speedMod, boolean damaging) {
+    public RandomStrollCardinalDirectionsGoal(PathfinderMob mob, double speedMod, int randomInterval, boolean damaging) {
         this.setFlags(EnumSet.of(Goal.Flag.MOVE));
         this.mob = (DungeonMob) mob;
         this.speedMod = speedMod;
         this.damaging = damaging;
+        this.randomInterval = randomInterval;
         this.movementVec = Vec3.ZERO;
         this.moveInDirectionTime = 0;
         this.moveDir = Direction.NORTH;
@@ -67,7 +69,7 @@ public class RandomStrollCardinalDirectionsGoal extends Goal {
                 checkDamage();
         }
 
-        if(moveInDirectionTime <= 0 || isBlocked(moveDir) || mob.getNavigation().isDone() || mob.getRandom().nextInt(100) == 0) {
+        if(moveInDirectionTime <= 0 || isBlocked(moveDir) || mob.getNavigation().isDone() || mob.getRandom().nextInt(randomInterval) == 0) {
             pickNewDirection();
         } else {
             moveInDirectionTime--;
