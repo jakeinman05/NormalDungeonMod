@@ -30,10 +30,10 @@ public class PacketHandler {
 
         CHANNEL.registerMessage(
                 packetId++,
-                BeamPointsToClientPacket.class,
-                BeamPointsToClientPacket::encode,
-                BeamPointsToClientPacket::decode,
-                BeamPointsToClientPacket::handle
+                BeamValuesToClientPacket.class,
+                BeamValuesToClientPacket::encode,
+                BeamValuesToClientPacket::decode,
+                BeamValuesToClientPacket::handle
         );
     }
 
