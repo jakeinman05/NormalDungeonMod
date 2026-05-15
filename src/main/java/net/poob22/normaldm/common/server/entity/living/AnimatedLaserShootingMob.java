@@ -113,6 +113,11 @@ public abstract class AnimatedLaserShootingMob extends DungeonMob {
 
     public void setLaserType(LaserType pLaserType) {
         this.LASER_TYPE = pLaserType;
+
+        switch (pLaserType) {
+            case STRAIGHT, HOMING -> this.setLaserStatic(true);
+            case FOLLOWING ->  this.setLaserStatic(false);
+        }
     }
 
     public LaserType getLaserType() {
