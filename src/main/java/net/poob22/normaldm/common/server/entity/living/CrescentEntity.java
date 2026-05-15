@@ -75,7 +75,7 @@ public class CrescentEntity extends AnimatedLaserShootingMob {
     @Override
     public boolean hurt(DamageSource pSource, float pAmount) {
         if(!this.level().isClientSide) {
-            if(this.getHealth() > 0.5F && this.random.nextFloat() > 0.4F)
+            if(!this.isShooting() && this.getHealth() > 0.5F && this.random.nextFloat() > 0.4F)
                 makeShort();
         }
 
