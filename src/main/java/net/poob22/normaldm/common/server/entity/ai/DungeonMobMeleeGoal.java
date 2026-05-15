@@ -13,12 +13,14 @@ public class DungeonMobMeleeGoal extends Goal {
     private final double speedMod;
     protected int attackCooldown;
 
+    protected int RECALC_PATH_TIME;
     private int recalculatePath = 0;
 
-    public DungeonMobMeleeGoal(DungeonMob mob, double speedModifier) {
+    public DungeonMobMeleeGoal(DungeonMob mob, double speedModifier, int pathingInterval) {
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
         this.mob = mob;
         this.speedMod = speedModifier;
+        this.RECALC_PATH_TIME = pathingInterval;
     }
 
     @Override
@@ -44,7 +46,7 @@ public class DungeonMobMeleeGoal extends Goal {
             if(recalculatePath > 0) this.recalculatePath--;
 
             else {
-                recalculatePath = 6;
+                recalculatePath = RECALC_PATH_TIME;
                 this.mob.getNavigation().moveTo(target, speedMod);
             }
 
