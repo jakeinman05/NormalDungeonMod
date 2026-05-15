@@ -71,6 +71,8 @@ public class BeamValuesToClientPacket {
                 beam.shooterViewVec = msg.shooterViewVec;
                 beam.targetPos = msg.targetPos;
                 beam.lerpStrength = msg.lerpValue;
+
+                beam.constructBeamPoints(beam.lerpStrength);
             }
         });
 
