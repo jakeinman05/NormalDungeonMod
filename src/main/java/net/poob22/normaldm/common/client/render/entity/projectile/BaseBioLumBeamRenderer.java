@@ -3,7 +3,6 @@ package net.poob22.normaldm.common.client.render.entity.projectile;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -70,10 +69,6 @@ public class BaseBioLumBeamRenderer extends EntityRenderer<BioluminescentBeamEnt
                     start = beam.points.get(i - 1);
                     end = beam.points.get(i);
                 }
-
-                Vec3 cameraPos = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
-                Vec3 renderStart = start.subtract(cameraPos);
-                Vec3 renderEnd = end.subtract(cameraPos);
 
                 Vec3 localStart = start.subtract(beam.position());
                 Vec3 localEnd = end.subtract(beam.position());
