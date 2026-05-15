@@ -26,13 +26,13 @@ public class FleshGuyEntity extends DungeonMob {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return DungeonMob.createDungeonMobAttributes().add(Attributes.MAX_HEALTH, 7.0D).add(Attributes.MOVEMENT_SPEED, 0.41).add(Attributes.ATTACK_DAMAGE, 2.0F);
+        return DungeonMob.createDungeonMobAttributes().add(Attributes.MAX_HEALTH, 7.0D).add(Attributes.MOVEMENT_SPEED, 0.333).add(Attributes.ATTACK_DAMAGE, 1.5F);
     }
 
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(0, new DungeonMobMeleeGoal(this, 1.0D));
+        this.goalSelector.addGoal(0, new DungeonMobMeleeGoal(this, 1.0D, 0));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, false));
     }
 
