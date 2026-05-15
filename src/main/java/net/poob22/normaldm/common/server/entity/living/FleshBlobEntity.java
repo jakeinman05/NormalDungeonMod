@@ -8,57 +8,53 @@ import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.poob22.normaldm.common.server.entity.ai.AiUtil;
+import net.poob22.normaldm.common.server.entity.ai.RetreatGoal;
 import net.poob22.normaldm.common.server.entity.registry.DungeonMobs;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
 public class FleshBlobEntity extends DungeonMob {
     public static EntityDataAccessor<Integer> RESPAWN_TIMER = SynchedEntityData.defineId(FleshBlobEntity.class, EntityDataSerializers.INT);
+    public static EntityDataAccessor<Integer> TYPE_TO_SPAWN = SynchedEntityData.defineId(FleshBlobEntity.class, EntityDataSerializers.INT);
     public final AnimationState throbAnimation = new AnimationState();
-
-    private final List<EntityType<? extends DungeonMob>> toSpawn = new ArrayList<>();
 
     public FleshBlobEntity(EntityType<? extends FleshBlobEntity> entityType, Level world) {
         super(entityType, world);
         this.setRespawnTimer(120);
         this.throbAnimation.start(this.tickCount);
-        this.setHurtParticleAmount(4);
-        this.setDeathParticleAmount(10);
-
-        toSpawn.add(DungeonMobs.FLESH_GUY.entityType.get());
+        this.setHurtParticleAmount(7);
+        this.setDeathParticleAmount(20);
     }
 
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, Player.class, false));
+        this.goalSelector.addGoal(0, new BlobRetreatGoal(this, 64));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return DungeonMob.createDungeonMobAttributes().add(Attributes.MAX_HEALTH, 5.0D).add(Attributes.KNOCKBACK_RESISTANCE, 2.0D);
+        return DungeonMob.createDungeonMobAttributes().add(Attributes.MAX_HEALTH, 5.0D).add(Attributes.KNOCKBACK_RESISTANCE, 2.0D).add(Attributes.MOVEMENT_SPEED, 0.1D);
     }
 
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(RESPAWN_TIMER, 120);
+        this.entityData.define(TYPE_TO_SPAWN, 0);
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
+    public void addAdditionalSaveData(@NotNull CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("RespawnTimer", this.getRespawnTimer());
+        tag.putInt("TypeToSpawn", getTypeInt());
     }
 
     @Override
-    public void load(CompoundTag tag) {
+    public void load(@NotNull CompoundTag tag) {
         super.load(tag);
         this.setRespawnTimer(tag.getInt("RespawnTimer"));
+        this.setTypeInt(getTypeInt());
     }
 
     public void setRespawnTimer(int timerValue) {
@@ -67,6 +63,14 @@ public class FleshBlobEntity extends DungeonMob {
 
     private int getRespawnTimer() {
         return this.entityData.get(RESPAWN_TIMER);
+    }
+
+    public void setTypeInt(int type) {
+        this.entityData.set(TYPE_TO_SPAWN, type);
+    }
+
+    public int getTypeInt() {
+        return this.entityData.get(TYPE_TO_SPAWN);
     }
 
     @Override
@@ -78,10 +82,25 @@ public class FleshBlobEntity extends DungeonMob {
                 FleshGuyEntity guy = DungeonMobs.FLESH_GUY.entityType.get().create(level());
                 guy.setHealth(this.getHealth() + 2);
                 guy.setPos(this.position());
+                guy.setTypeInt(this.getTypeInt());
                 level().addFreshEntity(guy);
             }
             this.remove(RemovalReason.DISCARDED);
         }
         this.setRespawnTimer(this.getRespawnTimer() - 1);
+    }
+
+    static class BlobRetreatGoal extends RetreatGoal {
+        FleshBlobEntity blob;
+
+        public BlobRetreatGoal(FleshBlobEntity mob, double retreatDistance) {
+            super(mob, retreatDistance);
+            this.blob = mob;
+        }
+
+        @Override
+        public boolean canUse() {
+            return this.blob.getTypeInt() == 3 && super.canUse();
+        }
     }
 }

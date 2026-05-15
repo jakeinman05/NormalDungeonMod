@@ -16,48 +16,42 @@ public class FleshBlobModel<T extends FleshBlobEntity> extends HierarchicalModel
 	private final ModelPart body;
 	private final ModelPart larm;
 	private final ModelPart rarm;
-	private final ModelPart rleg;
 	private final ModelPart lleg;
+	private final ModelPart rleg;
 
 	public FleshBlobModel(ModelPart root) {
 		this.base = root.getChild("base");
 		this.head = this.base.getChild("head");
 		this.body = this.base.getChild("body");
-		this.larm = this.body.getChild("larm");
-		this.rarm = this.body.getChild("rarm");
-		this.rleg = this.body.getChild("rleg");
-		this.lleg = this.body.getChild("lleg");
+		this.larm = this.base.getChild("larm");
+		this.rarm = this.base.getChild("rarm");
+		this.lleg = this.base.getChild("lleg");
+		this.rleg = this.base.getChild("rleg");
 	}
 
 	public static LayerDefinition createBodyLayer() {
 		MeshDefinition meshdefinition = new MeshDefinition();
 		PartDefinition partdefinition = meshdefinition.getRoot();
 
-		PartDefinition base = partdefinition.addOrReplaceChild("base", CubeListBuilder.create(), PartPose.offset(-12.5F, 24.0F, -9.4F));
+		PartDefinition base = partdefinition.addOrReplaceChild("base", CubeListBuilder.create(), PartPose.offsetAndRotation(-1.0F, 24.0F, 0.0F, 0.0F, 3.1416F, 0.0F));
 
-		PartDefinition head = base.addOrReplaceChild("head", CubeListBuilder.create(), PartPose.offset(12.0F, -17.0F, 7.5F));
+		PartDefinition head = base.addOrReplaceChild("head", CubeListBuilder.create(), PartPose.offset(-4.0F, -6.0F, 1.0F));
 
-		PartDefinition cube_r1 = head.addOrReplaceChild("cube_r1", CubeListBuilder.create().texOffs(0, 0).addBox(-2.0F, -7.0F, -3.0F, 7.0F, 7.0F, 7.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-2.5F, 14.7F, 2.5F, -0.2182F, 0.3491F, 0.5672F));
+		PartDefinition cube_r1 = head.addOrReplaceChild("cube_r1", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(1.0F, 4.0F, -1.0F, -0.262F, -0.0421F, -0.3378F));
 
-		PartDefinition body = base.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.offset(12.0F, -13.0F, 7.5F));
+		PartDefinition body = base.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 16).addBox(-5.0F, -6.0F, -2.0F, 8.0F, 12.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -2.0F, 0.0F, -1.5708F, 0.48F, 0.0F));
 
-		PartDefinition cube_r2 = body.addOrReplaceChild("cube_r2", CubeListBuilder.create().texOffs(0, 14).addBox(-2.0F, -6.0F, -2.0F, 7.0F, 8.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(1.5F, 10.3F, 0.0F, -1.6474F, -1.21F, -0.0392F));
+		PartDefinition larm = base.addOrReplaceChild("larm", CubeListBuilder.create(), PartPose.offsetAndRotation(2.5F, -4.0F, -3.0F, 0.0F, 0.0F, -0.9163F));
 
-		PartDefinition larm = body.addOrReplaceChild("larm", CubeListBuilder.create(), PartPose.offset(-3.5F, -3.0F, 0.0F));
+		PartDefinition cube_r2 = larm.addOrReplaceChild("cube_r2", CubeListBuilder.create().texOffs(46, 0).addBox(-2.0F, -2.0F, -2.0F, 3.0F, 12.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.5438F, -1.0332F, 4.0F, -1.1187F, 0.1547F, -0.2663F));
 
-		PartDefinition cube_r3 = larm.addOrReplaceChild("cube_r3", CubeListBuilder.create().texOffs(12, 26).addBox(-1.0F, -2.0F, -2.0F, 2.0F, 9.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(7.0F, 15.0F, -2.5F, 0.0F, 0.0F, 1.5708F));
+		PartDefinition rarm = base.addOrReplaceChild("rarm", CubeListBuilder.create().texOffs(32, 0).addBox(-1.5F, -6.0F, -2.0F, 3.0F, 12.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-5.5F, -3.0F, -4.0F, 0.0F, 0.0F, 0.9599F));
 
-		PartDefinition rarm = body.addOrReplaceChild("rarm", CubeListBuilder.create(), PartPose.offset(3.5F, -3.0F, 0.0F));
+		PartDefinition lleg = base.addOrReplaceChild("lleg", CubeListBuilder.create().texOffs(16, 32).addBox(-2.0F, -6.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-4.0F, -4.8F, 6.0F, 0.0F, 0.0F, 1.0036F));
 
-		PartDefinition cube_r4 = rarm.addOrReplaceChild("cube_r4", CubeListBuilder.create().texOffs(22, 26).addBox(-1.0F, -2.0F, -2.0F, 2.0F, 9.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-1.0F, 9.8F, -0.5F, -0.7476F, 1.4247F, -1.465F));
+		PartDefinition rleg = base.addOrReplaceChild("rleg", CubeListBuilder.create(), PartPose.offset(1.0F, -6.0F, 0.0F));
 
-		PartDefinition rleg = body.addOrReplaceChild("rleg", CubeListBuilder.create(), PartPose.offset(-1.5F, 4.0F, 0.0F));
-
-		PartDefinition cube_r5 = rleg.addOrReplaceChild("cube_r5", CubeListBuilder.create().texOffs(0, 26).addBox(0.0F, -9.0F, -2.0F, 3.0F, 9.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-3.5F, 6.0F, 6.5F, -0.1309F, -0.0023F, 1.5535F));
-
-		PartDefinition lleg = body.addOrReplaceChild("lleg", CubeListBuilder.create(), PartPose.offset(1.5F, 4.0F, 0.0F));
-
-		PartDefinition cube_r6 = lleg.addOrReplaceChild("cube_r6", CubeListBuilder.create().texOffs(22, 14).addBox(-1.0F, -9.0F, -2.0F, 3.0F, 9.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-7.5F, 7.0F, 0.5F, 0.0786F, -0.3405F, 1.0337F));
+		PartDefinition cube_r3 = rleg.addOrReplaceChild("cube_r3", CubeListBuilder.create().texOffs(0, 32).addBox(-3.0F, -12.0F, -1.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(5.0F, 3.0F, -0.8F, -0.7849F, 0.0308F, -1.5399F));
 
 		return LayerDefinition.create(meshdefinition, 64, 64);
 	}
@@ -65,7 +59,7 @@ public class FleshBlobModel<T extends FleshBlobEntity> extends HierarchicalModel
 	@Override
 	public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-		this.animate(((FleshBlobEntity)entity).throbAnimation, FleshBlobAnimations.throb, ageInTicks);
+		this.animate(entity.throbAnimation, FleshBlobAnimations.throb, ageInTicks);
 	}
 
 	@Override
