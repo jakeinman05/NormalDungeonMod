@@ -42,7 +42,7 @@ public class BigFellaEntity extends AnimatedRandomlyAttackingMob {
     protected void registerGoals() {
         super.registerGoals();
         this.goalSelector.addGoal(0, new BigFellaRandomAttackGoal(this));
-        this.goalSelector.addGoal(1, new DungeonMobMeleeGoal(this, 1.0D));
+        this.goalSelector.addGoal(1, new DungeonMobMeleeGoal(this, 1.0D, 6));
 
         this.targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, Player.class, false));
     }
