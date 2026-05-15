@@ -75,7 +75,10 @@ public class FleshBlobEntity extends DungeonMob {
 
         if(getRespawnTimer() <= 0) {
             if(!this.level().isClientSide) {
-                AiUtil.spawnEnemiesOnDeath(this, toSpawn, false);
+                FleshGuyEntity guy = DungeonMobs.FLESH_GUY.entityType.get().create(level());
+                guy.setHealth(this.getHealth() + 2);
+                guy.setPos(this.position());
+                level().addFreshEntity(guy);
             }
             this.remove(RemovalReason.DISCARDED);
         }
