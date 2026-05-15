@@ -27,6 +27,7 @@ public class DungeonMob extends Monster {
     SimpleParticleType deathParticle;
     int deathParticleAmount;
     int hurtParticleAmount;
+    boolean doDeathPool = true;
 
     /// Add an isFriendly property in case of enemies being friendly to players
     protected DungeonMob(EntityType<? extends Monster> pEntityType, Level pLevel) {
@@ -85,6 +86,10 @@ public class DungeonMob extends Monster {
         return this.deathParticleAmount > 0 ? this.deathParticleAmount : 10;
     }
 
+    public void setDoDeathPool(boolean doDeathPool) {
+        this.doDeathPool = doDeathPool;
+    }
+
     public void setHurtParticleAmount(int hurtParticleAmount) {
         if(hurtParticleAmount <= 0) {
             this.hurtParticleAmount = getDeathParticleAmount();
@@ -111,7 +116,8 @@ public class DungeonMob extends Monster {
         if(!this.level().isClientSide) {
             sendParticles((byte) 1);
             float sizeMultiplier = 1.3F + this.getRandom().nextInt(1);
-            PacketHandler.sendToTracking(this, new BloodPoolPacket(this.getX(), this.getY(), this.getZ(), this.getBbWidth() * sizeMultiplier));
+            if(doDeathPool)
+                PacketHandler.sendToTracking(this, new BloodPoolPacket(this.getX(), this.getY(), this.getZ(), this.getBbWidth() * sizeMultiplier));
         }
         this.remove(RemovalReason.KILLED);
     }
