@@ -40,7 +40,7 @@ public class ShootLaserCardinalDirectionGoal extends Goal {
         if(--shotInterval <= 0) {
             for(Direction d : ALL_DIRECTIONS) {
                 lookVec = getShootVec(d);
-                AABB box = new AABB(mob.position(), lookVec).inflate(0.7F);
+                AABB box = new AABB(mob.position(), lookVec).inflate(0.5F);
                 List<Player> players = mob.level().getEntitiesOfClass(Player.class, box, player -> player != null && player.isAlive() && !player.isSpectator() && !player.isCreative());
 
                 if(!players.isEmpty()) {
