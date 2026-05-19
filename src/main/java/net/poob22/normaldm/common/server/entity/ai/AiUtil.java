@@ -11,6 +11,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.poob22.normaldm.common.server.entity.living.DungeonMob;
 import org.apache.commons.lang3.RandomUtils;
+import org.joml.Vector3f;
 
 import java.util.List;
 import java.util.Objects;
@@ -89,5 +90,13 @@ public class AiUtil {
 
             level.sendParticles(particleType, x, y, z, 0, v.x, v.y, v.z, 1.0D);
         }
+    }
+
+    public static Vector3f toVec3f(Vec3 v) {
+        return new Vector3f((float) v.x, (float) v.y, (float) v.z);
+    }
+
+    public static Vec3 toVec3(Vector3f v) {
+        return new Vec3(v.x, v.y, v.z);
     }
 }
