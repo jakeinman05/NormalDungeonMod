@@ -113,6 +113,11 @@ public abstract class AnimatedLaserShootingMob extends DungeonMob {
 
     public void setLaserType(LaserType pLaserType) {
         this.LASER_TYPE = pLaserType;
+
+        switch (pLaserType) {
+            case STRAIGHT, HOMING -> this.setLaserStatic(true);
+            case FOLLOWING ->  this.setLaserStatic(false);
+        }
     }
 
     public LaserType getLaserType() {
@@ -151,9 +156,5 @@ public abstract class AnimatedLaserShootingMob extends DungeonMob {
         return this.IS_STATIC;
     }
 
-    public boolean shootBeam() {
-        this.beam = new BioluminescentBeamEntity(this.level(), this, getLaserDuration(), getLaserDistance(), isLaserStatic(), getLaserType());
-        this.beam.setPos(this.getX(), this.getEyeY(), this.getZ());
-        return this.level().addFreshEntity(beam);
-    }
+    public abstract boolean shootBeam();
 }

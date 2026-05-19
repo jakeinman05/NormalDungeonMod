@@ -5,13 +5,15 @@ import org.jetbrains.annotations.NotNull;
 
 public enum LaserType implements StringRepresentable {
     STRAIGHT,
-    HOMING;
+    HOMING,
+    FOLLOWING;
 
     @Override
     public @NotNull String getSerializedName() {
         return switch(this) {
             case STRAIGHT -> "straight";
             case HOMING -> "homing";
+            case FOLLOWING -> "following";
         };
     }
 }

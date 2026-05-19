@@ -13,11 +13,12 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.poob22.normaldm.NormalDungeonMod;
+import net.minecraft.world.phys.Vec3;
 import net.poob22.normaldm.common.client.particles.NDMParticles;
 import net.poob22.normaldm.common.server.entity.ai.RandomStrollCardinalDirectionsGoal;
 import net.poob22.normaldm.common.server.entity.ai.ShootLaserCardinalDirectionGoal;
 import net.poob22.normaldm.common.server.entity.definition.LaserType;
+import net.poob22.normaldm.common.server.entity.projectile.BioluminescentBeamEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,7 +32,6 @@ public class CrescentEntity extends AnimatedLaserShootingMob {
         setChargeUpDuration(20);
         setLaserDuration(30);
         setLaserDistance(50);
-        setLaserStatic(false);
         setLaserType(LaserType.STRAIGHT);
     }
 
@@ -76,7 +76,7 @@ public class CrescentEntity extends AnimatedLaserShootingMob {
     @Override
     public boolean hurt(DamageSource pSource, float pAmount) {
         if(!this.level().isClientSide) {
-            if(this.getHealth() > 0.5F && this.random.nextFloat() > 0.4F)
+            if(!this.isShooting() && this.getHealth() > 0.5F && this.random.nextFloat() > 0.4F)
                 makeShort();
         }
 
@@ -150,5 +150,16 @@ public class CrescentEntity extends AnimatedLaserShootingMob {
         refreshDimensions();
 
         super.initializeSpawn();
+    }
+
+    @Override
+    public boolean shootBeam() {
+        if(this.getTarget() != null) {
+            this.beam = new BioluminescentBeamEntity(this.level(), this, this.getTarget(), getLaserDuration(), getLaserDistance(), isLaserStatic(), getLaserType());
+            Vec3 pos = this.position();
+            this.beam.setPos(pos.x, this.getEyeY(), pos.z);
+            return this.level().addFreshEntity(beam);
+        }
+        return false;
     }
 }

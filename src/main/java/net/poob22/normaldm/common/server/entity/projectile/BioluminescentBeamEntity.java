@@ -1,5 +1,7 @@
 package net.poob22.normaldm.common.server.entity.projectile;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -13,16 +15,19 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.poob22.normaldm.NormalDungeonMod;
-import net.poob22.normaldm.common.client.packet.BeamPointsToClientPacket;
-import net.poob22.normaldm.common.client.packet.PacketHandler;
+import net.poob22.normaldm.common.client.particles.NDMParticles;
+import net.poob22.normaldm.common.server.entity.ai.AiUtil;
 import net.poob22.normaldm.common.server.entity.definition.LaserType;
 import net.poob22.normaldm.common.server.entity.living.DungeonMob;
 import net.poob22.normaldm.common.server.entity.registry.NDMEntities;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,24 +35,33 @@ import java.util.UUID;
 
 public class BioluminescentBeamEntity extends Entity {
     public static final EntityDataAccessor<Integer> SHOOTER_UUID = SynchedEntityData.defineId(BioluminescentBeamEntity.class, EntityDataSerializers.INT);
-    public static final EntityDataAccessor<Integer> POINTS_SIZE = SynchedEntityData.defineId(BioluminescentBeamEntity.class, EntityDataSerializers.INT);
+    public static final EntityDataAccessor<Integer> LIFETIME = SynchedEntityData.defineId(BioluminescentBeamEntity.class, EntityDataSerializers.INT);
+    public static final EntityDataAccessor<Integer> LASER_DISTANCE = SynchedEntityData.defineId(BioluminescentBeamEntity.class, EntityDataSerializers.INT);
+    public static final EntityDataAccessor<Boolean> STATIC = SynchedEntityData.defineId(BioluminescentBeamEntity.class, EntityDataSerializers.BOOLEAN);
+    public static final EntityDataAccessor<Vector3f> SHOOTER_POS = SynchedEntityData.defineId(BioluminescentBeamEntity.class, EntityDataSerializers.VECTOR3);
+    public static final EntityDataAccessor<Vector3f> SHOOTER_VIEW_ANGLE = SynchedEntityData.defineId(BioluminescentBeamEntity.class, EntityDataSerializers.VECTOR3);
+    public static final EntityDataAccessor<Vector3f> TARGET_POS = SynchedEntityData.defineId(BioluminescentBeamEntity.class, EntityDataSerializers.VECTOR3);
+    public static final EntityDataAccessor<Float> LERP_STRENGTH = SynchedEntityData.defineId(BioluminescentBeamEntity.class, EntityDataSerializers.FLOAT);
+
+    protected double segmentRadius = 0.5;
+    protected double segmentLength = 0.75;
+    protected float DEFAULT_LERP_STRENGTH = 0.065F;
+    protected int MAX_LIFETIME;
+    protected float damage;
+
+    public float s = 1.0F;
+    public float so = 1.0F;
 
     private boolean beamBuilt = false;
-    private boolean isStatic = false;
-    private boolean pointsDirty = false;
-    private boolean firstTickInit = false;
-
-    public Vec3 beamEnd;
 
     public LivingEntity shooter;
     public UUID shooterUuid;
     public List<Vec3> points;
     public List<Vec3> pointso;
-    protected int lifeTime;
+    private LivingEntity target;
+    private BlockHitResult hitPoint;
 
     private LaserType type;
-    protected double segmentRadius = 0.5;
-    protected float laserDistance = 0;
 
     protected List<LivingEntity> justHit = new ArrayList<>();
 
@@ -55,78 +69,23 @@ public class BioluminescentBeamEntity extends Entity {
         super(pEntityType, pLevel);
         this.points = new ArrayList<>();
         this.pointso = new ArrayList<>();
-        this.beamEnd = Vec3.ZERO;
     }
-    public BioluminescentBeamEntity(Level level, LivingEntity shooter, int lifeTime, float laserDistance, boolean isStatic, LaserType type) {
+    public BioluminescentBeamEntity(Level level, LivingEntity shooter, LivingEntity target, int lifeTime, int laserDistance, boolean isStatic, LaserType type) {
         this(NDMEntities.BIOLUMINESCENT_BEAM_SEGMENT.get(), level);
         this.shooter = shooter;
         this.shooterUuid = shooter.getUUID();
         this.entityData.set(SHOOTER_UUID, shooter.getId());
 
-        // true for entities shooting in one direction without looking around
-        this.isStatic = isStatic;
+        // scale damage based on players damage stat in dungeon
+        this.damage = this.shooter instanceof Player ? 1.0F : 1.0F;
+
         this.type = type;
+        this.target = target;
 
-        this.lifeTime = lifeTime;
-        this.laserDistance = laserDistance;
-        this.setBeamEnd(beamEnd);
-    }
-
-    @Override
-    public void tick() {
-        if(!level().isClientSide) {
-            if(this.lifeTime > 0) {
-                this.lifeTime--;
-
-                if(firstTickInit) {
-                    if(!beamBuilt)
-                        switch(this.type) {
-                            case STRAIGHT:
-                                buildStraitBeam();
-                                break;
-                            case HOMING:
-                                buildStraitBeam();
-                                break;
-                        }
-
-                    if(!points.isEmpty()) {
-                        this.setPos(points.get(0).x, points.get(0).y - 0.5, points.get(0).z);
-                    }
-
-                    if(pointsDirty) {
-                        PacketHandler.sendToTracking(this, new BeamPointsToClientPacket(this.getId(), this.points, getBeamEnd()));
-                        pointsDirty = false;
-                    }
-                }
-
-                if(this.tickCount % 3 == 0) {
-                    clearJustHit();
-                    if(checkSegmentDamage()) {
-                        if(level() instanceof ServerLevel sl) {
-                            for(LivingEntity entity : justHit) {
-                                Vec3 entityCenter = entity.getBoundingBox().getCenter();
-                                sl.sendParticles(ParticleTypes.SMOKE, entityCenter.x, entityCenter.y, entityCenter.z, 5, random.nextDouble(), random.nextDouble(), random.nextDouble(), 0.0F);
-                            }
-                        }
-                    }
-
-                    for(Vec3 point : points) {
-                        ((ServerLevel) level()).sendParticles(ParticleTypes.SMOKE, point.x, point.y, point.z, 1, 0, 0, 0, 0);
-                    }
-                }
-
-                if(this.shooter == null || !this.shooter.isAlive()) {
-                    this.remove(RemovalReason.DISCARDED);
-                }
-            } else {
-                this.remove(RemovalReason.DISCARDED);
-            }
-        }
-
-        if(!firstTickInit)
-            firstTickInit = true;
-
-        super.tick();
+        this.MAX_LIFETIME = lifeTime;
+        this.setLifetime(MAX_LIFETIME);
+        this.setLaserDistance(laserDistance);
+        this.setStatic(isStatic);
     }
 
     @Override
@@ -144,74 +103,178 @@ public class BioluminescentBeamEntity extends Entity {
     @Override
     protected void defineSynchedData() {
         this.entityData.define(SHOOTER_UUID, -1);
-        this.entityData.define(POINTS_SIZE, 0);
+        this.entityData.define(LIFETIME, 0);
+        this.entityData.define(LASER_DISTANCE, 0);
+        this.entityData.define(STATIC, false);
+        this.entityData.define(SHOOTER_POS, new Vector3f(0.0F, 0.0F, 0.0F));
+        this.entityData.define(SHOOTER_VIEW_ANGLE, new Vector3f(0.0F, 0.0F, 0.0F));
+        this.entityData.define(TARGET_POS, new Vector3f(0.0F, 0.0F, 0.0F));
+        this.entityData.define(LERP_STRENGTH, 0.0F);
     }
 
     @Override
     protected void readAdditionalSaveData(@NotNull CompoundTag tag) {
-        this.lifeTime = tag.getInt("lifeTime");
         this.shooterUuid = tag.getUUID("shooterUuid");
-        setBeamEnd(new Vec3(tag.getDouble("beamEndx"), tag.getDouble("beamEndy"), tag.getDouble("beamEndz")));
-
-        setPointsSize(tag.getInt("numPoints"));
-        this.points = new ArrayList<>();
-        for(int i = 0; i < getPointsSize(); i++) {
-            this.points.add(new Vec3(tag.getDouble("point" + i + "x"), tag.getDouble("point" + i + "y"), tag.getDouble("point" + i + "z")));
-        }
+        this.setLifetime(tag.getInt("lifetime"));
+        this.setLaserDistance(tag.getInt("laserDistance"));
+        this.setStatic(tag.getBoolean("static"));
+        this.setLerpStrength(tag.getFloat("lerpStrength"));
+        this.setShooterPos(loadVec3fData(tag, "shooterPos"));
+        this.setShooterViewVector(loadVec3fData(tag, "shooterViewAngle"));
+        this.setTargetPos(loadVec3fData(tag, "targetPos"));
     }
 
     @Override
     protected void addAdditionalSaveData(@NotNull CompoundTag tag) {
-        tag.putInt("lifeTime", this.lifeTime);
         tag.putUUID("shooterUuid", this.shooterUuid);
-        int size = getPointsSize();
-        tag.putInt("numPoints", size);
-        tag.putDouble("beamEndx", this.beamEnd.x);
-        tag.putDouble("beamEndy", this.beamEnd.y);
-        tag.putDouble("beamEndz", this.beamEnd.z);
-
-        for(int i = 0; i < size; i++) {
-            String vecX = "point" + i + "x";
-            String vecY = "point" + i + "y";
-            String vecZ = "point" + i + "z";
-
-            tag.putDouble(vecX, points.get(i).x);
-            tag.putDouble(vecY, points.get(i).y);
-            tag.putDouble(vecZ, points.get(i).z);
-        }
+        tag.putInt("lifetime", this.getLifetime());
+        tag.putInt("laserDistance", this.getLaserDistance());
+        tag.putBoolean("static", this.isStatic());
+        tag.putFloat("lerpStrength", getLerpStrength());
+        saveVec3fData(tag, entityData.get(SHOOTER_POS), "shooterPos");
+        saveVec3fData(tag, entityData.get(SHOOTER_VIEW_ANGLE), "shooterViewAngle");
+        saveVec3fData(tag, entityData.get(TARGET_POS), "targetPos");
     }
 
-    private void buildStraitBeam() {
-        if(!level().isClientSide && this.shooter != null) {
-            Vec3 start;
+    @Override
+    public void tick() {
+        if(this.getLifetime() > 0) {
+            this.setLifetime(this.getLifetime() - 1);
 
-            if(this.shooter instanceof Player) start = this.shooter.getEyePosition().subtract(0, 1, 0);
-            else start = this.shooter.getEyePosition();
-            Vec3 direction = this.shooter.getViewVector(1.0F);
-            start = start.add(direction.scale(1.0F));
-            Vec3 end = start.add(direction.scale(laserDistance));
-            BlockHitResult hitResult = level().clip(new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this.shooter));
-            Vec3 endHit = hitResult.getLocation();
-            double diffLen = endHit.subtract(start).length();
+            if(!level().isClientSide) {
+                if(!beamBuilt && !(this.type == null)) {
+                    switch(this.type) {
+                        case STRAIGHT:
+                            setShooterPos(this.shooter.getEyePosition());
+                            setShooterViewVector(this.shooter.getViewVector(1.0F));
+                            setTargetPos(Vec3.ZERO);
+                            setLerpStrength(0.0F);
+                            constructBeamPoints(getLerpStrength());
+                            break;
+                        case HOMING:
+                            setShooterPos(this.shooter.getEyePosition());
+                            setShooterViewVector(this.shooter.getViewVector(1.0F));
+                            setTargetPos(this.target.getBoundingBox().getCenter());
+                            setLerpStrength(DEFAULT_LERP_STRENGTH);
+                            constructBeamPoints(getLerpStrength());
+                            break;
+                        case FOLLOWING:
+                            setShooterPos(this.shooter.getEyePosition());
+                            setShooterViewVector(this.shooter.getViewVector(1.0F));
+                            setTargetPos(this.target.getBoundingBox().getCenter());
+                            setLerpStrength((float) (DEFAULT_LERP_STRENGTH + (0.055 * (1.0F - ((double) this.getLifetime() / this.MAX_LIFETIME)))));
+                            constructBeamPoints(getLerpStrength());
+                            break;
+                    }
+                }
 
-            this.setBeamEnd(endHit);
+                if(level() instanceof ServerLevel sl) {
+                    if(this.tickCount % 2 == 0) {
+                        clearJustHit();
+                        if(checkSegmentDamage()) {
+                            for(LivingEntity entity : justHit) {
+                                Vec3 entityCenter = entity.getBoundingBox().getCenter();
+                                sl.sendParticles(ParticleTypes.SMOKE, entityCenter.x, entityCenter.y, entityCenter.z, 5, random.nextDouble() - 0.5, random.nextDouble() - 0.5, random.nextDouble() - 0.5, 0.0F);
+                            }
+                        }
+                    }
 
-            // add old points
-            this.pointso.clear();
-            this.pointso.addAll(this.points);
+                    if(hitPoint != null) {
+                        BlockPos pos = new BlockPos(hitPoint.getBlockPos());
+                        BlockState state = sl.getBlockState(pos);
+                        if(state.getBlock() == Blocks.AIR) {
+                            pos.relative(hitPoint.getDirection());
+                            state = sl.getBlockState(pos);
+                        }
+                        BlockParticleOption type = new BlockParticleOption(ParticleTypes.BLOCK, state);
+                        Vec3 v = hitPoint.getLocation();
+                        sl.sendParticles(type, v.x, v.y, v.z, 5, random.nextDouble() - 0.5, random.nextDouble() - 0.5, random.nextDouble() - 0.5, 0.0F);
+                    }
+
+                    for(int i = 1; i < points.size(); i++) {
+                        if(random.nextDouble() > 0.8) {
+                            Vec3 v0 = points.get(i - 1);
+                            Vec3 v1 = points.get(i);
+                            Vec3 pos = v0.lerp(v1, random.nextDouble());
+                            sl.sendParticles(NDMParticles.BEAM_PLASMA_PARTICLE.get(), pos.x, pos.y, pos.z, 1, random.nextDouble() - 0.5, 0, random.nextDouble() - 0.5, 0.0F);
+                        }
+                    }
+                }
+
+                if(this.shooter == null || !this.shooter.isAlive()) {
+                    this.remove(RemovalReason.DISCARDED);
+                }
+            }
+
+            if(this.level().isClientSide) {
+                constructBeamPoints(getLerpStrength());
+
+                if(this.getLifetime() <= 10) {
+                    this.so = s;
+                    this.s = (float)(1.0 - (1.0 - this.getLifetime() * 0.1));
+                }
+            }
+
+        } else {
+            this.remove(RemovalReason.DISCARDED);
+        }
+
+        super.tick();
+    }
+
+    public void constructBeamPoints(double lerpStrength) {
+        if(this.shooter != null) {
             clearPoints();
-            for(float i = 0; i < diffLen + 0.75; i += 0.75F){
-                this.addPoint(start.add(direction.scale(i)));
+            Vec3 currentDir = getShooterViewVector();
+
+            Vec3 start;
+            if(this.shooter instanceof Player) start = getShooterPos().subtract(0, 1, 0);
+            else start = getShooterPos();
+            start = start.add(currentDir.scale(1.0F));
+            addPoint(start);
+
+            Vec3 end;
+            boolean hitBlock = false;
+            int segments = 1;
+
+            while(!hitBlock) {
+                if(getTargetPos().lengthSqr() > 1e-6) {
+                    Vec3 toTargetDir = getTargetPos().subtract(start).normalize();
+                    currentDir = currentDir.lerp(toTargetDir, lerpStrength).normalize();
+                }
+
+                end = start.add(currentDir.scale(segmentLength));
+                BlockHitResult hitResult = this.level().clip(new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this.shooter));
+
+                addPoint(end);
+                segments++;
+
+                if(segments >= getLaserDistance()) {
+                    break;
+                }
+
+                start = hitResult.getLocation();
+
+                if(hitResult.getType() == HitResult.Type.BLOCK) {
+                    this.hitPoint = hitResult;
+                    hitBlock = true;
+                } else {
+                    this.hitPoint = null;
+                }
             }
         }
 
-        if(this.isStatic)
+        if(isStatic()) {
             beamBuilt = true;
+            if(this.level().isClientSide) {
+                this.pointso.addAll(this.points);
+            }
+        }
     }
 
     private boolean checkSegmentDamage() {
         if(!points.isEmpty()) {
-            for(int i = 1; i < getPointsSize(); i++) {
+            for(int i = 1; i < points.size(); i++) {
                 Vec3 start = points.get(i - 1);
                 Vec3 end = points.get(i);
                 AABB box = new AABB(start, end).inflate(1.0D);
@@ -237,7 +300,6 @@ public class BioluminescentBeamEntity extends Entity {
                         }
                         indexCount++;
                     }
-                    NormalDungeonMod.LOGGER.info("Nearest point index: " + minIdx);
 
                     Vec3 nearestPos = pointsOnEntity[minIdx];
                     Vec3 AB = end.subtract(start);
@@ -255,7 +317,7 @@ public class BioluminescentBeamEntity extends Entity {
 
                     double totalRadius = ent.getBbWidth()/2 + segmentRadius;
                     if(vec.lengthSqr() < totalRadius * totalRadius) {
-                        if(ent.hurt(damageSources().mobAttack(this.shooter), 1)) {
+                        if(ent.hurt(damageSources().mobAttack(this.shooter), damage)) {
                             addJustHit(ent);
                             return true;
                         }
@@ -269,58 +331,93 @@ public class BioluminescentBeamEntity extends Entity {
 
     public void addPoint(Vec3 point) {
         this.points.add(point);
-        setPointsSize(this.points.size());
-        setPointsDirty();
-    }
-
-    public void setPoints(List<Vec3> pointsToAdd, int size) {
-        for(int i = 0; i < size; i++) {
-            this.points.add(pointsToAdd.get(i));
-        }
-        setPointsSize(size);
-    }
-
-    public void setPointsDirty() {
-        this.pointsDirty = true;
-    }
-
-    public void removePoint(Vec3 point) {
-        if(this.points.remove(point))
-            setPointsDirty();
-        else
-            NormalDungeonMod.LOGGER.warn("Point to remove: {} is not in the list for beam entity: {}", point.toString(), this);
-
-        this.entityData.set(POINTS_SIZE, this.points.size());
     }
 
     public void clearPoints() {
-        this.points.clear();
-        this.entityData.set(POINTS_SIZE, 0);
-        setPointsDirty();
-    }
-
-    private void setPointsSize(int size) {
-        this.entityData.set(POINTS_SIZE, size);
-        //NormalDungeonMod.LOGGER.info("Size: {}", getPointsSize());
-    }
-
-    public int getPointsSize() {
-        return this.entityData.get(POINTS_SIZE);
-    }
-
-    public void setBeamEnd(Vec3 beamEnd) {
-        this.beamEnd = beamEnd;
-    }
-
-    public Vec3 getBeamEnd() {
-        return this.beamEnd;
+        pointso.clear();
+        pointso.addAll(points);
+        points.clear();
     }
 
     private void addJustHit(LivingEntity entity) {
-        this.justHit.add(entity);
+        if(entity instanceof Player)
+            this.justHit.add(entity);
     }
 
     private void clearJustHit() {
         this.justHit.clear();
+    }
+
+    private void setLifetime(int lifetime) {
+        this.entityData.set(LIFETIME, lifetime);
+    }
+
+    public int getLifetime() {
+        return this.entityData.get(LIFETIME);
+    }
+
+    private void setLaserDistance(int distance) {
+        this.entityData.set(LASER_DISTANCE, distance);
+    }
+
+    private int getLaserDistance() {
+        return this.entityData.get(LASER_DISTANCE);
+    }
+
+    private void setStatic(boolean isStatic) {
+        this.entityData.set(STATIC, isStatic);
+    }
+
+    private boolean isStatic() {
+        return this.entityData.get(STATIC);
+    }
+
+    private void setShooterPos(Vec3 shooterPos) {
+        Vector3f v = AiUtil.toVec3f(shooterPos);
+        this.entityData.set(SHOOTER_POS, v);
+    }
+
+    private Vec3 getShooterPos() {
+        return AiUtil.toVec3(this.entityData.get(SHOOTER_POS));
+    }
+
+    private void setShooterViewVector(Vec3 viewAngle) {
+        Vector3f v = AiUtil.toVec3f(viewAngle);
+        this.entityData.set(SHOOTER_VIEW_ANGLE, v);
+    }
+
+    private Vec3 getShooterViewVector() {
+        return AiUtil.toVec3(this.entityData.get(SHOOTER_VIEW_ANGLE));
+    }
+
+    private void setTargetPos(Vec3 targetPos) {
+        Vector3f v = AiUtil.toVec3f(targetPos);
+        this.entityData.set(TARGET_POS, v);
+    }
+
+    private Vec3 getTargetPos() {
+        return AiUtil.toVec3(this.entityData.get(TARGET_POS));
+    }
+
+    private void setLerpStrength(float lerpStrength) {
+        this.entityData.set(LERP_STRENGTH, lerpStrength);
+    }
+
+    private float getLerpStrength() {
+        return this.entityData.get(LERP_STRENGTH);
+    }
+
+    private void saveVec3fData(CompoundTag tag, Vector3f v, String type) {
+        tag.putFloat(type + "x", v.x);
+        tag.putFloat(type + "y", v.y);
+        tag.putFloat(type + "z", v.z);
+    }
+
+    private Vec3 loadVec3fData(CompoundTag tag, String type) {
+        float x = tag.getFloat(type + "x");
+        float y = tag.getFloat(type + "y");
+        float z = tag.getFloat(type + "z");
+        Vector3f vf= new Vector3f(x, y, z);
+        return AiUtil.toVec3(vf);
     }
 }

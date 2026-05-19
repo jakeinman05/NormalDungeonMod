@@ -7,6 +7,7 @@ import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class BloodPoolParticle extends TextureSheetParticle {
@@ -41,7 +42,7 @@ public class BloodPoolParticle extends TextureSheetParticle {
     }
 
     @Override
-    public void render(VertexConsumer buffer, Camera cameraInfo, float partialTicks) {
+    public void render(@NotNull VertexConsumer buffer, Camera cameraInfo, float partialTicks) {
         Vec3 camPos = cameraInfo.getPosition();
 
         float x = (float)(Mth.lerp(partialTicks, this.xo, this.x) - camPos.x);
@@ -88,7 +89,7 @@ public class BloodPoolParticle extends TextureSheetParticle {
     }
 
     @Override
-    public ParticleRenderType getRenderType() {
+    public @NotNull ParticleRenderType getRenderType() {
         return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
     }
 
@@ -100,7 +101,7 @@ public class BloodPoolParticle extends TextureSheetParticle {
         }
 
         @Override
-        public @Nullable Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+        public @Nullable Particle createParticle(@NotNull SimpleParticleType type, @NotNull ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
             float size = (float) xSpeed;
             BloodPoolParticle particle = new BloodPoolParticle(level, x, y, z, size);
             particle.pickSprite(this.sprites);
