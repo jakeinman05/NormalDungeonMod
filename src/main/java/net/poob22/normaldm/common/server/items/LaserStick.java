@@ -19,7 +19,7 @@ public class LaserStick extends Item {
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(Level level, @NotNull Player player, @NotNull InteractionHand pUsedHand) {
         if(!level.isClientSide) {
-            BioluminescentBeamEntity beam = new BioluminescentBeamEntity(level, player, 200, 21.0F, false, LaserType.STRAIGHT);
+            BioluminescentBeamEntity beam = new BioluminescentBeamEntity(level, player, player, 120, 21, false, LaserType.STRAIGHT);
 
             beam.setPos(player.getX(), player.getEyeY() - 1F, player.getZ());
             level.addFreshEntity(beam);
