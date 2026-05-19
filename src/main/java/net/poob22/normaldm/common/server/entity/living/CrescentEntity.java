@@ -13,6 +13,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.phys.Vec3;
 import net.poob22.normaldm.common.client.particles.NDMParticles;
 import net.poob22.normaldm.common.server.entity.ai.RandomStrollCardinalDirectionsGoal;
 import net.poob22.normaldm.common.server.entity.ai.ShootLaserCardinalDirectionGoal;
@@ -155,7 +156,8 @@ public class CrescentEntity extends AnimatedLaserShootingMob {
     public boolean shootBeam() {
         if(this.getTarget() != null) {
             this.beam = new BioluminescentBeamEntity(this.level(), this, this.getTarget(), getLaserDuration(), getLaserDistance(), isLaserStatic(), getLaserType());
-            this.beam.setPos(this.getX(), this.getEyeY(), this.getZ());
+            Vec3 pos = this.position();
+            this.beam.setPos(pos.x, this.getEyeY(), pos.z);
             return this.level().addFreshEntity(beam);
         }
         return false;
