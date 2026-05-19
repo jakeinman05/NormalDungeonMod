@@ -12,21 +12,19 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.poob22.normaldm.common.client.model.BioluminescentBeamSegmentModel;
 import net.poob22.normaldm.common.server.entity.projectile.BioluminescentBeamEntity;
 import net.poob22.normaldm.common.server.entity.registry.DungeonMobs;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Random;
-
 import static net.poob22.normaldm.NormalDungeonMod.MODID;
 
 public class BaseBioLumBeamRenderer extends EntityRenderer<BioluminescentBeamEntity> {
     private final BioluminescentBeamSegmentModel<BioluminescentBeamEntity> model;
-    private final Random rand = new Random();
 
-    private int FRAME_TIME = 1;
+    private final int FRAME_TIME = 1;
     private static final ResourceLocation[] START_FRAMES = new ResourceLocation[] {
             rl("textures/entity/biolum_beam/beam_start0.png"),
             rl("textures/entity/biolum_beam/beam_start1.png"),
@@ -50,14 +48,12 @@ public class BaseBioLumBeamRenderer extends EntityRenderer<BioluminescentBeamEnt
     public void render(BioluminescentBeamEntity beam, float entityYaw, float partialTick, @NotNull PoseStack poseStack, @NotNull MultiBufferSource buffer, int packedLight) {
         if(beam.shooter != null && !beam.points.isEmpty() && !beam.pointso.isEmpty()) {
             int age = beam.tickCount;
-            int startIdx = (age/FRAME_TIME) % START_FRAMES.length;
-            int middleIdx = (age/FRAME_TIME) % MIDDLE_FRAMES.length;
 
             for(int i = 1; i < beam.points.size(); i++) {
                 Vec3 start;
                 Vec3 end;
 
-                if(beam.points.size() == beam.pointso.size()) {
+                if(i < beam.pointso.size()) {
                     Vec3 oldStart = beam.pointso.get(i - 1);
                     Vec3 newStart = beam.points.get(i - 1);
                     Vec3 oldEnd = beam.pointso.get(i);
@@ -66,8 +62,7 @@ public class BaseBioLumBeamRenderer extends EntityRenderer<BioluminescentBeamEnt
                     start = oldStart.lerp(newStart, partialTick);
                     end = oldEnd.lerp(newEnd, partialTick);
                 } else {
-                    start = beam.points.get(i - 1);
-                    end = beam.points.get(i);
+                    continue;
                 }
 
                 Vec3 localStart = start.subtract(beam.position());
@@ -83,10 +78,22 @@ public class BaseBioLumBeamRenderer extends EntityRenderer<BioluminescentBeamEnt
                 poseStack.mulPose(Axis.YP.rotationDegrees(yaw));
                 poseStack.mulPose(Axis.XP.rotationDegrees(-pitch));
 
-                ResourceLocation texture;
-                if(i == 1) texture = START_FRAMES[rand.nextInt(START_FRAMES.length)];
-                else texture = MIDDLE_FRAMES[rand.nextInt(MIDDLE_FRAMES.length)];
+                if(beam.getLifetime() < 10) {
+                    poseStack.scale((float)(1.0 - (1.0 - beam.getLifetime() * 0.1)), (float)(1.0 - (1.0 - beam.getLifetime() * 0.1)), 1.0F);
+                }
 
+                int startSeed = i * 31 + beam.getId() * 17;
+                int startOffset = Math.abs(startSeed) % START_FRAMES.length;
+                int startIdx = ((age/FRAME_TIME) + startOffset) % START_FRAMES.length;
+
+                int middleSeed = i * 31 + beam.getId() * 17;
+                int middleOffset = Math.abs(middleSeed) % MIDDLE_FRAMES.length;
+                int middleIdx = ((age/FRAME_TIME) + middleOffset) % MIDDLE_FRAMES.length;
+
+
+                ResourceLocation texture;
+                if(i == 1) texture = START_FRAMES[startIdx];
+                else texture = MIDDLE_FRAMES[middleIdx];
 
                 this.model.setupAnim(beam, partialTick, 0.0F, -0.1F, 0.0F, 0.0F);
                 VertexConsumer vertexConsumer = buffer.getBuffer(this.model.renderType(texture));
@@ -105,19 +112,17 @@ public class BaseBioLumBeamRenderer extends EntityRenderer<BioluminescentBeamEnt
     }
 
     @Override
-    public boolean shouldRender(BioluminescentBeamEntity beaam, Frustum camera, double pCamX, double pCamY, double pCamZ) {
-//        if(!beaam.points.isEmpty()) {
-//            for(int i = 1; i < beaam.getPointsSize(); i++) {
-//                Vec3 start = beaam.points.get(i - 1);
-//                Vec3 end = beaam.points.get(i);
-//                AABB box = new AABB(start, end);
-//                if(camera.isVisible(box.inflate(1.0D))) {
-//                    return true;
-//                }
-//            }
-//        }
-//        return false;
-
-        return true;
+    public boolean shouldRender(BioluminescentBeamEntity beam, @NotNull Frustum camera, double pCamX, double pCamY, double pCamZ) {
+        if(!beam.points.isEmpty()) {
+            for(int i = 1; i < beam.points.size(); i++) {
+                Vec3 start = beam.points.get(i - 1);
+                Vec3 end = beam.points.get(i);
+                AABB box = new AABB(start, end);
+                if(camera.isVisible(box.inflate(1.0D))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
