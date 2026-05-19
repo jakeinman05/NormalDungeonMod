@@ -21,7 +21,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.poob22.normaldm.NormalDungeonMod;
+import net.poob22.normaldm.common.client.particles.NDMParticles;
 import net.poob22.normaldm.common.server.entity.ai.AiUtil;
 import net.poob22.normaldm.common.server.entity.definition.LaserType;
 import net.poob22.normaldm.common.server.entity.living.DungeonMob;
@@ -47,6 +47,7 @@ public class BioluminescentBeamEntity extends Entity {
     protected double segmentLength = 0.75;
     protected float DEFAULT_LERP_STRENGTH = 0.065F;
     protected int MAX_LIFETIME;
+    protected float damage;
 
     private boolean beamBuilt = false;
 
@@ -71,6 +72,7 @@ public class BioluminescentBeamEntity extends Entity {
         this.shooter = shooter;
         this.shooterUuid = shooter.getUUID();
         this.entityData.set(SHOOTER_UUID, shooter.getId());
+        this.damage = this.shooter instanceof Player ? 1.0F : 1.0F;
 
         this.type = type;
         this.target = target;
@@ -161,33 +163,38 @@ public class BioluminescentBeamEntity extends Entity {
                     }
                 }
 
-                if(this.tickCount % 2 == 0) {
-                    clearJustHit();
-                    if(checkSegmentDamage()) {
-                        if(level() instanceof ServerLevel sl) {
+                if(level() instanceof ServerLevel sl) {
+                    if(this.tickCount % 2 == 0) {
+                        clearJustHit();
+                        if(checkSegmentDamage()) {
                             for(LivingEntity entity : justHit) {
                                 Vec3 entityCenter = entity.getBoundingBox().getCenter();
                                 sl.sendParticles(ParticleTypes.SMOKE, entityCenter.x, entityCenter.y, entityCenter.z, 5, random.nextDouble() - 0.5, random.nextDouble() - 0.5, random.nextDouble() - 0.5, 0.0F);
                             }
                         }
                     }
-                }
 
-                if(hitPoint != null) {
-                    if(level() instanceof ServerLevel sl) {
+                    if(hitPoint != null) {
                         BlockPos pos = new BlockPos(hitPoint.getBlockPos());
                         BlockState state = sl.getBlockState(pos);
                         if(state.getBlock() == Blocks.AIR) {
-                            NormalDungeonMod.LOGGER.info("Pos is AIR");
                             pos.relative(hitPoint.getDirection());
                             state = sl.getBlockState(pos);
                             if(state.getBlock() == Blocks.AIR) {
-                                NormalDungeonMod.LOGGER.info("Pos is STILL AIR");
                             }
                         }
                         BlockParticleOption type = new BlockParticleOption(ParticleTypes.BLOCK, state);
                         Vec3 v = hitPoint.getLocation();
-                        sl.sendParticles(type, v.x, v.y, v.z, 5, 0, 0, 0, 0.0F);
+                        sl.sendParticles(type, v.x, v.y, v.z, 5, random.nextDouble() - 0.5, random.nextDouble() - 0.5, random.nextDouble() - 0.5, 0.0F);
+                    }
+
+                    for(int i = 1; i < points.size(); i++) {
+                        if(random.nextDouble() > 0.8) {
+                            Vec3 v0 = points.get(i - 1);
+                            Vec3 v1 = points.get(i);
+                            Vec3 pos = v0.lerp(v1, random.nextDouble());
+                            sl.sendParticles(NDMParticles.BEAM_PLASMA_PARTICLE.get(), pos.x, pos.y, pos.z, 1, random.nextDouble() - 0.5, 0, random.nextDouble() - 0.5, 0.0F);
+                        }
                     }
                 }
 
@@ -302,7 +309,7 @@ public class BioluminescentBeamEntity extends Entity {
 
                     double totalRadius = ent.getBbWidth()/2 + segmentRadius;
                     if(vec.lengthSqr() < totalRadius * totalRadius) {
-                        if(ent.hurt(damageSources().mobAttack(this.shooter), 1)) {
+                        if(ent.hurt(damageSources().mobAttack(this.shooter), damage)) {
                             addJustHit(ent);
                             return true;
                         }
@@ -325,7 +332,8 @@ public class BioluminescentBeamEntity extends Entity {
     }
 
     private void addJustHit(LivingEntity entity) {
-        this.justHit.add(entity);
+        if(entity instanceof Player)
+            this.justHit.add(entity);
     }
 
     private void clearJustHit() {
