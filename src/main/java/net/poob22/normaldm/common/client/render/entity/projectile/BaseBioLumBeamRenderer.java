@@ -14,7 +14,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.client.model.BioluminescentBeamSegmentModel;
 import net.poob22.normaldm.common.server.entity.projectile.BioluminescentBeamEntity;
 import net.poob22.normaldm.common.server.entity.registry.DungeonMobs;
