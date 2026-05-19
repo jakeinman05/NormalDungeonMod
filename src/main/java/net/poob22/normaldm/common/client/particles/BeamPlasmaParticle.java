@@ -4,6 +4,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
+import net.poob22.normaldm.NormalDungeonMod;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,8 +14,8 @@ public class BeamPlasmaParticle extends TextureSheetParticle {
     float startR;
     float startG;
     float startB;
-    float endR = 0.239F;
-    float endG = 0.106F;
+    float endR = 0.388F;
+    float endG = 0.149F;
     float endB = 0.0F;
 
     protected BeamPlasmaParticle(ClientLevel pLevel, double pX, double pY, double pZ) {
@@ -26,8 +27,8 @@ public class BeamPlasmaParticle extends TextureSheetParticle {
         this.xd *= 0.8;
         this.yd *= 0.8;
         this.zd *= 0.8;
-        this.quadSize *= 0.4F + random.nextFloat();
-        this.lifetime = 80 + random.nextInt(40);
+        this.quadSize *= 0.5F + (random.nextFloat() - 0.5F) * 0.05F;
+        this.lifetime = 40 + random.nextInt(40);
         this.lifetime = Math.max(this.lifetime, 1);
         this.hasPhysics = true;
 
@@ -54,16 +55,22 @@ public class BeamPlasmaParticle extends TextureSheetParticle {
         float g = Mth.lerp(progress, this.startG, this.endG);
         float b = Mth.lerp(progress, this.startB, this.endB);
         this.setColor(r, g, b);
-        this.alpha = 1.0F - (progress);
-    }
-
-    public float getQuadSize(float f) {
-        return this.quadSize * Mth.clamp(((float) this.age + f) / (float) this.lifetime * 24.0F, 0.0F, 1.0F);
     }
 
     @Override
     public @NotNull ParticleRenderType getRenderType() {
-        return ParticleRenderType.PARTICLE_SHEET_LIT;
+        return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
+    }
+
+    @Override
+    protected int getLightColor(float pPartialTick) {
+        int packed = super.getLightColor(pPartialTick);
+        int sky = packed >> 16 & 255;
+        float p = (float) this.age /this.lifetime;
+        p = p * p;
+        int block = (int)Mth.lerp(p, 240, 96);
+
+        return block | (sky << 16);
     }
 
     public static class Factory implements ParticleProvider<SimpleParticleType> {
