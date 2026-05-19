@@ -107,8 +107,8 @@ public class RandomStrollCardinalDirectionsGoal extends Goal {
 
     private boolean isBlocked(Direction d) {
         BlockPos next = mob.blockPosition().relative(d);
-        return !mob.level().getBlockState(next).isAir();
-        // || !mob.level().getBlockState(next.relative(d)).isAir()
+        BlockPos nextBelow = next.below();
+        return !mob.level().getBlockState(next).isAir() || mob.level().getBlockState(nextBelow).isAir();
     }
 
     private void checkDamage() {
