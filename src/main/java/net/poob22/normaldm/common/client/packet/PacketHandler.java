@@ -27,14 +27,6 @@ public class PacketHandler {
                 BloodPoolPacket::decode,
                 BloodPoolPacket::handle
         );
-
-        CHANNEL.registerMessage(
-                packetId++,
-                BeamValuesToClientPacket.class,
-                BeamValuesToClientPacket::encode,
-                BeamValuesToClientPacket::decode,
-                BeamValuesToClientPacket::handle
-        );
     }
 
     public static void sendToTracking(Entity entity, Object packet) {
