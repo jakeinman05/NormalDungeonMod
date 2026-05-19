@@ -49,6 +49,9 @@ public class BioluminescentBeamEntity extends Entity {
     protected int MAX_LIFETIME;
     protected float damage;
 
+    public float s = 1.0F;
+    public float so = 1.0F;
+
     private boolean beamBuilt = false;
 
     public LivingEntity shooter;
@@ -72,6 +75,8 @@ public class BioluminescentBeamEntity extends Entity {
         this.shooter = shooter;
         this.shooterUuid = shooter.getUUID();
         this.entityData.set(SHOOTER_UUID, shooter.getId());
+
+        // scale damage based on players damage stat in dungeon
         this.damage = this.shooter instanceof Player ? 1.0F : 1.0F;
 
         this.type = type;
@@ -180,8 +185,6 @@ public class BioluminescentBeamEntity extends Entity {
                         if(state.getBlock() == Blocks.AIR) {
                             pos.relative(hitPoint.getDirection());
                             state = sl.getBlockState(pos);
-                            if(state.getBlock() == Blocks.AIR) {
-                            }
                         }
                         BlockParticleOption type = new BlockParticleOption(ParticleTypes.BLOCK, state);
                         Vec3 v = hitPoint.getLocation();
@@ -205,6 +208,11 @@ public class BioluminescentBeamEntity extends Entity {
 
             if(this.level().isClientSide) {
                 constructBeamPoints(getLerpStrength());
+
+                if(this.getLifetime() <= 10) {
+                    this.so = s;
+                    this.s = (float)(1.0 - (1.0 - this.getLifetime() * 0.1));
+                }
             }
 
         } else {

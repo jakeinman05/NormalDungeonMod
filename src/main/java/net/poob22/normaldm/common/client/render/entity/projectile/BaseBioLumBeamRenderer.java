@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.client.model.BioluminescentBeamSegmentModel;
 import net.poob22.normaldm.common.server.entity.projectile.BioluminescentBeamEntity;
 import net.poob22.normaldm.common.server.entity.registry.DungeonMobs;
@@ -61,6 +62,13 @@ public class BaseBioLumBeamRenderer extends EntityRenderer<BioluminescentBeamEnt
 
                     start = oldStart.lerp(newStart, partialTick);
                     end = oldEnd.lerp(newEnd, partialTick);
+
+                    // snap render to position on first tick
+                    if(beam.tickCount <= 2) {
+                        start = beam.points.get(i - 1);
+                        end = beam.points.get(i);
+                    }
+
                 } else {
                     continue;
                 }
@@ -79,7 +87,8 @@ public class BaseBioLumBeamRenderer extends EntityRenderer<BioluminescentBeamEnt
                 poseStack.mulPose(Axis.XP.rotationDegrees(-pitch));
 
                 if(beam.getLifetime() < 10) {
-                    poseStack.scale((float)(1.0 - (1.0 - beam.getLifetime() * 0.1)), (float)(1.0 - (1.0 - beam.getLifetime() * 0.1)), 1.0F);
+                    float scale = Mth.lerp(partialTick, beam.so, beam.s);
+                    poseStack.scale(scale, scale, 1.0F);
                 }
 
                 int startSeed = i * 31 + beam.getId() * 17;
