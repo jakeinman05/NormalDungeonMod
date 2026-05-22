@@ -1,0 +1,15 @@
+{
+  "type": "normaldm:dungeon_type",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "layers": [
+        {"block": "minecraft:bedrock","height": 1},
+        {"block": "normaldm:cellar_wall", "height": 60},
+        {"block": "normaldm:plywood","height": 3}
+      ],
+      "biome": "minecraft:plains",
+      "structure_overrides": []
+    }
+  }
+}
