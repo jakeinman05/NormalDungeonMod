@@ -22,6 +22,6 @@ public class RoomDefinition {
     }
 
     public String toString() {
-        return name.toUpperCase();
+        return name;
     }
 }
