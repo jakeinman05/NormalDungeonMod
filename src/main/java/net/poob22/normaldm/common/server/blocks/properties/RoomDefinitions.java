@@ -63,7 +63,7 @@ public class RoomDefinitions {
                 return room;
             }
         }
-        NormalDungeonMod.LOGGER.error("Room Type not found! Returning null for attempted type: " + roomType);
+        NormalDungeonMod.LOGGER.error("Invalid Room Type: " + roomType);
         return null;
     }
 
