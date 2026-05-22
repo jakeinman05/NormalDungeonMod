@@ -47,12 +47,18 @@ public class RoomControllerBlock extends BaseEntityBlock {
         BlockEntity blockEntity = level.getBlockEntity(pos);
         ItemStack itemStack = player.getItemInHand(interactionHand);
         if(!level.isClientSide) {
-            if(itemStack.getItem() instanceof DungeonWandItem && blockEntity instanceof RoomControllerBlockEntity roomController) {
-                if(!player.isShiftKeyDown()) {
-                    cycleRoomType(roomController, player);
-                    return InteractionResult.SUCCESS;
+            if(blockEntity instanceof RoomControllerBlockEntity roomController) {
+                if(itemStack.getItem() instanceof DungeonWandItem) {
+                    if(!player.isShiftKeyDown()) {
+                        cycleRoomType(roomController, player);
+                        return InteractionResult.SUCCESS;
+                    }
+                }
+                else if(itemStack.isEmpty() && !player.isShiftKeyDown()) {
+                    player.sendSystemMessage(Component.literal("Room Type: " + roomController.RoomLayout.toString()));
                 }
             }
+
         }
 
         if(level.isClientSide) {
