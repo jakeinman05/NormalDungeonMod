@@ -5,6 +5,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
@@ -32,6 +33,8 @@ public class NormalDungeonMod
 {
     public static final String MODID = "normaldm";
     public static final Logger LOGGER = LogUtils.getLogger();
+
+    public static final GameRules.Key<GameRules.BooleanValue> ALLOW_ROOM_CONTROLLER_FUNCTION = GameRules.register("allowNDMRoomSpawning", GameRules.Category.MISC, GameRules.BooleanValue.create(true));
 
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TAB = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, NormalDungeonMod.MODID);
     public static final RegistryObject<CreativeModeTab> TAB = CREATIVE_MODE_TAB.register("normaldm_tab", () -> CreativeModeTab.builder()
