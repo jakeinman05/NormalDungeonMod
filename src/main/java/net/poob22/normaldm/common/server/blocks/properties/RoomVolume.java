@@ -29,4 +29,12 @@ public class RoomVolume {
 
         return isPlayerBound ? box.deflate(1.25D) : box;
     }
+
+    public BlockPos getMin() {
+        return min;
+    }
+
+    public BlockPos getMax() {
+        return max;
+    }
 }
