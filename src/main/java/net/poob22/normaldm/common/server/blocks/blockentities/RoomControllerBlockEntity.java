@@ -32,6 +32,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.server.blocks.DungeonGateBlock;
 import net.poob22.normaldm.common.server.blocks.DungeonMobSpawnerBlock;
+import net.poob22.normaldm.common.server.blocks.NDMBlocks;
 import net.poob22.normaldm.common.server.blocks.properties.GateState;
 import net.poob22.normaldm.common.server.blocks.properties.RoomDefinition;
 import net.poob22.normaldm.common.server.blocks.properties.RoomDefinitions;
@@ -368,7 +369,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
 
         BlockPos offsetPos = pos.offset(offset);
 
-        boolean spawned = chosenRoom.place(
+        chosenRoom.place(
                 level.getStructureManager(),
                 level,
                 level.structureManager(),
@@ -380,11 +381,20 @@ public class RoomControllerBlockEntity extends BlockEntity {
                 level.getRandom(),
                 false
         );
+        getGatesInRoom(level);
+        coverUnusedGates(level);
+    }
 
-        if(spawned) {
-            NormalDungeonMod.LOGGER.info("Spawning room at " + pos + " with offset" + offset + " for dimension " + dimension);
-        } else {
-            NormalDungeonMod.LOGGER.info("Failed to spawn");
+    protected void coverUnusedGates(Level level) {
+        for(BlockPos pos : this.GatesInRoom) {
+            if(level.getBlockState(pos).getBlock() instanceof DungeonGateBlock gate) {
+                if(!gate.shouldBeHere(level, pos)) {
+                    level.setBlock(pos, NDMBlocks.CELLAR_WALL.get().defaultBlockState(), 3);
+                    level.setBlock(pos.above(), NDMBlocks.CELLAR_WALL.get().defaultBlockState(), 3);
+
+                    NormalDungeonMod.LOGGER.info("Replaced Gate at pos: " + pos);
+                }
+            }
         }
     }
 
