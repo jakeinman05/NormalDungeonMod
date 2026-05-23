@@ -168,6 +168,21 @@ public class DungeonGateBlock extends Block {
                 1.0D);
     }
 
+    public boolean shouldBeHere(Level level, BlockPos pos) {
+        boolean flag = true;
+
+        Direction facing = level.getBlockState(pos).getValue(FACING);
+        if(level.getBlockState(pos).getValue(HALF) == DoubleBlockHalf.UPPER) pos = pos.below();
+        pos = pos.below();
+
+        BlockState state1 = level.getBlockState(pos.relative(facing));
+        BlockState state2 = level.getBlockState(pos.relative(facing.getOpposite()));
+
+        if(state1.isAir() || state2.isAir()) flag = false;
+
+        return flag;
+    }
+
     /// BLOCK OVERRIDES
 
     @Override
