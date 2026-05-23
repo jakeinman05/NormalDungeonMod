@@ -12,7 +12,7 @@ public class RoomDefinitions {
             new RoomDefinition(
                     "small",
                     RoomType.SMALL,
-                    new RoomVolume(new BlockPos(-5, 1, -5), new BlockPos(5, 7, 5))
+                    new RoomVolume(new BlockPos(-5, 1, -5), new BlockPos(5, 8, 5))
             )
     );
 
@@ -20,7 +20,7 @@ public class RoomDefinitions {
             new RoomDefinition(
                 "small_hallway_ns",
                     RoomType.SMALL_HALLWAY,
-                    new RoomVolume(new BlockPos(-3, 1, -6), new BlockPos(3, 7, 6))
+                    new RoomVolume(new BlockPos(-3, 1, -6), new BlockPos(3, 8, 6))
             )
     );
 
@@ -28,7 +28,7 @@ public class RoomDefinitions {
             new RoomDefinition(
                     "small_hallway_ew",
                     RoomType.SMALL_HALLWAY,
-                    new RoomVolume(new BlockPos(-6, 1, -3), new BlockPos(6, 7, 3))
+                    new RoomVolume(new BlockPos(-6, 1, -3), new BlockPos(6, 8, 3))
             )
     );
 
@@ -36,7 +36,7 @@ public class RoomDefinitions {
             new RoomDefinition(
                     "medium",
                     RoomType.MEDIUM,
-                    new RoomVolume(new BlockPos(-8, 1, -8), new BlockPos(8, 7, 8))
+                    new RoomVolume(new BlockPos(-8, 1, -8), new BlockPos(8, 8, 8))
             )
     );
 
@@ -52,8 +52,8 @@ public class RoomDefinitions {
             new RoomDefinition(
                     "small_l_shaped",
                     RoomType.L_SHAPED,
-                    new RoomVolume(new BlockPos(-11, 1, -3), new BlockPos(4, 7, 3)),
-                    new RoomVolume(new BlockPos(-4, 1, -8), new BlockPos(4, 7, 3))
+                    new RoomVolume(new BlockPos(-11, 1, -3), new BlockPos(4, 8, 3)),
+                    new RoomVolume(new BlockPos(-4, 1, -8), new BlockPos(4, 8, 3))
             )
     );
 
