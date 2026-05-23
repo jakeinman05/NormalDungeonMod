@@ -1,22 +1,34 @@
 package net.poob22.normaldm.common.server.blocks.blockentities;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
+import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.server.blocks.DungeonGateBlock;
 import net.poob22.normaldm.common.server.blocks.DungeonMobSpawnerBlock;
@@ -31,12 +43,16 @@ import org.slf4j.Logger;
 
 import java.util.*;
 
+import static net.poob22.normaldm.NormalDungeonMod.MODID;
+
 public class RoomControllerBlockEntity extends BlockEntity {
     Logger LOG = NormalDungeonMod.LOGGER;
 
     public int tickCount;
     private static final int CHECK_INTERVAL = 10;
     List<RoomVolume> roomBounds;
+
+    public boolean roomSpawned = false;
 
     // default room type
     public RoomDefinition RoomLayout = RoomDefinitions.SMALL;
@@ -61,11 +77,25 @@ public class RoomControllerBlockEntity extends BlockEntity {
     public static void tick(Level level, BlockPos pos, BlockState state, RoomControllerBlockEntity entity) {
         entity.tickCount++;
 
+        if(!level.getGameRules().getBoolean(NormalDungeonMod.ALLOW_ROOM_CONTROLLER_FUNCTION)) {
+            return;
+        }
+
         if(entity.roomBounds == null) {
             entity.initBounds();
         }
 
         if(!level.isClientSide) {
+            if(!entity.hasSpawned() && level instanceof ServerLevel sl) {
+                entity.setHasSpawned();
+                entity.setChanged();
+
+                BlockPos spawnPos = entity.getBlockPos();
+                BlockPos spawnOffset = entity.getRoomSpawnOffset();
+
+                entity.spawnRoom(sl, spawnPos, spawnOffset);
+            }
+
             if(entity.tickCount % CHECK_INTERVAL == 0){
                 switch(entity.state) {
                     case DORMANT:
@@ -121,8 +151,10 @@ public class RoomControllerBlockEntity extends BlockEntity {
     private void clearRoom(Level level) {
         unlockGates(level);
         level.playSound(null, this.getBlockPos(), SoundEvents.WITHER_DEATH, SoundSource.BLOCKS, 1.0f, 1.0f);
-        // other feedback responses
 
+        if(level instanceof ServerLevel l) {
+            spawnRewards(l);
+        }
     }
 
     public void checkFailRoom() {
@@ -304,10 +336,82 @@ public class RoomControllerBlockEntity extends BlockEntity {
         }
     }
 
+    protected void spawnRewards(ServerLevel l) {
+        BlockPos pos = this.getBlockPos();
+
+        ResourceLocation r = ResourceLocation.fromNamespaceAndPath(MODID, "dungeon_rewards/basic_rewards");
+        LootTable table = l.getServer().getLootData().getLootTable(r);
+        LootParams params = new LootParams.Builder(l).create(LootContextParamSets.EMPTY);
+        ObjectArrayList<ItemStack> rewards = table.getRandomItems(params);
+
+        for(ItemStack stack : rewards) {
+            ItemEntity item = new ItemEntity(l, pos.getX() + 0.5, pos.getY() + 2.0, pos.getZ() + 0.5, stack);
+
+            item.setDeltaMovement(item.getDeltaMovement().add(0, 0.2, 0));
+            l.addFreshEntity(item);
+        }
+    }
+
+    protected void spawnRoom(ServerLevel level, BlockPos pos, BlockPos offset) {
+        String roomType = this.RoomLayout.toString();
+        String dimension = level.dimension().location().getPath();
+
+        ResourceLocation poolId = ResourceLocation.fromNamespaceAndPath(MODID, dimension + "_" + roomType + "_rooms");
+        StructureTemplatePool pool = level.registryAccess().registryOrThrow(Registries.TEMPLATE_POOL).get(poolId);
+
+        if(pool == null || pool.size() == 0) {
+            NormalDungeonMod.LOGGER.error("Template pool: " + poolId + " is returning a null template pool or is empty, cancelling room spawn...");
+            return;
+        }
+
+        StructurePoolElement chosenRoom = pool.getRandomTemplate(level.getRandom());
+
+        BlockPos offsetPos = pos.offset(offset);
+
+        boolean spawned = chosenRoom.place(
+                level.getStructureManager(),
+                level,
+                level.structureManager(),
+                level.getChunkSource().getGenerator(),
+                offsetPos,
+                pos,
+                Rotation.NONE,
+                BoundingBox.infinite(),
+                level.getRandom(),
+                false
+        );
+
+        if(spawned) {
+            NormalDungeonMod.LOGGER.info("Spawning room at " + pos + " with offset" + offset + " for dimension " + dimension);
+        } else {
+            NormalDungeonMod.LOGGER.info("Failed to spawn");
+        }
+    }
+
+    public boolean hasSpawned() {
+        return this.roomSpawned;
+    }
+
+    public void setHasSpawned() {
+        this.roomSpawned = true;
+    }
+
+    public BlockPos getRoomSpawnOffset() {
+        int minX = Integer.MAX_VALUE;
+        int minZ = Integer.MAX_VALUE;
+
+        for(RoomVolume v : roomBounds) {
+            if(v.getMin().getX() < minX) minX = v.getMin().getX();
+            if(v.getMin().getZ() < minZ) minZ = v.getMin().getZ();
+        }
+
+        return new BlockPos(minX, 1, minZ);
+    }
+
     /// NBT HELPERS ///
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
+    protected void saveAdditional(@NotNull CompoundTag tag) {
         super.saveAdditional(tag);
         // save room state
         RoomState s = state;
@@ -318,7 +422,8 @@ public class RoomControllerBlockEntity extends BlockEntity {
 
         saveUUIDSet(tag, "enemies", EnemiesInRoom);
         saveBlockPosSet(tag, "gatePos", GatesInRoom);
-        // add save data for chests later
+
+        tag.putBoolean("spawnedRoom", this.roomSpawned);
     }
 
     private void saveUUIDSet(CompoundTag tag, String key, Set<UUID> set) {
@@ -342,7 +447,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void load(CompoundTag tag) {
+    public void load(@NotNull CompoundTag tag) {
         super.load(tag);
         // load room state
         int s = tag.getInt("roomState");
@@ -356,6 +461,8 @@ public class RoomControllerBlockEntity extends BlockEntity {
 
         loadUUIDSet(tag, "enemies", EnemiesInRoom);
         loadBlockPosSet(tag, "gatePos", GatesInRoom);
+
+        this.roomSpawned = tag.getBoolean("spawnedRoom");
     }
 
     private void loadUUIDSet(CompoundTag tag, String key, Set<UUID> set) {
