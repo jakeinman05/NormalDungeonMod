@@ -5,7 +5,7 @@
       "weight": 100,
       "element": {
         "element_type": "minecraft:single_pool_element",
-        "location": "normaldm:cellar/rooms/cellar_small_hallway_ns",
+        "location": "normaldm:cellar/rooms/small_l/cellar_small_l_shaped",
         "processors": "minecraft:empty",
         "projection": "rigid"
       }
