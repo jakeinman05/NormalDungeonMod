@@ -172,13 +172,21 @@ public class DungeonGateBlock extends Block {
         boolean flag = true;
 
         Direction facing = level.getBlockState(pos).getValue(FACING);
-        if(level.getBlockState(pos).getValue(HALF) == DoubleBlockHalf.UPPER) pos = pos.below();
-        pos = pos.below();
 
-        BlockState state1 = level.getBlockState(pos.relative(facing));
-        BlockState state2 = level.getBlockState(pos.relative(facing.getOpposite()));
+        // no next room check
+        if(level.getBlockState(pos).getValue(HALF) == DoubleBlockHalf.UPPER) pos = pos.below();
+        BlockPos groundPos = pos.below();
+
+        BlockState state1 = level.getBlockState(groundPos.relative(facing));
+        BlockState state2 = level.getBlockState(groundPos.relative(facing.getOpposite()));
 
         if(state1.isAir() || state2.isAir()) flag = false;
+
+        // leads into wall check
+        BlockState state3 = level.getBlockState(pos.relative(facing));
+        BlockState state4 = level.getBlockState(pos.relative(facing.getOpposite()));
+
+        if(!state3.isAir() || !state4.isAir()) flag = false;
 
         return flag;
     }
