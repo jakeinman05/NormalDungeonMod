@@ -12,23 +12,55 @@ public class RoomDefinitions {
             new RoomDefinition(
                     "small",
                     RoomType.SMALL,
-                    new RoomVolume(new BlockPos(-5, 1, -5), new BlockPos(5, 8, 5))
+                    new RoomVolume(new BlockPos(-6, 1, -6), new BlockPos(6, 8, 6))
             )
     );
 
     public static final RoomDefinition SMALL_HALLWAY_NS = register(
             new RoomDefinition(
                 "small_hallway_ns",
-                    RoomType.SMALL_HALLWAY,
-                    new RoomVolume(new BlockPos(-3, 1, -6), new BlockPos(3, 8, 6))
+                    RoomType.HALLWAY,
+                    new RoomVolume(new BlockPos(-4, 1, -6), new BlockPos(4, 8, 6))
             )
     );
 
     public static final RoomDefinition SMALL_HALLWAY_EW = register(
             new RoomDefinition(
                     "small_hallway_ew",
-                    RoomType.SMALL_HALLWAY,
-                    new RoomVolume(new BlockPos(-6, 1, -3), new BlockPos(6, 8, 3))
+                    RoomType.HALLWAY,
+                    new RoomVolume(new BlockPos(-6, 1, -4), new BlockPos(6, 8, 4))
+            )
+    );
+
+    public static final RoomDefinition LARGE_HALLWAY_NS = register(
+            new RoomDefinition(
+                    "large_hallway_ns",
+                    RoomType.HALLWAY,
+                    new RoomVolume(new BlockPos(-6, 1, -12), new BlockPos(6, 8, 12))
+            )
+    );
+
+    public static final RoomDefinition LARGE_HALLWAY_EW = register(
+            new RoomDefinition(
+                    "large_hallway_ew",
+                    RoomType.HALLWAY,
+                    new RoomVolume(new BlockPos(-12, 1, -6), new BlockPos(12, 8, 6))
+            )
+    );
+
+    public static final RoomDefinition LARGE_HALLWAY_SLIM_NS = register(
+            new RoomDefinition(
+                    "large_hallway_slim_ns",
+                    RoomType.HALLWAY,
+                    new RoomVolume(new BlockPos(-4, 1, -12), new BlockPos(4, 8, 12))
+            )
+    );
+
+    public static final RoomDefinition LARGE_HALLWAY_SLIM_EW = register(
+            new RoomDefinition(
+                    "large_hallway_slim_ew",
+                    RoomType.HALLWAY,
+                    new RoomVolume(new BlockPos(-12, 1, -4), new BlockPos(12, 8, 4))
             )
     );
 
@@ -36,7 +68,7 @@ public class RoomDefinitions {
             new RoomDefinition(
                     "medium",
                     RoomType.MEDIUM,
-                    new RoomVolume(new BlockPos(-8, 1, -8), new BlockPos(8, 8, 8))
+                    new RoomVolume(new BlockPos(-9, 1, -9), new BlockPos(9, 8, 9))
             )
     );
 
@@ -44,7 +76,7 @@ public class RoomDefinitions {
             new RoomDefinition(
                     "large",
                     RoomType.LARGE,
-                    new RoomVolume(new BlockPos(-10, 1, -10), new BlockPos(10, 8, 10))
+                    new RoomVolume(new BlockPos(-12, 1, -12), new BlockPos(12, 8, 12))
             )
     );
 
@@ -52,8 +84,8 @@ public class RoomDefinitions {
             new RoomDefinition(
                     "small_l_shaped",
                     RoomType.L_SHAPED,
-                    new RoomVolume(new BlockPos(-11, 1, -3), new BlockPos(4, 8, 3)),
-                    new RoomVolume(new BlockPos(-4, 1, -8), new BlockPos(4, 8, 3))
+                    new RoomVolume(new BlockPos(-6, 1, -18), new BlockPos(6, 8, 6)),
+                    new RoomVolume(new BlockPos(-18, 1, -6), new BlockPos(6, 8, 6))
             )
     );
 
