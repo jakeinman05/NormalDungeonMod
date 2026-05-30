@@ -11,7 +11,7 @@ public class RoomDefinitions {
     public static final RoomDefinition SMALL = register(
             new RoomDefinition(
                     "small",
-                    RoomType.SMALL,
+                    RoomType.SQUARE,
                     new RoomVolume(new BlockPos(-6, 1, -6), new BlockPos(6, 8, 6))
             )
     );
@@ -67,7 +67,7 @@ public class RoomDefinitions {
     public static final RoomDefinition MEDIUM = register(
             new RoomDefinition(
                     "medium",
-                    RoomType.MEDIUM,
+                    RoomType.SQUARE,
                     new RoomVolume(new BlockPos(-9, 1, -9), new BlockPos(9, 8, 9))
             )
     );
@@ -75,7 +75,7 @@ public class RoomDefinitions {
     public static final RoomDefinition LARGE = register(
             new RoomDefinition(
                     "large",
-                    RoomType.LARGE,
+                    RoomType.SQUARE,
                     new RoomVolume(new BlockPos(-12, 1, -12), new BlockPos(12, 8, 12))
             )
     );
@@ -84,8 +84,8 @@ public class RoomDefinitions {
             new RoomDefinition(
                     "small_l_shaped",
                     RoomType.L_SHAPED,
-                    new RoomVolume(new BlockPos(-6, 1, -18), new BlockPos(6, 8, 6)),
-                    new RoomVolume(new BlockPos(-18, 1, -6), new BlockPos(6, 8, 6))
+                    new RoomVolume(new BlockPos(-6, 1, -18), new BlockPos(6, 8, 6)), // NS
+                    new RoomVolume(new BlockPos(-18, 1, -6), new BlockPos(6, 8, 6))  // EW
             )
     );
 
