@@ -37,4 +37,8 @@ public class RoomVolume {
     public BlockPos getMax() {
         return max;
     }
+
+    public String toString() {
+        return "Min: " + this.min + ", Max: " + this.max;
+    }
 }
