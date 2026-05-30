@@ -23,6 +23,8 @@ import net.poob22.normaldm.common.client.events.RoomBBRenderer;
 import net.poob22.normaldm.common.server.blocks.blockentities.NDMBlockEntities;
 import net.poob22.normaldm.common.server.blocks.blockentities.RoomControllerBlockEntity;
 import net.poob22.normaldm.common.server.blocks.properties.RoomDefinitions;
+import net.poob22.normaldm.common.server.entity.ai.AiUtil;
+import net.poob22.normaldm.common.server.items.DungeonRotationWandItem;
 import net.poob22.normaldm.common.server.items.DungeonWandItem;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -54,6 +56,12 @@ public class RoomControllerBlock extends BaseEntityBlock {
                         return InteractionResult.SUCCESS;
                     }
                 }
+                else if(itemStack.getItem() instanceof DungeonRotationWandItem) {
+                    if(!player.isShiftKeyDown()) {
+                        cycleDirection(roomController, player);
+                        return InteractionResult.SUCCESS;
+                    }
+                }
                 else if(itemStack.isEmpty() && !player.isShiftKeyDown()) {
                     player.sendSystemMessage(Component.literal("Room Type: " + roomController.RoomLayout.toString()));
                 }
@@ -80,13 +88,22 @@ public class RoomControllerBlock extends BaseEntityBlock {
         player.sendSystemMessage(Component.literal("Room Type: " + rc.RoomLayout.toString()));
     }
 
+    public void cycleDirection(RoomControllerBlockEntity rc, Player player) {
+        int index = AiUtil.CARDINAL_DIRECTIONS.indexOf(rc.CurrentDirection);
+        index = (index + 1) % AiUtil.CARDINAL_DIRECTIONS.size();
+        rc.setCurrentDirection(AiUtil.CARDINAL_DIRECTIONS.get(index));
+        player.sendSystemMessage(Component.literal("Current Direction: " + rc.CurrentDirection.toString()));
+    }
+
+    @SuppressWarnings("deprecation")
     @Override
-    public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+    public @NotNull VoxelShape getShape(@NotNull BlockState pState, @NotNull BlockGetter pLevel, @NotNull BlockPos pPos, @NotNull CollisionContext pContext) {
         return super.getShape(pState, pLevel, pPos, pContext);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public RenderShape getRenderShape(BlockState pState) {
+    public @NotNull RenderShape getRenderShape(@NotNull BlockState pState) {
         return RenderShape.MODEL;
     }
 }
