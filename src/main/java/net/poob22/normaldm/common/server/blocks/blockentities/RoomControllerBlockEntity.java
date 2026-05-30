@@ -2,6 +2,7 @@ package net.poob22.normaldm.common.server.blocks.blockentities;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -33,10 +34,8 @@ import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.server.blocks.DungeonGateBlock;
 import net.poob22.normaldm.common.server.blocks.DungeonMobSpawnerBlock;
 import net.poob22.normaldm.common.server.blocks.NDMBlocks;
-import net.poob22.normaldm.common.server.blocks.properties.GateState;
-import net.poob22.normaldm.common.server.blocks.properties.RoomDefinition;
-import net.poob22.normaldm.common.server.blocks.properties.RoomDefinitions;
-import net.poob22.normaldm.common.server.blocks.properties.RoomVolume;
+import net.poob22.normaldm.common.server.blocks.properties.*;
+import net.poob22.normaldm.common.server.entity.ai.AiUtil;
 import net.poob22.normaldm.common.server.entity.living.DungeonMob;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -57,6 +56,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
 
     // default room type
     public RoomDefinition RoomLayout = RoomDefinitions.SMALL;
+    public Direction CurrentDirection = Direction.NORTH;
 
     public enum RoomState {
         DORMANT,
@@ -98,7 +98,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
             }
 
             if(entity.tickCount % CHECK_INTERVAL == 0){
-                switch(entity.state) {
+                switch(entity.getRoomState()) {
                     case DORMANT:
                         entity.dormantState(level);
                         break;
@@ -117,7 +117,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
     }
 
     public void initBounds() {
-        roomBounds = RoomLayout.getVolumes();
+        roomBounds = RoomLayout.getVolumes(this.CurrentDirection);
     }
 
     /// STATE METHODS ///
@@ -273,6 +273,16 @@ public class RoomControllerBlockEntity extends BlockEntity {
         setChanged();
         if(level != null)
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+
+        initBounds();
+    }
+
+    public void setCurrentDirection(Direction direction) {
+        this.CurrentDirection = direction;
+        setChanged();
+        if(level != null)
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+
         initBounds();
     }
 
@@ -383,7 +393,6 @@ public class RoomControllerBlockEntity extends BlockEntity {
         );
         getGatesInRoom(level);
         coverUnusedGates(level);
-        decayRoom(level);
 
         ResourceLocation floorPoolId = ResourceLocation.fromNamespaceAndPath(MODID, dimension + "/floors/" + roomType + "_floors");
         StructureTemplatePool floorPool = level.registryAccess().registryOrThrow(Registries.TEMPLATE_POOL).get(floorPoolId);
@@ -394,6 +403,8 @@ public class RoomControllerBlockEntity extends BlockEntity {
         }
 
         StructurePoolElement chosenFloor = floorPool.getRandomTemplate(level.getRandom());
+
+        offsetPos = offsetPos.offset(1, 0 ,1);
 
         chosenFloor.place(
                 level.getStructureManager(),
@@ -407,6 +418,8 @@ public class RoomControllerBlockEntity extends BlockEntity {
                 level.getRandom(),
                 false
         );
+
+        decayRoom(level);
     }
 
     public BlockPos getRoomSpawnOffset() {
@@ -491,6 +504,18 @@ public class RoomControllerBlockEntity extends BlockEntity {
             tag.putString("roomType", RoomLayout.toString());
         }
 
+        if(this.CurrentDirection != null) {
+            int index = 0;
+            for(Direction d : AiUtil.CARDINAL_DIRECTIONS) {
+                if(d == this.CurrentDirection) {
+                    tag.putInt("direction_index", index);
+                    break;
+                } else {
+                    index++;
+                }
+            }
+        }
+
         saveUUIDSet(tag, "enemies", EnemiesInRoom);
         saveBlockPosSet(tag, "gatePos", GatesInRoom);
 
@@ -528,6 +553,8 @@ public class RoomControllerBlockEntity extends BlockEntity {
             LOG.error("Invalid Room State Loaded...Reverting To DORMANT");
             state = RoomState.DORMANT;
         }
+        this.setCurrentDirection(AiUtil.CARDINAL_DIRECTIONS.get(tag.getInt("direction_index")));
+
         this.setRoomLayout(RoomDefinitions.get(tag.getString("roomType")));
 
         loadUUIDSet(tag, "enemies", EnemiesInRoom);
