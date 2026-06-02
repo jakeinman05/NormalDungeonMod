@@ -16,51 +16,27 @@ public class RoomDefinitions {
             )
     );
 
-    public static final RoomDefinition SMALL_HALLWAY_NS = register(
+    public static final RoomDefinition SMALL_HALLWAY = register(
             new RoomDefinition(
-                "small_hallway_ns",
+                "small_hallway",
                     RoomType.HALLWAY,
                     new RoomVolume(new BlockPos(-4, 1, -6), new BlockPos(4, 8, 6))
             )
     );
 
-    public static final RoomDefinition SMALL_HALLWAY_EW = register(
+    public static final RoomDefinition LARGE_HALLWAY = register(
             new RoomDefinition(
-                    "small_hallway_ew",
-                    RoomType.HALLWAY,
-                    new RoomVolume(new BlockPos(-6, 1, -4), new BlockPos(6, 8, 4))
-            )
-    );
-
-    public static final RoomDefinition LARGE_HALLWAY_NS = register(
-            new RoomDefinition(
-                    "large_hallway_ns",
+                    "large_hallway",
                     RoomType.HALLWAY,
                     new RoomVolume(new BlockPos(-6, 1, -12), new BlockPos(6, 8, 12))
             )
     );
 
-    public static final RoomDefinition LARGE_HALLWAY_EW = register(
+    public static final RoomDefinition LARGE_HALLWAY_SLIM = register(
             new RoomDefinition(
-                    "large_hallway_ew",
-                    RoomType.HALLWAY,
-                    new RoomVolume(new BlockPos(-12, 1, -6), new BlockPos(12, 8, 6))
-            )
-    );
-
-    public static final RoomDefinition LARGE_HALLWAY_SLIM_NS = register(
-            new RoomDefinition(
-                    "large_hallway_slim_ns",
+                    "large_hallway_slim",
                     RoomType.HALLWAY,
                     new RoomVolume(new BlockPos(-4, 1, -12), new BlockPos(4, 8, 12))
-            )
-    );
-
-    public static final RoomDefinition LARGE_HALLWAY_SLIM_EW = register(
-            new RoomDefinition(
-                    "large_hallway_slim_ew",
-                    RoomType.HALLWAY,
-                    new RoomVolume(new BlockPos(-12, 1, -4), new BlockPos(12, 8, 4))
             )
     );
 
