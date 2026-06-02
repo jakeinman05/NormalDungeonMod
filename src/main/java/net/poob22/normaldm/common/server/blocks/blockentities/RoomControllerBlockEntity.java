@@ -367,6 +367,20 @@ public class RoomControllerBlockEntity extends BlockEntity {
         String roomType = this.RoomLayout.toString();
         String dimension = level.dimension().location().getPath();
 
+        Rotation rot = switch (this.CurrentDirection) {
+            case DOWN -> null;
+            case UP -> null;
+            case NORTH -> Rotation.NONE;
+            case EAST -> this.RoomLayout.getType() == RoomType.HALLWAY ? Rotation.COUNTERCLOCKWISE_90 : Rotation.CLOCKWISE_90;
+            case SOUTH -> this.RoomLayout.getType() == RoomType.HALLWAY ? Rotation.NONE : Rotation.CLOCKWISE_180;
+            case WEST -> Rotation.COUNTERCLOCKWISE_90;
+        };
+
+        if(rot == null) {
+            NormalDungeonMod.LOGGER.error("Rotation for room " + this.RoomLayout.toString() + " is null, Cancelling Spawn...");
+            return;
+        }
+
         ResourceLocation roomPoolId = ResourceLocation.fromNamespaceAndPath(MODID, dimension + "/" + roomType + "_rooms");
         StructureTemplatePool roomPool = level.registryAccess().registryOrThrow(Registries.TEMPLATE_POOL).get(roomPoolId);
 
@@ -386,7 +400,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
                 level.getChunkSource().getGenerator(),
                 offsetPos,
                 pos,
-                Rotation.NONE,
+                rot,
                 BoundingBox.infinite(),
                 level.getRandom(),
                 false
@@ -413,7 +427,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
                 level.getChunkSource().getGenerator(),
                 offsetPos,
                 pos,
-                Rotation.NONE,
+                rot,
                 BoundingBox.infinite(),
                 level.getRandom(),
                 false
@@ -423,15 +437,42 @@ public class RoomControllerBlockEntity extends BlockEntity {
     }
 
     public BlockPos getRoomSpawnOffset() {
-        int minX = Integer.MAX_VALUE;
-        int minZ = Integer.MAX_VALUE;
+        int offX = 0;
+        int offZ = 0;
 
         for(RoomVolume v : roomBounds) {
-            if(v.getMin().getX() < minX) minX = v.getMin().getX();
-            if(v.getMin().getZ() < minZ) minZ = v.getMin().getZ();
+            if(this.RoomLayout.getType() == RoomType.L_SHAPED) {
+                switch (this.CurrentDirection) {
+                    case NORTH:
+                        offX = -6;
+                        offZ = -6;
+                        break;
+                    case EAST:
+                        offX = 6;
+                        offZ = -6;
+                        break;
+                    case SOUTH:
+                        offX = 6;
+                        offZ = 6;
+                        break;
+                    case WEST:
+                        offX = -6;
+                        offZ = 6;
+                        break;
+                }
+            }
+
+            else {
+                if(v.getMin().getX() < offX) offX = v.getMin().getX();
+                if(v.getMin().getZ() < offZ) offZ = v.getMin().getZ();
+
+                if(this.RoomLayout.getType() == RoomType.HALLWAY && this.CurrentDirection == Direction.EAST || this.CurrentDirection == Direction.WEST) {
+                    offZ *= -1;
+                }
+            }
         }
 
-        return new BlockPos(minX, 1, minZ);
+        return new BlockPos(offX, 1, offZ);
     }
 
     protected void coverUnusedGates(Level level) {
