@@ -381,7 +381,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
             return;
         }
 
-        ResourceLocation roomPoolId = ResourceLocation.fromNamespaceAndPath(MODID, dimension + "/" + roomType + "_rooms");
+        ResourceLocation roomPoolId = ResourceLocation.fromNamespaceAndPath(MODID, dimension + "/rooms/" + roomType + "_rooms");
         StructureTemplatePool roomPool = level.registryAccess().registryOrThrow(Registries.TEMPLATE_POOL).get(roomPoolId);
 
         if(roomPool == null || roomPool.size() == 0) {
