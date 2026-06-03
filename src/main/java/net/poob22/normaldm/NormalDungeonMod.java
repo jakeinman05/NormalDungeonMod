@@ -54,6 +54,7 @@ public class NormalDungeonMod
                 output.accept(NDMBlocks.CELLAR_GATE.get());
                 output.accept(NDMBlocks.ROOM_CONTROLLER_BLOCK.get());
                 output.accept(NDMItems.DUNGEON_WAND.get());
+                output.accept(NDMItems.DUNGEON_ROTATION_WAND.get());
                 output.accept(NDMBlocks.DUNGEON_MOB_SPAWNER_BLOCK.get());
                 output.accept(NDMItems.MAGGOT_SPAWN_EGG.get());
                 output.accept(NDMItems.CHARGER_MAGGOT_SPAWN_EGG.get());
