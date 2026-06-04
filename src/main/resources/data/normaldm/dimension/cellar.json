@@ -3,13 +3,15 @@
   "generator": {
     "type": "minecraft:flat",
     "settings": {
+      "biome": "normaldm:cellar",
+      "lakes": false,
+      "features": false,
       "layers": [
-        {"block": "minecraft:bedrock","height": 1},
-        {"block": "normaldm:cellar_wall", "height": 60},
-        {"block": "normaldm:plywood","height": 3}
-      ],
-      "biome": "minecraft:plains",
-      "structure_overrides": []
+        {
+          "height": 0,
+          "block": "minecraft:air"
+        }
+      ]
     }
   }
 }
