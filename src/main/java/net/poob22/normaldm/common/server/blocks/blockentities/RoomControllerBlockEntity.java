@@ -34,6 +34,7 @@ import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.server.blocks.DungeonGateBlock;
 import net.poob22.normaldm.common.server.blocks.DungeonMobSpawnerBlock;
 import net.poob22.normaldm.common.server.blocks.NDMBlocks;
+import net.poob22.normaldm.common.server.blocks.RoomControllerBlock;
 import net.poob22.normaldm.common.server.blocks.properties.*;
 import net.poob22.normaldm.common.server.entity.ai.AiUtil;
 import net.poob22.normaldm.common.server.entity.living.DungeonMob;
@@ -44,19 +45,18 @@ import org.slf4j.Logger;
 import java.util.*;
 
 import static net.poob22.normaldm.NormalDungeonMod.MODID;
+import static net.poob22.normaldm.common.server.blocks.RoomControllerBlock.FACING;
 
 public class RoomControllerBlockEntity extends BlockEntity {
     Logger LOG = NormalDungeonMod.LOGGER;
 
     public int tickCount;
     private static final int CHECK_INTERVAL = 10;
-    List<RoomVolume> roomBounds;
 
     public boolean roomSpawned = false;
 
     // default room type
     public RoomDefinition RoomLayout = RoomDefinitions.SMALL;
-    public Direction CurrentDirection = Direction.NORTH;
 
     public enum RoomState {
         DORMANT,
@@ -80,10 +80,6 @@ public class RoomControllerBlockEntity extends BlockEntity {
 
         if(!level.getGameRules().getBoolean(NormalDungeonMod.ALLOW_ROOM_CONTROLLER_FUNCTION)) {
             return;
-        }
-
-        if(entity.roomBounds == null) {
-            entity.initBounds();
         }
 
         if(!level.isClientSide) {
@@ -117,7 +113,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
     }
 
     public void initBounds() {
-        roomBounds = RoomLayout.getVolumes(this.CurrentDirection);
+        //roomBounds = RoomLayout.getVolumes(getDirection());
     }
 
     /// STATE METHODS ///
@@ -200,10 +196,9 @@ public class RoomControllerBlockEntity extends BlockEntity {
     }
 
     /// UTIL METHODS ///
-
     public void getSpawnedEnemiesInRoom(Level level) {
         List<DungeonMob> Enemies = new ArrayList<>();
-        for(RoomVolume v : roomBounds) {
+        for(RoomVolume v : getRoomBounds()) {
             Enemies.addAll(level.getEntitiesOfClass(DungeonMob.class, v.toAABB(this.getBlockPos(), false)));
         }
 
@@ -220,7 +215,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
                 Entity e = level.getEntity(id);
                 if(e instanceof DungeonMob) {
                     boolean flag = false;
-                    for(RoomVolume v : roomBounds) {
+                    for(RoomVolume v : getRoomBounds()) {
                         if (v.toAABB(this.getBlockPos(), false).intersects(e.getBoundingBox())) {
                             flag = true;
                             break;
@@ -241,7 +236,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
 
     public void getPlayersInRoom(Level level) {
         Set<Player> p = new HashSet<>();
-        for(RoomVolume v : roomBounds) {
+        for(RoomVolume v : getRoomBounds()) {
             p.addAll(level.getEntitiesOfClass(Player.class, v.toAABB(this.getBlockPos(), true), player -> player.isAlive() && !player.isSpectator() && !player.isCreative() && player.isAlive()));
         }
         PlayersInRoom.clear();
@@ -253,7 +248,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
     }
 
     protected boolean isPlayerInVolumes(Player player) {
-        for(RoomVolume v : roomBounds) {
+        for(RoomVolume v : getRoomBounds()) {
             if(v.toAABB(this.getBlockPos(), true).intersects(player.getBoundingBox())) {
                 return true;
             }
@@ -262,7 +257,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
     }
 
     public List<RoomVolume> getRoomBounds() {
-        return roomBounds;
+        return RoomLayout.getVolumes(getDirection());
     }
     public RoomState getRoomState() {
         return state;
@@ -273,17 +268,17 @@ public class RoomControllerBlockEntity extends BlockEntity {
         setChanged();
         if(level != null)
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-
-        initBounds();
     }
 
     public void setCurrentDirection(Direction direction) {
-        this.CurrentDirection = direction;
+        this.getBlockState().setValue(FACING, direction);
         setChanged();
         if(level != null)
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+    }
 
-        initBounds();
+    public Direction getDirection() {
+        return this.getBlockState().getValue(FACING);
     }
 
     private void lockGates(Level level) {
@@ -312,7 +307,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
 
         BlockPos origin = this.getBlockPos();
 
-        for(RoomVolume v : roomBounds) {
+        for(RoomVolume v : getRoomBounds()) {
             BlockPos min = origin.offset(v.min);
             BlockPos max = origin.offset(v.max);
 
@@ -331,7 +326,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
         BlockPos origin = this.getBlockPos();
 
         if(this.level != null && !this.level.isClientSide){
-            for(RoomVolume v : roomBounds) {
+            for(RoomVolume v : getRoomBounds()) {
                 BlockPos min = origin.offset(v.min);
                 BlockPos max = origin.offset(v.max);
 
@@ -367,14 +362,9 @@ public class RoomControllerBlockEntity extends BlockEntity {
         String roomType = this.RoomLayout.toString();
         String dimension = level.dimension().location().getPath();
 
-        Rotation rot = switch (this.CurrentDirection) {
-            case DOWN -> null;
-            case UP -> null;
-            case NORTH -> Rotation.NONE;
-            case EAST -> this.RoomLayout.getType() == RoomType.HALLWAY ? Rotation.COUNTERCLOCKWISE_90 : Rotation.CLOCKWISE_90;
-            case SOUTH -> this.RoomLayout.getType() == RoomType.HALLWAY ? Rotation.NONE : Rotation.CLOCKWISE_180;
-            case WEST -> Rotation.COUNTERCLOCKWISE_90;
-        };
+        Rotation rot = getRoomRotation();
+
+        NormalDungeonMod.LOGGER.info("Room is being placed with rotation: " + rot + " for direction: " + getDirection());
 
         if(rot == null) {
             NormalDungeonMod.LOGGER.error("Rotation for room " + this.RoomLayout.toString() + " is null, Cancelling Spawn...");
@@ -392,6 +382,8 @@ public class RoomControllerBlockEntity extends BlockEntity {
         StructurePoolElement chosenRoom = roomPool.getRandomTemplate(level.getRandom());
 
         BlockPos offsetPos = pos.offset(offset);
+
+        NormalDungeonMod.LOGGER.info("Offset Pos: " + offset);
 
         chosenRoom.place(
                 level.getStructureManager(),
@@ -440,9 +432,11 @@ public class RoomControllerBlockEntity extends BlockEntity {
         int offX = 0;
         int offZ = 0;
 
-        for(RoomVolume v : roomBounds) {
+        Direction d = getDirection();
+
+        for(RoomVolume v : getRoomBounds()) {
             if(this.RoomLayout.getType() == RoomType.L_SHAPED) {
-                switch (this.CurrentDirection) {
+                switch (d) {
                     case NORTH:
                         offX = -6;
                         offZ = -6;
@@ -466,13 +460,34 @@ public class RoomControllerBlockEntity extends BlockEntity {
                 if(v.getMin().getX() < offX) offX = v.getMin().getX();
                 if(v.getMin().getZ() < offZ) offZ = v.getMin().getZ();
 
-                if(this.RoomLayout.getType() == RoomType.HALLWAY && this.CurrentDirection == Direction.EAST || this.CurrentDirection == Direction.WEST) {
+                NormalDungeonMod.LOGGER.info("offX: " + offX + " offZ: " + offZ + " after getting mins of box:");
+                NormalDungeonMod.LOGGER.info(v.toString());
+
+                if(this.RoomLayout.getType() == RoomType.HALLWAY && (d == Direction.EAST || d == Direction.WEST)) {
                     offZ *= -1;
                 }
             }
         }
 
         return new BlockPos(offX, 1, offZ);
+    }
+
+    private Rotation getRoomRotation() {
+        Rotation r;
+
+        if(this.RoomLayout.getType() == RoomType.SQUARE) r = Rotation.NONE;
+
+        else {
+            r = switch (getDirection()) {
+                case NORTH -> Rotation.NONE;
+                case EAST -> this.RoomLayout.getType() == RoomType.HALLWAY ? Rotation.COUNTERCLOCKWISE_90 : Rotation.CLOCKWISE_90;
+                case SOUTH -> this.RoomLayout.getType() == RoomType.HALLWAY ? Rotation.NONE : Rotation.CLOCKWISE_180;
+                case WEST -> Rotation.COUNTERCLOCKWISE_90;
+                default -> null;
+            };
+        }
+
+        return r;
     }
 
     protected void coverUnusedGates(Level level) {
@@ -487,7 +502,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
     }
 
     protected void decayRoom(Level level) {
-        for(RoomVolume v : roomBounds) {
+        for(RoomVolume v : getRoomBounds()) {
             BlockPos min = this.getBlockPos().offset(v.getMin());
             BlockPos max = this.getBlockPos().offset(v.getMax());
             for(BlockPos pos : BlockPos.betweenClosed(min ,max)) {
@@ -545,18 +560,6 @@ public class RoomControllerBlockEntity extends BlockEntity {
             tag.putString("roomType", RoomLayout.toString());
         }
 
-        if(this.CurrentDirection != null) {
-            int index = 0;
-            for(Direction d : AiUtil.CARDINAL_DIRECTIONS) {
-                if(d == this.CurrentDirection) {
-                    tag.putInt("direction_index", index);
-                    break;
-                } else {
-                    index++;
-                }
-            }
-        }
-
         saveUUIDSet(tag, "enemies", EnemiesInRoom);
         saveBlockPosSet(tag, "gatePos", GatesInRoom);
 
@@ -594,7 +597,6 @@ public class RoomControllerBlockEntity extends BlockEntity {
             LOG.error("Invalid Room State Loaded...Reverting To DORMANT");
             state = RoomState.DORMANT;
         }
-        this.setCurrentDirection(AiUtil.CARDINAL_DIRECTIONS.get(tag.getInt("direction_index")));
 
         this.setRoomLayout(RoomDefinitions.get(tag.getString("roomType")));
 
