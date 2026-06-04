@@ -8,8 +8,8 @@ import java.util.List;
 
 public class LShapedTransformHelper {
     private static final List<RoomVolume> NORTH = List.of(
-            new RoomVolume(new BlockPos(6, 1, 18), new BlockPos(-6, 8 ,-6)),
-            new RoomVolume(new BlockPos(18, 1, 6), new BlockPos(-6, 8, -6))
+            new RoomVolume(new BlockPos(7, 1, 19), new BlockPos(-7, 8 ,-7)),
+            new RoomVolume(new BlockPos(19, 1, 7), new BlockPos(-7, 8, -7))
     );
 
     private static final List<RoomVolume> EAST = List.of(
