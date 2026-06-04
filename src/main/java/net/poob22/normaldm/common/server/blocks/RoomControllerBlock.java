@@ -1,6 +1,7 @@
 package net.poob22.normaldm.common.server.blocks;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -8,14 +9,15 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseEntityBlock;
-import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -30,8 +32,17 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class RoomControllerBlock extends BaseEntityBlock {
+    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+
     protected RoomControllerBlock() {
         super(BlockBehaviour.Properties.of().strength(1000.0f).sound(SoundType.DEEPSLATE));
+
+        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.@NotNull Builder<Block, BlockState> builder) {
+        builder.add(FACING);
     }
 
     @Override
@@ -58,12 +69,12 @@ public class RoomControllerBlock extends BaseEntityBlock {
                 }
                 else if(itemStack.getItem() instanceof DungeonRotationWandItem) {
                     if(!player.isShiftKeyDown()) {
-                        cycleDirection(roomController, player);
+                        cycleDirection(level, pos, state, player);
                         return InteractionResult.SUCCESS;
                     }
                 }
                 else if(itemStack.isEmpty() && !player.isShiftKeyDown()) {
-                    player.sendSystemMessage(Component.literal("Room Type: " + roomController.RoomLayout.toString()));
+                    player.sendSystemMessage(Component.literal("Room Type: " + roomController.RoomLayout.toString() + " Direction: " + state.getValue(FACING)));
                 }
             }
 
@@ -88,11 +99,25 @@ public class RoomControllerBlock extends BaseEntityBlock {
         player.sendSystemMessage(Component.literal("Room Type: " + rc.RoomLayout.toString()));
     }
 
-    public void cycleDirection(RoomControllerBlockEntity rc, Player player) {
-        int index = AiUtil.CARDINAL_DIRECTIONS.indexOf(rc.CurrentDirection);
-        index = (index + 1) % AiUtil.CARDINAL_DIRECTIONS.size();
-        rc.setCurrentDirection(AiUtil.CARDINAL_DIRECTIONS.get(index));
-        player.sendSystemMessage(Component.literal("Current Direction: " + rc.CurrentDirection.toString()));
+    public void cycleDirection(Level level, BlockPos pos, BlockState state, Player player) {
+        Direction current = state.getValue(FACING);
+
+        Direction next = switch (current) {
+            case NORTH -> Direction.EAST;
+            case EAST -> Direction.SOUTH;
+            case SOUTH -> Direction.WEST;
+            case WEST -> Direction.NORTH;
+            default -> Direction.NORTH;
+        };
+
+        level.setBlock(pos, state.setValue(FACING, next), 3);
+
+        player.sendSystemMessage(Component.literal("Current Direction: " + next));
+    }
+
+    @Override
+    public BlockState rotate(BlockState state, @NotNull Rotation rotation) {
+        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
     }
 
     @SuppressWarnings("deprecation")
