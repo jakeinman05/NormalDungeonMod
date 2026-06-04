@@ -26,6 +26,7 @@ import net.poob22.normaldm.common.server.blocks.blockentities.NDMBlockEntities;
 import net.poob22.normaldm.common.server.entity.registry.DungeonMobs;
 import net.poob22.normaldm.common.server.entity.registry.NDMEntities;
 import net.poob22.normaldm.common.server.items.NDMItems;
+import net.poob22.normaldm.common.server.structures.NDMStructurePlacementTypes;
 import org.slf4j.Logger;
 
 @Mod(NormalDungeonMod.MODID)
@@ -76,6 +77,7 @@ public class NormalDungeonMod
         NDMItems.register(bus);
         NDMBlockEntities.register(bus);
         NDMParticles.register(bus);
+        NDMStructurePlacementTypes.REG.register(bus);
         PacketHandler.registerPackets();
         CREATIVE_MODE_TAB.register(bus);
 
