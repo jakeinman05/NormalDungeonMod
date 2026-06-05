@@ -11,40 +11,40 @@ public class RoomDefinitions {
     public static final RoomDefinition SMALL = register(
             new RoomDefinition(
                     "small",
-                    RoomType.SMALL,
-                    new RoomVolume(new BlockPos(-5, 1, -5), new BlockPos(5, 7, 5))
+                    RoomType.SQUARE,
+                    new RoomVolume(new BlockPos(-6, 1, -6), new BlockPos(6, 8, 6))
             )
     );
 
-    public static final RoomDefinition SMALL_HALLWAY_NS = register(
+    public static final RoomDefinition SMALL_HALLWAY = register(
             new RoomDefinition(
-                "small_hallway_ns",
-                    RoomType.SMALL_HALLWAY,
-                    new RoomVolume(new BlockPos(-3, 1, -6), new BlockPos(3, 7, 6))
+                "small_hallway",
+                    RoomType.HALLWAY,
+                    new RoomVolume(new BlockPos(-4, 1, -6), new BlockPos(4, 8, 6))
             )
     );
 
-    public static final RoomDefinition SMALL_HALLWAY_EW = register(
+    public static final RoomDefinition LARGE_HALLWAY = register(
             new RoomDefinition(
-                    "small_hallway_ew",
-                    RoomType.SMALL_HALLWAY,
-                    new RoomVolume(new BlockPos(-6, 1, -3), new BlockPos(6, 7, 3))
+                    "large_hallway",
+                    RoomType.HALLWAY,
+                    new RoomVolume(new BlockPos(-6, 1, -12), new BlockPos(6, 8, 12))
             )
     );
 
-    public static final RoomDefinition MEDIUM = register(
+    public static final RoomDefinition LARGE_HALLWAY_SLIM = register(
             new RoomDefinition(
-                    "medium",
-                    RoomType.MEDIUM,
-                    new RoomVolume(new BlockPos(-8, 1, -8), new BlockPos(8, 7, 8))
+                    "large_hallway_slim",
+                    RoomType.HALLWAY,
+                    new RoomVolume(new BlockPos(-4, 1, -12), new BlockPos(4, 8, 12))
             )
     );
 
     public static final RoomDefinition LARGE = register(
             new RoomDefinition(
                     "large",
-                    RoomType.LARGE,
-                    new RoomVolume(new BlockPos(-10, 1, -10), new BlockPos(10, 8, 10))
+                    RoomType.SQUARE,
+                    new RoomVolume(new BlockPos(-12, 1, -12), new BlockPos(12, 8, 12))
             )
     );
 
@@ -52,8 +52,8 @@ public class RoomDefinitions {
             new RoomDefinition(
                     "small_l_shaped",
                     RoomType.L_SHAPED,
-                    new RoomVolume(new BlockPos(-11, 1, -3), new BlockPos(4, 7, 3)),
-                    new RoomVolume(new BlockPos(-4, 1, -8), new BlockPos(4, 7, 3))
+                    new RoomVolume(new BlockPos(-6, 1, -18), new BlockPos(6, 8, 6)), // NS
+                    new RoomVolume(new BlockPos(-18, 1, -6), new BlockPos(6, 8, 6))  // EW
             )
     );
 
@@ -63,7 +63,7 @@ public class RoomDefinitions {
                 return room;
             }
         }
-        NormalDungeonMod.LOGGER.error("Room Type not found! Returning null for attempted type: " + roomType);
+        NormalDungeonMod.LOGGER.error("Invalid Room Type: " + roomType);
         return null;
     }
 

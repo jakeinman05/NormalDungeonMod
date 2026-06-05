@@ -4,20 +4,16 @@ import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
 
 public enum RoomType implements StringRepresentable {
-    SMALL,
-    SMALL_HALLWAY,
-    MEDIUM,
-    LARGE,
+    SQUARE,
+    HALLWAY,
     L_SHAPED;
 
 
     @Override
     public @NotNull String getSerializedName() {
         return switch(this) {
-            case SMALL -> "small";
-            case SMALL_HALLWAY -> "small_hallway";
-            case MEDIUM -> "medium";
-            case LARGE -> "large";
+            case SQUARE -> "square";
+            case HALLWAY -> "hallway";
             case L_SHAPED -> "l_shaped";
         };
     }

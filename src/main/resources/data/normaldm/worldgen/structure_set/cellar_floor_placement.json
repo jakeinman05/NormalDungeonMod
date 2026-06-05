@@ -1,0 +1,12 @@
+{
+  "structures": [
+    {
+      "structure": "normaldm:cellar_floor",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "normaldm:fixed_origin",
+    "salt": 67676700
+  }
+}

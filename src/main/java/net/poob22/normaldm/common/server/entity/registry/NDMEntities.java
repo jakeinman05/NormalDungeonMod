@@ -23,7 +23,6 @@ public class NDMEntities {
 
     public static final RegistryObject<EntityType<BaseShotEntity>> FLESH_SHOT = ENTITY_TYPES.register("flesh_shot", () -> EntityType.Builder.of(BaseShotEntity::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(10).updateInterval(1).build("flesh_shot"));
     public static final RegistryObject<EntityType<SnotShotEntity>> SNOT_SHOT = ENTITY_TYPES.register("snot_shot", () -> EntityType.Builder.of(SnotShotEntity::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(10).updateInterval(1).build("snot_shot"));
-
     public static final RegistryObject<EntityType<BioluminescentBeamEntity>> BIOLUMINESCENT_BEAM_SEGMENT = ENTITY_TYPES.register("biolum_beam_segment", () -> EntityType.Builder.<BioluminescentBeamEntity>of(BioluminescentBeamEntity::new, MobCategory.MISC).sized(1.0F, 1.0F).setTrackingRange(10).build("biolum_beam_segment"));
 
     public static void RegisterAll() {

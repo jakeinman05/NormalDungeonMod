@@ -5,6 +5,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
@@ -25,6 +26,7 @@ import net.poob22.normaldm.common.server.blocks.blockentities.NDMBlockEntities;
 import net.poob22.normaldm.common.server.entity.registry.DungeonMobs;
 import net.poob22.normaldm.common.server.entity.registry.NDMEntities;
 import net.poob22.normaldm.common.server.items.NDMItems;
+import net.poob22.normaldm.common.server.structures.NDMStructurePlacementTypes;
 import org.slf4j.Logger;
 
 @Mod(NormalDungeonMod.MODID)
@@ -32,6 +34,8 @@ public class NormalDungeonMod
 {
     public static final String MODID = "normaldm";
     public static final Logger LOGGER = LogUtils.getLogger();
+
+    public static final GameRules.Key<GameRules.BooleanValue> ALLOW_ROOM_CONTROLLER_FUNCTION = GameRules.register("allowNDMRoomSpawning", GameRules.Category.MISC, GameRules.BooleanValue.create(true));
 
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TAB = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, NormalDungeonMod.MODID);
     public static final RegistryObject<CreativeModeTab> TAB = CREATIVE_MODE_TAB.register("normaldm_tab", () -> CreativeModeTab.builder()
@@ -51,6 +55,7 @@ public class NormalDungeonMod
                 output.accept(NDMBlocks.CELLAR_GATE.get());
                 output.accept(NDMBlocks.ROOM_CONTROLLER_BLOCK.get());
                 output.accept(NDMItems.DUNGEON_WAND.get());
+                output.accept(NDMItems.DUNGEON_ROTATION_WAND.get());
                 output.accept(NDMBlocks.DUNGEON_MOB_SPAWNER_BLOCK.get());
                 output.accept(NDMItems.MAGGOT_SPAWN_EGG.get());
                 output.accept(NDMItems.CHARGER_MAGGOT_SPAWN_EGG.get());
@@ -72,6 +77,7 @@ public class NormalDungeonMod
         NDMItems.register(bus);
         NDMBlockEntities.register(bus);
         NDMParticles.register(bus);
+        NDMStructurePlacementTypes.REG.register(bus);
         PacketHandler.registerPackets();
         CREATIVE_MODE_TAB.register(bus);
 

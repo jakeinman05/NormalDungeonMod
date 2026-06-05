@@ -13,6 +13,7 @@ public class NDMItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
 
     public static final RegistryObject<Item> DUNGEON_WAND = ITEMS.register("dungeon_wand", () -> new DungeonWandItem(new Item.Properties()));
+    public static final RegistryObject<Item> DUNGEON_ROTATION_WAND = ITEMS.register("dungeon_rotation_wand", () -> new DungeonRotationWandItem(new Item.Properties()));
     public static final RegistryObject<Item> BEAM_STICK = ITEMS.register("beam_stick", () -> new LaserStick(new Item.Properties()));
 
     public static final RegistryObject<Item> MAGGOT_SPAWN_EGG = ITEMS.register("maggot_spawn_egg", () -> new DungeonMobSpawnEgg(DungeonMobs.MAGGOT.entityType, 0, 0, new Item.Properties()));

@@ -16,6 +16,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -168,7 +169,35 @@ public class DungeonGateBlock extends Block {
                 1.0D);
     }
 
+    public boolean shouldBeHere(Level level, BlockPos pos) {
+        boolean flag = true;
+
+        Direction facing = level.getBlockState(pos).getValue(FACING);
+
+        // no next room check
+        if(level.getBlockState(pos).getValue(HALF) == DoubleBlockHalf.UPPER) pos = pos.below();
+        BlockPos groundPos = pos.below();
+
+        BlockState state1 = level.getBlockState(groundPos.relative(facing));
+        BlockState state2 = level.getBlockState(groundPos.relative(facing.getOpposite()));
+
+        if(state1.isAir() || state2.isAir()) flag = false;
+
+        // leads into wall check
+        BlockState state3 = level.getBlockState(pos.relative(facing));
+        BlockState state4 = level.getBlockState(pos.relative(facing.getOpposite()));
+
+        if(!state3.isAir() || !state4.isAir()) flag = false;
+
+        return flag;
+    }
+
     /// BLOCK OVERRIDES
+    @Override
+    public BlockState rotate(BlockState state, @NotNull Rotation rotation) {
+        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
+    }
+
 
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {

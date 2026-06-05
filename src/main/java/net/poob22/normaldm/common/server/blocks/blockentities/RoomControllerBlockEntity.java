@@ -1,29 +1,42 @@
 package net.poob22.normaldm.common.server.blocks.blockentities;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
+import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.server.blocks.DungeonGateBlock;
 import net.poob22.normaldm.common.server.blocks.DungeonMobSpawnerBlock;
-import net.poob22.normaldm.common.server.blocks.properties.GateState;
-import net.poob22.normaldm.common.server.blocks.properties.RoomDefinition;
-import net.poob22.normaldm.common.server.blocks.properties.RoomDefinitions;
-import net.poob22.normaldm.common.server.blocks.properties.RoomVolume;
+import net.poob22.normaldm.common.server.blocks.NDMBlocks;
+import net.poob22.normaldm.common.server.blocks.RoomControllerBlock;
+import net.poob22.normaldm.common.server.blocks.properties.*;
+import net.poob22.normaldm.common.server.entity.ai.AiUtil;
 import net.poob22.normaldm.common.server.entity.living.DungeonMob;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,12 +44,16 @@ import org.slf4j.Logger;
 
 import java.util.*;
 
+import static net.poob22.normaldm.NormalDungeonMod.MODID;
+import static net.poob22.normaldm.common.server.blocks.RoomControllerBlock.FACING;
+
 public class RoomControllerBlockEntity extends BlockEntity {
     Logger LOG = NormalDungeonMod.LOGGER;
 
     public int tickCount;
     private static final int CHECK_INTERVAL = 10;
-    List<RoomVolume> roomBounds;
+
+    public boolean roomSpawned = false;
 
     // default room type
     public RoomDefinition RoomLayout = RoomDefinitions.SMALL;
@@ -61,13 +78,23 @@ public class RoomControllerBlockEntity extends BlockEntity {
     public static void tick(Level level, BlockPos pos, BlockState state, RoomControllerBlockEntity entity) {
         entity.tickCount++;
 
-        if(entity.roomBounds == null) {
-            entity.initBounds();
+        if(!level.getGameRules().getBoolean(NormalDungeonMod.ALLOW_ROOM_CONTROLLER_FUNCTION)) {
+            return;
         }
 
         if(!level.isClientSide) {
+            if(!entity.hasSpawned() && level instanceof ServerLevel sl) {
+                entity.setHasSpawned();
+                entity.setChanged();
+
+                BlockPos spawnPos = entity.getBlockPos();
+                BlockPos spawnOffset = entity.getRoomSpawnOffset();
+
+                entity.spawnRoom(sl, spawnPos, spawnOffset);
+            }
+
             if(entity.tickCount % CHECK_INTERVAL == 0){
-                switch(entity.state) {
+                switch(entity.getRoomState()) {
                     case DORMANT:
                         entity.dormantState(level);
                         break;
@@ -86,7 +113,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
     }
 
     public void initBounds() {
-        roomBounds = RoomLayout.getVolumes();
+        //roomBounds = RoomLayout.getVolumes(getDirection());
     }
 
     /// STATE METHODS ///
@@ -121,8 +148,10 @@ public class RoomControllerBlockEntity extends BlockEntity {
     private void clearRoom(Level level) {
         unlockGates(level);
         level.playSound(null, this.getBlockPos(), SoundEvents.WITHER_DEATH, SoundSource.BLOCKS, 1.0f, 1.0f);
-        // other feedback responses
 
+        if(level instanceof ServerLevel l) {
+            spawnRewards(l);
+        }
     }
 
     public void checkFailRoom() {
@@ -167,10 +196,9 @@ public class RoomControllerBlockEntity extends BlockEntity {
     }
 
     /// UTIL METHODS ///
-
     public void getSpawnedEnemiesInRoom(Level level) {
         List<DungeonMob> Enemies = new ArrayList<>();
-        for(RoomVolume v : roomBounds) {
+        for(RoomVolume v : getRoomBounds()) {
             Enemies.addAll(level.getEntitiesOfClass(DungeonMob.class, v.toAABB(this.getBlockPos(), false)));
         }
 
@@ -187,7 +215,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
                 Entity e = level.getEntity(id);
                 if(e instanceof DungeonMob) {
                     boolean flag = false;
-                    for(RoomVolume v : roomBounds) {
+                    for(RoomVolume v : getRoomBounds()) {
                         if (v.toAABB(this.getBlockPos(), false).intersects(e.getBoundingBox())) {
                             flag = true;
                             break;
@@ -208,7 +236,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
 
     public void getPlayersInRoom(Level level) {
         Set<Player> p = new HashSet<>();
-        for(RoomVolume v : roomBounds) {
+        for(RoomVolume v : getRoomBounds()) {
             p.addAll(level.getEntitiesOfClass(Player.class, v.toAABB(this.getBlockPos(), true), player -> player.isAlive() && !player.isSpectator() && !player.isCreative() && player.isAlive()));
         }
         PlayersInRoom.clear();
@@ -220,7 +248,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
     }
 
     protected boolean isPlayerInVolumes(Player player) {
-        for(RoomVolume v : roomBounds) {
+        for(RoomVolume v : getRoomBounds()) {
             if(v.toAABB(this.getBlockPos(), true).intersects(player.getBoundingBox())) {
                 return true;
             }
@@ -229,7 +257,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
     }
 
     public List<RoomVolume> getRoomBounds() {
-        return roomBounds;
+        return RoomLayout.getVolumes(getDirection());
     }
     public RoomState getRoomState() {
         return state;
@@ -240,7 +268,17 @@ public class RoomControllerBlockEntity extends BlockEntity {
         setChanged();
         if(level != null)
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-        initBounds();
+    }
+
+    public void setCurrentDirection(Direction direction) {
+        this.getBlockState().setValue(FACING, direction);
+        setChanged();
+        if(level != null)
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+    }
+
+    public Direction getDirection() {
+        return this.getBlockState().getValue(FACING);
     }
 
     private void lockGates(Level level) {
@@ -269,7 +307,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
 
         BlockPos origin = this.getBlockPos();
 
-        for(RoomVolume v : roomBounds) {
+        for(RoomVolume v : getRoomBounds()) {
             BlockPos min = origin.offset(v.min);
             BlockPos max = origin.offset(v.max);
 
@@ -288,7 +326,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
         BlockPos origin = this.getBlockPos();
 
         if(this.level != null && !this.level.isClientSide){
-            for(RoomVolume v : roomBounds) {
+            for(RoomVolume v : getRoomBounds()) {
                 BlockPos min = origin.offset(v.min);
                 BlockPos max = origin.offset(v.max);
 
@@ -304,10 +342,214 @@ public class RoomControllerBlockEntity extends BlockEntity {
         }
     }
 
+    protected void spawnRewards(ServerLevel l) {
+        BlockPos pos = this.getBlockPos();
+
+        ResourceLocation r = ResourceLocation.fromNamespaceAndPath(MODID, "dungeon_rewards/basic_rewards");
+        LootTable table = l.getServer().getLootData().getLootTable(r);
+        LootParams params = new LootParams.Builder(l).create(LootContextParamSets.EMPTY);
+        ObjectArrayList<ItemStack> rewards = table.getRandomItems(params);
+
+        for(ItemStack stack : rewards) {
+            ItemEntity item = new ItemEntity(l, pos.getX() + 0.5, pos.getY() + 2.0, pos.getZ() + 0.5, stack);
+
+            item.setDeltaMovement(item.getDeltaMovement().add(0, 0.2, 0));
+            l.addFreshEntity(item);
+        }
+    }
+
+    protected void spawnRoom(ServerLevel level, BlockPos pos, BlockPos offset) {
+        String roomType = this.RoomLayout.toString();
+        String dimension = level.dimension().location().getPath();
+
+        Rotation rot = getRoomRotation();
+
+        NormalDungeonMod.LOGGER.info("Room is being placed with rotation: " + rot + " for direction: " + getDirection());
+
+        if(rot == null) {
+            NormalDungeonMod.LOGGER.error("Rotation for room " + this.RoomLayout.toString() + " is null, Cancelling Spawn...");
+            return;
+        }
+
+        ResourceLocation roomPoolId = ResourceLocation.fromNamespaceAndPath(MODID, dimension + "/rooms/" + roomType + "_rooms");
+        StructureTemplatePool roomPool = level.registryAccess().registryOrThrow(Registries.TEMPLATE_POOL).get(roomPoolId);
+
+        if(roomPool == null || roomPool.size() == 0) {
+            NormalDungeonMod.LOGGER.error("Template pool: " + roomPoolId + " is returning a null template pool or is empty, cancelling room spawn...");
+            return;
+        }
+
+        StructurePoolElement chosenRoom = roomPool.getRandomTemplate(level.getRandom());
+
+        BlockPos offsetPos = pos.offset(offset);
+
+        NormalDungeonMod.LOGGER.info("Offset Pos: " + offset);
+
+        chosenRoom.place(
+                level.getStructureManager(),
+                level,
+                level.structureManager(),
+                level.getChunkSource().getGenerator(),
+                offsetPos,
+                pos,
+                rot,
+                BoundingBox.infinite(),
+                level.getRandom(),
+                false
+        );
+        getGatesInRoom(level);
+        coverUnusedGates(level);
+
+        ResourceLocation floorPoolId = ResourceLocation.fromNamespaceAndPath(MODID, dimension + "/floors/" + roomType + "_floors");
+        StructureTemplatePool floorPool = level.registryAccess().registryOrThrow(Registries.TEMPLATE_POOL).get(floorPoolId);
+
+        if(floorPool == null || floorPool.size() == 0) {
+            NormalDungeonMod.LOGGER.error("Template pool: " + floorPoolId + " is returning a null template pool or is empty, cancelling room spawn...");
+            return;
+        }
+
+        StructurePoolElement chosenFloor = floorPool.getRandomTemplate(level.getRandom());
+
+        chosenFloor.place(
+                level.getStructureManager(),
+                level,
+                level.structureManager(),
+                level.getChunkSource().getGenerator(),
+                offsetPos,
+                pos,
+                rot,
+                BoundingBox.infinite(),
+                level.getRandom(),
+                false
+        );
+
+        decayRoom(level);
+    }
+
+    public BlockPos getRoomSpawnOffset() {
+        int offX = 0;
+        int offZ = 0;
+
+        Direction d = getDirection();
+
+        for(RoomVolume v : getRoomBounds()) {
+            if(this.RoomLayout.getType() == RoomType.L_SHAPED) {
+                switch (d) {
+                    case NORTH:
+                        offX = -6;
+                        offZ = -6;
+                        break;
+                    case EAST:
+                        offX = 6;
+                        offZ = -6;
+                        break;
+                    case SOUTH:
+                        offX = 6;
+                        offZ = 6;
+                        break;
+                    case WEST:
+                        offX = -6;
+                        offZ = 6;
+                        break;
+                }
+            }
+
+            else {
+                if(v.getMin().getX() < offX) offX = v.getMin().getX();
+                if(v.getMin().getZ() < offZ) offZ = v.getMin().getZ();
+
+                NormalDungeonMod.LOGGER.info("offX: " + offX + " offZ: " + offZ + " after getting mins of box:");
+                NormalDungeonMod.LOGGER.info(v.toString());
+
+                if(this.RoomLayout.getType() == RoomType.HALLWAY && (d == Direction.EAST || d == Direction.WEST)) {
+                    offZ *= -1;
+                }
+            }
+        }
+
+        return new BlockPos(offX, 1, offZ);
+    }
+
+    private Rotation getRoomRotation() {
+        Rotation r;
+
+        if(this.RoomLayout.getType() == RoomType.SQUARE) r = Rotation.NONE;
+
+        else {
+            r = switch (getDirection()) {
+                case NORTH -> Rotation.NONE;
+                case EAST -> this.RoomLayout.getType() == RoomType.HALLWAY ? Rotation.COUNTERCLOCKWISE_90 : Rotation.CLOCKWISE_90;
+                case SOUTH -> this.RoomLayout.getType() == RoomType.HALLWAY ? Rotation.NONE : Rotation.CLOCKWISE_180;
+                case WEST -> Rotation.COUNTERCLOCKWISE_90;
+                default -> null;
+            };
+        }
+
+        return r;
+    }
+
+    protected void coverUnusedGates(Level level) {
+        for(BlockPos pos : this.GatesInRoom) {
+            if(level.getBlockState(pos).getBlock() instanceof DungeonGateBlock gate) {
+                if(!gate.shouldBeHere(level, pos)) {
+                    level.setBlock(pos, NDMBlocks.CELLAR_WALL.get().defaultBlockState(), 3);
+                    level.setBlock(pos.above(), NDMBlocks.CELLAR_WALL.get().defaultBlockState(), 3);
+                }
+            }
+        }
+    }
+
+    protected void decayRoom(Level level) {
+        for(RoomVolume v : getRoomBounds()) {
+            BlockPos min = this.getBlockPos().offset(v.getMin());
+            BlockPos max = this.getBlockPos().offset(v.getMax());
+            for(BlockPos pos : BlockPos.betweenClosed(min ,max)) {
+                BlockState state = level.getBlockState(pos);
+
+                if(state.isAir()) continue;
+
+                if(state.is(NDMBlocks.CELLAR_WALL.get())) {
+                    float roll = level.random.nextFloat();
+
+                    if(pos.getY() - this.getBlockPos().getY() == 2) {
+                        if(roll <= 0.05F) {
+                            level.setBlock(pos, NDMBlocks.CELLAR_WALL_DRAIN.get().defaultBlockState(), 2);
+                        }
+                        else if(roll <= 0.5F) {
+                            BlockState newState = level.random.nextInt(2) == 1 ? NDMBlocks.CELLAR_WALL_CRACKED.get().defaultBlockState() : NDMBlocks.CELLAR_WALL_MOSSY.get().defaultBlockState();
+                            level.setBlock(pos, newState, 2);
+                        }
+                    }
+                    else {
+                        if(roll <= 0.6F) {
+                            BlockState newState = roll <= 0.3 ? NDMBlocks.CELLAR_WALL_MOSSY.get().defaultBlockState() : NDMBlocks.CELLAR_WALL_CRACKED.get().defaultBlockState();
+                            level.setBlock(pos, newState, 2);
+                        }
+                    }
+                }
+                if(state.is(NDMBlocks.CELLAR_CEILING.get())) {
+                    float roll = level.random.nextFloat();
+
+                    if(roll <= 0.2) {
+                        level.setBlock(pos, NDMBlocks.CELLAR_CEILING_MOLDY.get().defaultBlockState(), 2);
+                    }
+                }
+            }
+        }
+    }
+
+    public boolean hasSpawned() {
+        return this.roomSpawned;
+    }
+
+    public void setHasSpawned() {
+        this.roomSpawned = true;
+    }
+
     /// NBT HELPERS ///
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
+    protected void saveAdditional(@NotNull CompoundTag tag) {
         super.saveAdditional(tag);
         // save room state
         RoomState s = state;
@@ -318,7 +560,8 @@ public class RoomControllerBlockEntity extends BlockEntity {
 
         saveUUIDSet(tag, "enemies", EnemiesInRoom);
         saveBlockPosSet(tag, "gatePos", GatesInRoom);
-        // add save data for chests later
+
+        tag.putBoolean("spawnedRoom", this.roomSpawned);
     }
 
     private void saveUUIDSet(CompoundTag tag, String key, Set<UUID> set) {
@@ -342,7 +585,7 @@ public class RoomControllerBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void load(CompoundTag tag) {
+    public void load(@NotNull CompoundTag tag) {
         super.load(tag);
         // load room state
         int s = tag.getInt("roomState");
@@ -352,10 +595,13 @@ public class RoomControllerBlockEntity extends BlockEntity {
             LOG.error("Invalid Room State Loaded...Reverting To DORMANT");
             state = RoomState.DORMANT;
         }
+
         this.setRoomLayout(RoomDefinitions.get(tag.getString("roomType")));
 
         loadUUIDSet(tag, "enemies", EnemiesInRoom);
         loadBlockPosSet(tag, "gatePos", GatesInRoom);
+
+        this.roomSpawned = tag.getBoolean("spawnedRoom");
     }
 
     private void loadUUIDSet(CompoundTag tag, String key, Set<UUID> set) {

@@ -1,0 +1,32 @@
+{
+  "fallback":"minecraft:empty",
+  "elements": [
+    {
+      "weight": 100,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "normaldm:cellar/floors/large/cellar_large_floor1",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 100,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "normaldm:cellar/floors/large/cellar_large_floor2",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      }
+    },
+    {
+      "weight": 100,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "normaldm:cellar/floors/large/cellar_large_floor3",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      }
+    }
+  ]
+}

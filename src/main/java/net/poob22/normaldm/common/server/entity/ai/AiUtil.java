@@ -1,5 +1,6 @@
 package net.poob22.normaldm.common.server.entity.ai;
 
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
@@ -17,6 +18,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class AiUtil {
+    public static final List<Direction> CARDINAL_DIRECTIONS = List.of(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST);
+
     public static boolean checkDamage(DungeonMob mob, LivingEntity target, double addReach) {
         if(mob.hasLineOfSight(target) && mob.distanceTo(target) <= (mob.getBbWidth() + addReach) + target.getBbWidth() + 0.1F) {
             return target.hurt(target.damageSources().mobAttack(mob), (float) Objects.requireNonNull(mob.getAttribute(Attributes.ATTACK_DAMAGE)).getValue());
