@@ -40,14 +40,6 @@ public class RoomDefinitions {
             )
     );
 
-    public static final RoomDefinition MEDIUM = register(
-            new RoomDefinition(
-                    "medium",
-                    RoomType.SQUARE,
-                    new RoomVolume(new BlockPos(-9, 1, -9), new BlockPos(9, 8, 9))
-            )
-    );
-
     public static final RoomDefinition LARGE = register(
             new RoomDefinition(
                     "large",
