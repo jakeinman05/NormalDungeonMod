@@ -410,8 +410,6 @@ public class RoomControllerBlockEntity extends BlockEntity {
 
         StructurePoolElement chosenFloor = floorPool.getRandomTemplate(level.getRandom());
 
-        offsetPos = offsetPos.offset(1, 0 ,1);
-
         chosenFloor.place(
                 level.getStructureManager(),
                 level,
