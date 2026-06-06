@@ -9,6 +9,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
+import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.server.entity.ai.RetreatGoal;
 import net.poob22.normaldm.common.server.entity.registry.DungeonMobs;
 import org.jetbrains.annotations.NotNull;
@@ -80,10 +81,16 @@ public class FleshBlobEntity extends DungeonMob {
         if(getRespawnTimer() <= 0) {
             if(!this.level().isClientSide) {
                 FleshGuyEntity guy = DungeonMobs.FLESH_GUY.entityType.get().create(level());
-                guy.setHealth(this.getHealth() + 2);
-                guy.setPos(this.position());
-                guy.setTypeInt(this.getTypeInt());
-                level().addFreshEntity(guy);
+                if(guy != null) {
+                    double health = this.getHealth();
+                    guy.getAttribute(Attributes.MAX_HEALTH).setBaseValue(health);
+                    guy.heal((float) health);
+                    guy.setPos(this.position());
+                    guy.setTypeInt(this.getTypeInt());
+                    NormalDungeonMod.LOGGER.info("Guys max health = " + guy.getAttributeBaseValue(Attributes.MAX_HEALTH));
+                    level().addFreshEntity(guy);
+                    NormalDungeonMod.LOGGER.info("Guys current health = " + guy.getHealth());
+                }
             }
             this.remove(RemovalReason.DISCARDED);
         }
@@ -94,7 +101,7 @@ public class FleshBlobEntity extends DungeonMob {
         FleshBlobEntity blob;
 
         public BlobRetreatGoal(FleshBlobEntity mob, double retreatDistance) {
-            super(mob, retreatDistance);
+            super(mob, retreatDistance, 3.0D);
             this.blob = mob;
         }
 

@@ -9,11 +9,13 @@ import net.poob22.normaldm.common.server.entity.living.DungeonMob;
 public class RetreatGoal extends Goal {
     DungeonMob mob;
     protected double retreatDistance;
+    private final double speedMultiplier;
     private LivingEntity target;
 
-    public RetreatGoal(DungeonMob mob, double retreatDistance) {
+    public RetreatGoal(DungeonMob mob, double retreatDistance, double speedMultiplier) {
         this.mob = mob;
         this.retreatDistance = retreatDistance;
+        this.speedMultiplier = speedMultiplier;
     }
 
     @Override
@@ -44,7 +46,7 @@ public class RetreatGoal extends Goal {
             }
 
             if(targetVec != null) {
-                this.mob.getNavigation().moveTo(targetVec.x, targetVec.y, targetVec.z, 1.0D);
+                this.mob.getNavigation().moveTo(targetVec.x, targetVec.y, targetVec.z, speedMultiplier);
             }
         }
     }
