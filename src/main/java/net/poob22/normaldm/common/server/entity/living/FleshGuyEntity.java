@@ -78,9 +78,20 @@ public class FleshGuyEntity extends DungeonMob {
     protected void tickDeath() {
         if(!this.level().isClientSide) {
             FleshBlobEntity blob = DungeonMobs.FLESH_BLOB.entityType.get().create(this.level());
-            blob.setPos(this.getX(), this.getY(), this.getZ());
-            blob.setTypeInt(this.getTypeInt());
-            level().addFreshEntity(blob);
+            if(blob != null) {
+                double health = this.getAttribute(Attributes.MAX_HEALTH).getValue() - 1;
+                blob.getAttribute(Attributes.MAX_HEALTH).setBaseValue(health);
+                if(blob.getAttributeBaseValue(Attributes.MAX_HEALTH) < 1e-16) {
+                    blob.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1);
+                }
+                blob.heal((float) health < 1e-16 ? 1 : (float) health);
+                NormalDungeonMod.LOGGER.info("Guys max hp: " + this.getAttribute(Attributes.MAX_HEALTH).getValue() + ", health: " + health);
+                blob.setPos(this.getX(), this.getY(), this.getZ());
+                blob.setTypeInt(this.getTypeInt());
+                NormalDungeonMod.LOGGER.info("Blobs max health = " + blob.getAttributeBaseValue(Attributes.MAX_HEALTH));
+                level().addFreshEntity(blob);
+                NormalDungeonMod.LOGGER.info("Blobs current health = " + blob.getHealth());
+            }
         }
         super.tickDeath();
     }
