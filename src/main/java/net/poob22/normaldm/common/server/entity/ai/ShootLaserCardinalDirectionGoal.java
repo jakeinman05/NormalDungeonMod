@@ -75,9 +75,12 @@ public class ShootLaserCardinalDirectionGoal extends Goal {
     @Override
     public void stop() {
         this.shotInterval = SHOT_COOLDOWN;
-        if(!this.mob.beam.isRemoved()) {
-            this.mob.beam.remove(Entity.RemovalReason.DISCARDED);
+        if(!(this.mob.beam == null)) {
+            if(!this.mob.beam.isRemoved()) {
+                this.mob.beam.remove(Entity.RemovalReason.DISCARDED);
+            }
         }
+
         super.stop();
     }
 
