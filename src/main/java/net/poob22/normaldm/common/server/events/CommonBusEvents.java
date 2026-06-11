@@ -12,14 +12,7 @@ import net.poob22.normaldm.common.server.misc.NDMTagRegistry;
 @Mod.EventBusSubscriber
 public class CommonBusEvents {
     @SubscribeEvent
-    public static void onLivingHurt(LivingHurtEvent event) {
-        DamageSource source = event.getSource();
-
-        if(source.is(NDMTagRegistry.DUNGEON_WEAPON)) {
-            LivingEntity entity = event.getEntity();
-            if(!(entity instanceof Player)) entity.invulnerableTime = 0;
-        }
-    }
+    public static void onLivingHurt(LivingHurtEvent event) {}
 
     @SubscribeEvent
     public static void onLivingKnockBackEvent(LivingKnockBackEvent event) {
