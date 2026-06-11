@@ -1,0 +1,33 @@
+package net.poob22.normaldm.common.server.events;
+
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.poob22.normaldm.NormalDungeonMod;
+import net.poob22.normaldm.common.server.misc.NDMTagRegistry;
+
+@Mod.EventBusSubscriber
+public class CommonBusEvents {
+    @SubscribeEvent
+    public static void onLivingHurt(LivingHurtEvent event){
+        DamageSource source = event.getSource();
+
+        if(source.is(NDMTagRegistry.DUNGEON_WEAPON)) {
+            LivingEntity entity = event.getEntity();
+            if(!(entity instanceof Player)) entity.invulnerableTime = 0;
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLivingKnockBackEvent(LivingKnockBackEvent event) {
+        DamageSource source = event.getEntity().getLastDamageSource();
+
+        if(source != null && source.is(NDMTagRegistry.BEAM_DAMAGE)) {
+            event.setStrength(0.1F);
+        }
+    }
+}
