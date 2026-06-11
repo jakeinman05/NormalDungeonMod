@@ -113,11 +113,10 @@ public class DungeonMob extends Monster {
 
     @Override
     protected void tickDeath() {
-        if(!this.level().isClientSide) {
+        if(!this.level().isClientSide && doDeathPool) {
             sendParticles((byte) 1);
             float sizeMultiplier = 1.3F + this.getRandom().nextInt(1);
-            if(doDeathPool)
-                PacketHandler.sendToTracking(this, new BloodPoolPacket(this.getX(), this.getY(), this.getZ(), this.getBbWidth() * sizeMultiplier));
+            PacketHandler.sendToTracking(this, new BloodPoolPacket(this.getX(), this.getY(), this.getZ(), this.getBbWidth() * sizeMultiplier));
         }
         this.remove(RemovalReason.KILLED);
     }
@@ -149,12 +148,11 @@ public class DungeonMob extends Monster {
 
             ((ServerLevel)this.level()).sendParticles(particleType, x, y, z, 0, v.x, v.y, v.z, 1.0D);
         }
-
     }
 
     @Override
     public int getExperienceReward() {
-        return this.getRandom().nextInt(4) == 0 ? super.getExperienceReward() : 0;
+        return this.getRandom().nextInt(5) == 0 ? super.getExperienceReward() : 0;
     }
 
     @Override
