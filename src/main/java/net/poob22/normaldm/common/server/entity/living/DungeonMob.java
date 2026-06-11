@@ -22,6 +22,7 @@ import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.client.packet.BloodPoolPacket;
 import net.poob22.normaldm.common.client.packet.PacketHandler;
 import net.poob22.normaldm.common.client.particles.NDMParticles;
+import org.jetbrains.annotations.NotNull;
 
 public class DungeonMob extends Monster {
     public static EntityDataAccessor<Boolean> IN_DUNGEON = SynchedEntityData.defineId(DungeonMob.class, EntityDataSerializers.BOOLEAN);
@@ -105,7 +106,7 @@ public class DungeonMob extends Monster {
     }
 
     @Override
-    public boolean hurt(DamageSource pSource, float pAmount) {
+    public boolean hurt(@NotNull DamageSource pSource, float pAmount) {
         if(!this.level().isClientSide) {
             sendParticles((byte) 0);
         }
