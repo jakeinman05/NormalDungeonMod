@@ -3,12 +3,14 @@ package net.poob22.normaldm.common.server.entity.projectile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,6 +24,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.poob22.normaldm.common.client.particles.NDMParticles;
+import net.poob22.normaldm.common.server.misc.NDMDamageTypes;
 import net.poob22.normaldm.common.server.entity.ai.AiUtil;
 import net.poob22.normaldm.common.server.entity.definition.LaserType;
 import net.poob22.normaldm.common.server.entity.living.DungeonMob;
@@ -53,6 +56,8 @@ public class BioluminescentBeamEntity extends Entity {
     public float so = 1.0F;
 
     private boolean beamBuilt = false;
+
+    Vec3 lastTargetPos;
 
     public LivingEntity shooter;
     public UUID shooterUuid;
@@ -147,8 +152,15 @@ public class BioluminescentBeamEntity extends Entity {
                         case STRAIGHT:
                             setShooterPos(this.shooter.getEyePosition());
                             setShooterViewVector(this.shooter.getViewVector(1.0F));
-                            setTargetPos(Vec3.ZERO);
-                            setLerpStrength(0.0F);
+
+                            Vec3 desiredTarget = getShooterPos().add(getShooterViewVector().scale(getLaserDistance()));
+                            if(lastTargetPos == null)
+                                lastTargetPos = desiredTarget;
+
+                            lastTargetPos = lastTargetPos.lerp(desiredTarget, 0.4);
+
+                            setTargetPos(lastTargetPos);
+                            setLerpStrength(DEFAULT_LERP_STRENGTH);
                             constructBeamPoints(getLerpStrength());
                             break;
                         case HOMING:
@@ -317,7 +329,9 @@ public class BioluminescentBeamEntity extends Entity {
 
                     double totalRadius = ent.getBbWidth()/2 + segmentRadius;
                     if(vec.lengthSqr() < totalRadius * totalRadius) {
-                        if(ent.hurt(damageSources().mobAttack(this.shooter), damage)) {
+                        var damageHolder = shooter.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(NDMDamageTypes.BEAM_DAMAGE);
+                        DamageSource source = new DamageSource(damageHolder, shooter);
+                        if(ent.hurt(source, damage)) {
                             addJustHit(ent);
                             return true;
                         }

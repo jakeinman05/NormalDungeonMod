@@ -1,5 +1,6 @@
 package net.poob22.normaldm.common.server.entity.living;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -17,9 +18,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.client.packet.BloodPoolPacket;
 import net.poob22.normaldm.common.client.packet.PacketHandler;
 import net.poob22.normaldm.common.client.particles.NDMParticles;
+import org.jetbrains.annotations.NotNull;
 
 public class DungeonMob extends Monster {
     public static EntityDataAccessor<Boolean> IN_DUNGEON = SynchedEntityData.defineId(DungeonMob.class, EntityDataSerializers.BOOLEAN);
@@ -103,7 +106,7 @@ public class DungeonMob extends Monster {
     }
 
     @Override
-    public boolean hurt(DamageSource pSource, float pAmount) {
+    public boolean hurt(@NotNull DamageSource pSource, float pAmount) {
         if(!this.level().isClientSide) {
             sendParticles((byte) 0);
         }
@@ -113,11 +116,21 @@ public class DungeonMob extends Monster {
 
     @Override
     protected void tickDeath() {
-        if(!this.level().isClientSide) {
+        if(!this.level().isClientSide && doDeathPool) {
             sendParticles((byte) 1);
             float sizeMultiplier = 1.3F + this.getRandom().nextInt(1);
-            if(doDeathPool)
-                PacketHandler.sendToTracking(this, new BloodPoolPacket(this.getX(), this.getY(), this.getZ(), this.getBbWidth() * sizeMultiplier));
+            BlockPos pos = this.blockPosition();
+            if(!this.onGround()) {
+                NormalDungeonMod.LOGGER.info("Enemy is not on ground");
+                while(true) {
+                    if(!level().getBlockState(pos.below()).isAir()) break;
+                    else {
+                        pos = pos.below();
+                    }
+                }
+            }
+
+            PacketHandler.sendToTracking(this, new BloodPoolPacket(this.getX(), pos.getY(), this.getZ(), this.getBbWidth() * sizeMultiplier));
         }
         this.remove(RemovalReason.KILLED);
     }
@@ -149,12 +162,11 @@ public class DungeonMob extends Monster {
 
             ((ServerLevel)this.level()).sendParticles(particleType, x, y, z, 0, v.x, v.y, v.z, 1.0D);
         }
-
     }
 
     @Override
     public int getExperienceReward() {
-        return this.getRandom().nextInt(4) == 0 ? super.getExperienceReward() : 0;
+        return this.getRandom().nextInt(5) == 0 ? super.getExperienceReward() : 0;
     }
 
     @Override
