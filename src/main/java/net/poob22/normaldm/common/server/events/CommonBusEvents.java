@@ -7,13 +7,12 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.server.misc.NDMTagRegistry;
 
 @Mod.EventBusSubscriber
 public class CommonBusEvents {
     @SubscribeEvent
-    public static void onLivingHurt(LivingHurtEvent event){
+    public static void onLivingHurt(LivingHurtEvent event) {
         DamageSource source = event.getSource();
 
         if(source.is(NDMTagRegistry.DUNGEON_WEAPON)) {
