@@ -1,5 +1,6 @@
 package net.poob22.normaldm.common.server.entity.living;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -17,6 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.client.packet.BloodPoolPacket;
 import net.poob22.normaldm.common.client.packet.PacketHandler;
 import net.poob22.normaldm.common.client.particles.NDMParticles;
@@ -116,7 +118,18 @@ public class DungeonMob extends Monster {
         if(!this.level().isClientSide && doDeathPool) {
             sendParticles((byte) 1);
             float sizeMultiplier = 1.3F + this.getRandom().nextInt(1);
-            PacketHandler.sendToTracking(this, new BloodPoolPacket(this.getX(), this.getY(), this.getZ(), this.getBbWidth() * sizeMultiplier));
+            BlockPos pos = this.blockPosition();
+            if(!this.onGround()) {
+                NormalDungeonMod.LOGGER.info("Enemy is not on ground");
+                while(true) {
+                    if(!level().getBlockState(pos.below()).isAir()) break;
+                    else {
+                        pos = pos.below();
+                    }
+                }
+            }
+
+            PacketHandler.sendToTracking(this, new BloodPoolPacket(this.getX(), pos.getY(), this.getZ(), this.getBbWidth() * sizeMultiplier));
         }
         this.remove(RemovalReason.KILLED);
     }
