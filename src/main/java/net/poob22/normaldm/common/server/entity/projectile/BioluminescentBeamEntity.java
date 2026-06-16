@@ -35,6 +35,7 @@ import org.joml.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public class BioluminescentBeamEntity extends Entity {
     public static final EntityDataAccessor<Integer> SHOOTER_UUID = SynchedEntityData.defineId(BioluminescentBeamEntity.class, EntityDataSerializers.INT);
@@ -182,13 +183,12 @@ public class BioluminescentBeamEntity extends Entity {
 
                 if(level() instanceof ServerLevel sl) {
                     if(this.tickCount % 2 == 0) {
-                        clearJustHit();
-                        if(checkSegmentDamage()) {
-                            for(LivingEntity entity : justHit) {
-                                Vec3 entityCenter = entity.getBoundingBox().getCenter();
-                                sl.sendParticles(ParticleTypes.SMOKE, entityCenter.x, entityCenter.y, entityCenter.z, 5, random.nextDouble() - 0.5, random.nextDouble() - 0.5, random.nextDouble() - 0.5, 0.0F);
-                            }
-                        }
+                        clearJustHit(entity -> !(entity instanceof Player));
+                        checkSegmentDamage();
+                    }
+
+                    if(this.tickCount % 10 == 0) {
+                        clearJustHit(entity -> entity instanceof Player);
                     }
 
                     if(hitPoint != null) {
@@ -284,7 +284,7 @@ public class BioluminescentBeamEntity extends Entity {
         }
     }
 
-    private boolean checkSegmentDamage() {
+    private void checkSegmentDamage() {
         if(!points.isEmpty()) {
             for(int i = 1; i < points.size(); i++) {
                 Vec3 start = points.get(i - 1);
@@ -333,14 +333,13 @@ public class BioluminescentBeamEntity extends Entity {
                         DamageSource source = new DamageSource(damageHolder, shooter);
                         if(ent.hurt(source, damage)) {
                             addJustHit(ent);
-                            return true;
+                            Vec3 entityCenter = ent.getBoundingBox().getCenter();
+                            ((ServerLevel) level()).sendParticles(ParticleTypes.SMOKE, entityCenter.x, entityCenter.y, entityCenter.z, 5, random.nextDouble() - 0.5, random.nextDouble() - 0.5, random.nextDouble() - 0.5, 0.1F);
                         }
                     }
                 }
             }
         }
-
-        return false;
     }
 
     public void addPoint(Vec3 point) {
@@ -354,12 +353,11 @@ public class BioluminescentBeamEntity extends Entity {
     }
 
     private void addJustHit(LivingEntity entity) {
-        if(entity instanceof Player)
-            this.justHit.add(entity);
+        this.justHit.add(entity);
     }
 
-    private void clearJustHit() {
-        this.justHit.clear();
+    private void clearJustHit(Predicate<LivingEntity> predicate) {
+        this.justHit.removeIf(predicate);
     }
 
     private void setLifetime(int lifetime) {
