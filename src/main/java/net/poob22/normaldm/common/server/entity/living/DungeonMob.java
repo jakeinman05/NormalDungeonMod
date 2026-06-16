@@ -107,11 +107,12 @@ public class DungeonMob extends Monster {
 
     @Override
     public boolean hurt(@NotNull DamageSource pSource, float pAmount) {
-        if(!this.level().isClientSide) {
+        boolean flag = super.hurt(pSource, pAmount);
+        if(!this.level().isClientSide && flag) {
             sendParticles((byte) 0);
         }
 
-        return super.hurt(pSource, pAmount);
+        return flag;
     }
 
     @Override
