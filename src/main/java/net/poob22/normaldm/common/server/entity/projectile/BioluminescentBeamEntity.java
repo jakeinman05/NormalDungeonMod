@@ -35,6 +35,7 @@ import org.joml.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
 public class BioluminescentBeamEntity extends Entity {
@@ -203,12 +204,19 @@ public class BioluminescentBeamEntity extends Entity {
                         sl.sendParticles(type, v.x, v.y, v.z, 5, random.nextDouble() - 0.5, random.nextDouble() - 0.5, random.nextDouble() - 0.5, 0.0F);
                     }
 
+                    if(this.getLifetime() <= 10) {
+                        this.s = (float) Mth.absMax((float)(1.0 - (1.0 - this.getLifetime() * 0.1)), 0.1);
+                        this.segmentRadius = this.segmentRadius * s;
+                    }
+
                     for(int i = 1; i < points.size(); i++) {
                         if(random.nextDouble() > 0.8) {
                             Vec3 v0 = points.get(i - 1);
                             Vec3 v1 = points.get(i);
                             Vec3 pos = v0.lerp(v1, random.nextDouble());
-                            sl.sendParticles(NDMParticles.BEAM_PLASMA_PARTICLE.get(), pos.x, pos.y, pos.z, 1, random.nextDouble() - 0.5, 0, random.nextDouble() - 0.5, 0.0F);
+                            double x = ThreadLocalRandom.current().nextDouble(-segmentRadius, segmentRadius);
+                            double z = ThreadLocalRandom.current().nextDouble(-segmentRadius, segmentRadius);
+                            sl.sendParticles(NDMParticles.BEAM_PLASMA_PARTICLE.get(), pos.x, pos.y, pos.z, 1, x, 0, z, 0.0F);
                         }
                     }
                 }
