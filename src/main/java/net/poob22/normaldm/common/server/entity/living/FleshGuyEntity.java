@@ -16,15 +16,10 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.poob22.normaldm.NormalDungeonMod;
-import net.poob22.normaldm.common.server.entity.ai.AiUtil;
 import net.poob22.normaldm.common.server.entity.ai.DungeonMobMeleeGoal;
 import net.poob22.normaldm.common.server.entity.registry.DungeonMobs;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class FleshGuyEntity extends DungeonMob {
     public static final EntityDataAccessor<Boolean> CLOSE = SynchedEntityData.defineId(FleshGuyEntity.class, EntityDataSerializers.BOOLEAN);
@@ -85,12 +80,9 @@ public class FleshGuyEntity extends DungeonMob {
                     blob.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1);
                 }
                 blob.heal((float) health < 1e-16 ? 1 : (float) health);
-                NormalDungeonMod.LOGGER.info("Guys max hp: " + this.getAttribute(Attributes.MAX_HEALTH).getValue() + ", health: " + health);
                 blob.setPos(this.getX(), this.getY(), this.getZ());
                 blob.setTypeInt(this.getTypeInt());
-                NormalDungeonMod.LOGGER.info("Blobs max health = " + blob.getAttributeBaseValue(Attributes.MAX_HEALTH));
                 level().addFreshEntity(blob);
-                NormalDungeonMod.LOGGER.info("Blobs current health = " + blob.getHealth());
             }
         }
         super.tickDeath();
