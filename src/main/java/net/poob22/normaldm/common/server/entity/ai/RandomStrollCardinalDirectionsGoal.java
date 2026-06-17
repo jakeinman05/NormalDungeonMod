@@ -44,13 +44,7 @@ public class RandomStrollCardinalDirectionsGoal extends Goal {
     @Override
     public boolean canUse() {
         if(this.damaging) {
-            LivingEntity target = this.mob.getTarget();
-            if(target == null) {
-                NormalDungeonMod.LOGGER.error("Target is null for entity {}", mob);
-                this.target = null;
-            } else {
-                this.target = target;
-            }
+            this.target = this.mob.getTarget();
         }
         return true;
     }
