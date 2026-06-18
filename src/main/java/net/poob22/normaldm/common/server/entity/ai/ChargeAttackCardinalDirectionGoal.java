@@ -9,13 +9,11 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.server.entity.definition.IChargingMob;
 import net.poob22.normaldm.common.server.entity.living.DungeonMob;
 
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Objects;
 
 public class ChargeAttackCardinalDirectionGoal extends Goal {
     DungeonMob mob;
@@ -27,6 +25,7 @@ public class ChargeAttackCardinalDirectionGoal extends Goal {
     int chargeInterval;
     boolean takeWallDamage;
     boolean randomInterval;
+    double addedReach;
 
     boolean stopCharge = false;
 
@@ -34,7 +33,7 @@ public class ChargeAttackCardinalDirectionGoal extends Goal {
     Direction chargeDir;
 
     // add a windup boolean that can be passed into the goal for future entity use
-    public ChargeAttackCardinalDirectionGoal(DungeonMob mob, double speedMod, int chargeDistance, int chargeCooldown, boolean takeWallDamage, boolean randomInterval) {
+    public ChargeAttackCardinalDirectionGoal(DungeonMob mob, double speedMod, int chargeDistance, int chargeCooldown, boolean takeWallDamage, boolean randomInterval, double addedReach) {
         this.setFlags(EnumSet.of(Goal.Flag.JUMP, Goal.Flag.MOVE));
         this.mob = mob;
         if(mob instanceof IChargingMob m) this.chargingMob = m;
@@ -44,13 +43,13 @@ public class ChargeAttackCardinalDirectionGoal extends Goal {
         this.takeWallDamage = takeWallDamage;
         this.chargeInterval = 0;
         this.randomInterval = randomInterval;
+        this.addedReach = addedReach;
     }
 
     @Override
     public boolean canUse() {
         if(!(mob instanceof  IChargingMob)) {
-            NormalDungeonMod.LOGGER.error("Mob must extend IChargingMob for ChargeAttackCardinalDirectionsGoal!");
-            return false;
+            throw new ClassCastException("Mob must be instance of IChargingMob for ChargeAttackCardinalDirectionGoal for: " + mob.getClass().getName());
         } else if(chargingMob == null) {
             return false;
         } else if(chargingMob.isCharging()) {
@@ -120,7 +119,7 @@ public class ChargeAttackCardinalDirectionGoal extends Goal {
         Vec3 move = new Vec3(chargeDir.getStepX() * speed, mob.onGround() ? 0 : mob.getDeltaMovement().y, chargeDir.getStepZ() * speed);
         mob.setDeltaMovement(move);
 
-        if(AiUtil.checkDamage(this.mob, this.target, 0.3D)) {
+        if(AiUtil.checkDamage(this.mob, this.target, addedReach)) {
             chargingMob.entityHitReaction();
             this.stopCharge = true;
         }
