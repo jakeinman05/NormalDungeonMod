@@ -27,9 +27,20 @@ public class PacketHandler {
                 BloodPoolPacket::decode,
                 BloodPoolPacket::handle
         );
+        CHANNEL.registerMessage(
+                packetId++,
+                PlayerLeftClickEmptyPacket.class,
+                PlayerLeftClickEmptyPacket::encode,
+                PlayerLeftClickEmptyPacket::decode,
+                PlayerLeftClickEmptyPacket::handle
+        );
     }
 
     public static void sendToTracking(Entity entity, Object packet) {
         CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), packet);
+    }
+
+    public static void sendToServer(Object packet) {
+        CHANNEL.sendToServer(packet);
     }
 }
