@@ -16,7 +16,6 @@ import static net.poob22.normaldm.NormalDungeonMod.MODID;
 
 @Mod.EventBusSubscriber
 public class CombatEvents {
-
     @SubscribeEvent
     public static void dungeonLeftClickEmpty(PlayerInteractEvent.LeftClickEmpty event) {
         Player player = event.getEntity();
