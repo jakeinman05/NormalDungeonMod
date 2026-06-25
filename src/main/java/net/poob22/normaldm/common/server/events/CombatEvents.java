@@ -20,7 +20,7 @@ public class CombatEvents {
     public static void dungeonLeftClickEmpty(PlayerInteractEvent.LeftClickEmpty event) {
         Player player = event.getEntity();
         if(player != null) {
-            if(checkPunch(player)) {
+            if(checkLevel(player)) {
                 PacketHandler.sendToServer(new PlayerLeftClickEmptyPacket(player.getUUID(), player.getDeltaMovement()));
             }
         }
@@ -39,14 +39,14 @@ public class CombatEvents {
     private static void punchEvent(PlayerEvent event) {
         Player player = event.getEntity();
         if(player != null) {
-            if(checkPunch(player)) {
+            if(checkLevel(player)) {
                 LeftClickHandler.catchInput(player, player.getDeltaMovement());
                 event.setCanceled(true);
             }
         }
     }
 
-    private static boolean checkPunch(Player player) {
+    private static boolean checkLevel(Player player) {
         ItemStack stack = player.getMainHandItem();
         ResourceLocation dim = player.level().dimension().location();
         return stack.is(ItemStack.EMPTY.getItem()) && dim.getNamespace().equals(MODID);
