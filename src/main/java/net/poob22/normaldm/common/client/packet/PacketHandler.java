@@ -34,6 +34,13 @@ public class PacketHandler {
                 PlayerLeftClickEmptyPacket::decode,
                 PlayerLeftClickEmptyPacket::handle
         );
+        CHANNEL.registerMessage(
+                packetId++,
+                ComboDataPacket.class,
+                ComboDataPacket::encode,
+                ComboDataPacket::decode,
+                ComboDataPacket::handle
+        );
     }
 
     public static void sendToTracking(Entity entity, Object packet) {
