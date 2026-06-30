@@ -5,6 +5,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
+import net.poob22.normaldm.common.client.packet.combat.ComboDataPacket;
+import net.poob22.normaldm.common.client.packet.combat.CooldownDataPacket;
 
 import static net.poob22.normaldm.NormalDungeonMod.MODID;
 
@@ -40,6 +42,13 @@ public class PacketHandler {
                 ComboDataPacket::encode,
                 ComboDataPacket::decode,
                 ComboDataPacket::handle
+        );
+        CHANNEL.registerMessage(
+                packetId++,
+                CooldownDataPacket.class,
+                CooldownDataPacket::encode,
+                CooldownDataPacket::decode,
+                CooldownDataPacket::handle
         );
     }
 
