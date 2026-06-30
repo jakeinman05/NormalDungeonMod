@@ -16,7 +16,7 @@ import net.poob22.normaldm.common.server.combat.capability.data.CombatProvider;
 import static net.poob22.normaldm.NormalDungeonMod.MODID;
 
 public class CombatInternalCapabilities {
-    public static final Capability<PlayerCombatData> COMBAT_DATA_CAPABILITY = CapabilityManager.get(new CapabilityToken<>() {});
+    public static final Capability<PlayerCombatData> COMBAT = CapabilityManager.get(new CapabilityToken<>() {});
 
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class ForgeBusEvents {
@@ -39,13 +39,15 @@ public class CombatInternalCapabilities {
             if(event.phase != TickEvent.Phase.END) {
                 return;
             }
-            if(player.level().isClientSide()) {
-                return;
+            if(player.level().isClientSide()) { // && toggle for showing dev gui is ON
+                player.getCapability(COMBAT).ifPresent(cap -> {
+                    cap.tick(player);
+                });
+            } else {
+                player.getCapability(COMBAT).ifPresent(cap -> {
+                    cap.tick(player);
+                });
             }
-
-            player.getCapability(COMBAT_DATA_CAPABILITY).ifPresent(cap -> {
-                cap.tick(player);
-            });
         }
     }
 }
