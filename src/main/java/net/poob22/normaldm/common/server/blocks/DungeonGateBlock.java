@@ -152,7 +152,6 @@ public class DungeonGateBlock extends Block {
         double xCenter = pos.getX() + voxelShape.bounds().getCenter().x;
         double yCenter = pos.getY() + voxelShape.bounds().getCenter().y;
         double zCenter = pos.getZ() + voxelShape.bounds().getCenter().z;
-        NormalDungeonMod.LOGGER.info("{}, {}, {}", xCenter, yCenter, zCenter);
         level.sendParticles(NDMParticles.FLESH_PARTICLE.get(),
                 xCenter, yCenter, zCenter,
                 18,
