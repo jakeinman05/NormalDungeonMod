@@ -6,12 +6,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.poob22.normaldm.common.client.packet.ComboDataPacket;
 import net.poob22.normaldm.common.server.entity.living.DungeonMob;
 
-import static net.poob22.normaldm.common.client.packet.PacketHandler.sendToTracking;
 import static net.poob22.normaldm.common.server.combat.CombatUtil.*;
-import static net.poob22.normaldm.common.server.combat.capability.CombatInternalCapabilities.COMBAT_DATA_CAPABILITY;
+import static net.poob22.normaldm.common.server.combat.capability.CombatInternalCapabilities.COMBAT;
 
 public class MainCombatHandler {
     public static void punch(Player player, Vec3 deltaMovement) {
@@ -28,10 +26,8 @@ public class MainCombatHandler {
 
         // if flag, check combos and increment them
         if (flag) {
-            player.getCapability(COMBAT_DATA_CAPABILITY).ifPresent(cap -> {
-                cap.getCombosData().incrementCombos();
-                // remove
-                sendToTracking(player, new ComboDataPacket(cap.getCombosData().getCombos()));
+            player.getCapability(COMBAT).ifPresent(cap -> {
+                cap.getCombosData().incrementCombos(player);
             });
         }
 
