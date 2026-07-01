@@ -9,7 +9,7 @@ public enum StatType implements StringRepresentable {
     HEALTH,
     ATTACK_SPEED,
     MOVEMENT_SPEED,
-    COOLDOWN_MULTIPLIER;
+    COMBO_MULTIPLIER;
 
     @Override
     public @NotNull String getSerializedName() {
@@ -19,7 +19,7 @@ public enum StatType implements StringRepresentable {
             case HEALTH -> "health";
             case ATTACK_SPEED -> "attack_speed";
             case MOVEMENT_SPEED -> "movement_speed";
-            case COOLDOWN_MULTIPLIER -> "cooldown_multiplier";
+            case COMBO_MULTIPLIER -> "combo_multiplier";
         };
     }
 }

@@ -14,7 +14,7 @@ public class StatsDataComponent extends SyncableComponent {
         baseStats.put(StatType.HEALTH, 20.0f);
         baseStats.put(StatType.ATTACK_SPEED, 5.0f); // ticks
         baseStats.put(StatType.MOVEMENT_SPEED, 1.0f); // multiplier of base movement speed
-        baseStats.put(StatType.COOLDOWN_MULTIPLIER, 1.41f);
+        baseStats.put(StatType.COMBO_MULTIPLIER, 1.2f);
         stats.clear();
         stats.putAll(baseStats);
     }
@@ -36,7 +36,7 @@ public class StatsDataComponent extends SyncableComponent {
         stats.put(StatType.HEALTH, health);
         stats.put(StatType.ATTACK_SPEED, atkSpeed);
         stats.put(StatType.MOVEMENT_SPEED, moveSpeed);
-        stats.put(StatType.COOLDOWN_MULTIPLIER, cooldownMult);
+        stats.put(StatType.COMBO_MULTIPLIER, cooldownMult);
     }
 
     public float getStat(StatType type) {
