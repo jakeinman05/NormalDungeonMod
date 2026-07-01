@@ -11,18 +11,18 @@ import java.util.function.Supplier;
 import static net.poob22.normaldm.common.server.combat.capability.CombatInternalCapabilities.COMBAT;
 
 public class CooldownDataPacket implements ComponentDataPacket {
-    int cooldown;
+    float cooldown;
 
-    public CooldownDataPacket(int cooldown) {
+    public CooldownDataPacket(float cooldown) {
         this.cooldown = cooldown;
     }
 
     public static void encode(CooldownDataPacket packet, FriendlyByteBuf buf) {
-        buf.writeInt(packet.cooldown);
+        buf.writeFloat(packet.cooldown);
     }
 
     public static CooldownDataPacket decode(FriendlyByteBuf buf) {
-        return new CooldownDataPacket(buf.readInt());
+        return new CooldownDataPacket(buf.readFloat());
     }
 
     public static void handle(CooldownDataPacket msg, Supplier<NetworkEvent.Context> ctx) {

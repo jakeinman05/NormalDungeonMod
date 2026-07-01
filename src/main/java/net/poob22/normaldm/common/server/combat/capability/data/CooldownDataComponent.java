@@ -1,17 +1,17 @@
 package net.poob22.normaldm.common.server.combat.capability.data;
 
 import net.minecraft.world.entity.player.Player;
-import net.poob22.normaldm.NormalDungeonMod;
 
-public class CooldownDataComponent {
+public class CooldownDataComponent extends SyncableComponent {
     private final int MAX_COOLDOWN = 40;
-    int cooldown;
+    float cooldown;
 
-    public void setCooldown(int cooldown) {
+    public void setCooldown(float cooldown) {
         this.cooldown = cooldown;
+        this.markDirty();
     }
 
-    public int getCooldown() {
+    public float getCooldown() {
         return cooldown;
     }
 
@@ -19,9 +19,13 @@ public class CooldownDataComponent {
         return cooldown <= 0;
     }
 
+    public void sync(float cooldown) {
+        this.cooldown = cooldown;
+    }
+
     public void tick(Player player) {
         if(cooldown > 0) {
-            NormalDungeonMod.LOGGER.info("Cooldown: " + cooldown);
+            //NormalDungeonMod.LOGGER.info("Cooldown: " + cooldown);
             cooldown--;
         }
     }
