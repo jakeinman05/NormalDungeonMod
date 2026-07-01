@@ -24,6 +24,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.poob22.normaldm.common.client.particles.NDMParticles;
+import net.poob22.normaldm.common.server.combat.capability.data.stats.StatType;
 import net.poob22.normaldm.common.server.misc.NDMDamageTypes;
 import net.poob22.normaldm.common.server.entity.ai.AiUtil;
 import net.poob22.normaldm.common.server.entity.definition.LaserType;
@@ -37,6 +38,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
+
+import static net.poob22.normaldm.common.server.combat.capability.CombatInternalCapabilities.COMBAT;
 
 public class BioluminescentBeamEntity extends Entity {
     public static final EntityDataAccessor<Integer> SHOOTER_UUID = SynchedEntityData.defineId(BioluminescentBeamEntity.class, EntityDataSerializers.INT);
@@ -84,7 +87,7 @@ public class BioluminescentBeamEntity extends Entity {
         this.entityData.set(SHOOTER_UUID, shooter.getId());
 
         // scale damage based on players damage stat in dungeon
-        this.damage = this.shooter instanceof Player ? 1.0F : 1.0F;
+        this.damage = this.shooter instanceof Player player ? player.getCapability(COMBAT).map(c -> c.getStats().getStat(StatType.DAMAGE)).orElse(1.0f) : 1.0F;
 
         this.type = type;
         this.target = target;
