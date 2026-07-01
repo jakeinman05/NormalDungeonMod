@@ -43,7 +43,7 @@ public class PlayerCombatData {
         }
         if(stats.isDirty()) {
             NormalDungeonMod.LOGGER.info("Sent stats packet");
-            sendPacket(player, new StatsDataPacket(stats.getStat(StatType.DAMAGE), stats.getStat(StatType.REACH), stats.getStat(StatType.HEALTH), stats.getStat(StatType.ATTACK_SPEED), stats.getStat(StatType.MOVEMENT_SPEED)));
+            sendPacket(player, new StatsDataPacket(stats.getStat(StatType.DAMAGE), stats.getStat(StatType.REACH), stats.getStat(StatType.HEALTH), stats.getStat(StatType.ATTACK_SPEED), stats.getStat(StatType.MOVEMENT_SPEED), stats.getStat(StatType.COMBO_MULTIPLIER)));
             stats.clearDirty();
         }
     }
