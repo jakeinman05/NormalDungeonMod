@@ -3,6 +3,7 @@ package net.poob22.normaldm.common.server.combat;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.poob22.normaldm.common.server.combat.capability.data.stats.StatType;
 
 import static net.poob22.normaldm.common.server.combat.capability.CombatInternalCapabilities.COMBAT;
 
@@ -18,7 +19,7 @@ public class LeftClickHandler {
 
         if(flag) capability.ifPresent(c -> {
             // grab cooldown from capability
-            c.getCooldownData().setCooldown(5);
+            c.getCooldownData().setCooldown(c.getStats().getStat(StatType.ATTACK_SPEED));
         });
 
         return flag;
