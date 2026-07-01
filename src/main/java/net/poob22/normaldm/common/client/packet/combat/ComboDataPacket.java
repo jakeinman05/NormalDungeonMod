@@ -12,20 +12,20 @@ import static net.poob22.normaldm.common.server.combat.capability.CombatInternal
 
 public class ComboDataPacket implements ComponentDataPacket {
     int combos;
-    int timer;
+    float timer;
 
-    public ComboDataPacket(int combos, int timer) {
+    public ComboDataPacket(int combos, float timer) {
         this.combos = combos;
         this.timer = timer;
     }
 
     public static void encode(ComboDataPacket packet, FriendlyByteBuf buf) {
         buf.writeInt(packet.combos);
-        buf.writeInt(packet.timer);
+        buf.writeFloat(packet.timer);
     }
 
     public static ComboDataPacket decode(FriendlyByteBuf buf) {
-        return new ComboDataPacket(buf.readInt(), buf.readInt());
+        return new ComboDataPacket(buf.readInt(), buf.readFloat());
     }
 
     public static void handle(ComboDataPacket msg, Supplier<NetworkEvent.Context> ctx) {

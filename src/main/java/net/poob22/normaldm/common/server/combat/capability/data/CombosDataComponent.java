@@ -1,10 +1,12 @@
 package net.poob22.normaldm.common.server.combat.capability.data;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.poob22.normaldm.NormalDungeonMod;
+import net.poob22.normaldm.common.server.combat.capability.data.stats.StatType;
 
-public class CombosDataComponent {
+import static net.poob22.normaldm.common.server.combat.capability.CombatInternalCapabilities.COMBAT;
+
+public class CombosDataComponent extends SyncableComponent {
     /*
     Scale combo reset with attack cooldown
     Basically make a method that returns a calculated timer reset
@@ -17,41 +19,73 @@ public class CombosDataComponent {
      */
     private final int comboTimerReset = 30;
     private int combos;
-    private long comboTimer = 0;
+    private float comboTimer = 0;
 
     public int getCombos() {
         return combos;
     }
 
-    public void setCombos(int combos) {
-        this.combos = combos;
-    }
-
-    public long getComboTimer() {
+    public float getComboTimer() {
         return comboTimer;
     }
 
-    public void setComboTimer() {
-        this.comboTimer = comboTimerReset + Minecraft.getInstance().level.getGameTime();
+    public void setComboTimer(Player player) {
+        // calculate based on player stats
+        if(player.getCapability(COMBAT).isPresent()) {
+            player.getCapability(COMBAT).ifPresent(c -> {
+                float attackSpeed = c.getStats().getStat(StatType.ATTACK_SPEED);
+                float comboMultiplier = c.getStats().getStat(StatType.COMBO_MULTIPLIER);
+                this.comboTimer = attackSpeed * comboMultiplier + (5 * comboMultiplier);
+            });
+        }
+        else
+            this.comboTimer = comboTimerReset;
     }
 
-    public void incrementCombos() {
+    public void setComboTimer(float timer) {
+        // calculate based on player stats
+        this.comboTimer = timer;
+    }
+
+    public void incrementCombos(Player player) {
         combos++;
+        setComboTimer(player);
+
+        if(!player.level().isClientSide()) {
+            markDirty();
+        }
+
         NormalDungeonMod.LOGGER.info("Combos: " + combos);
-        // reset timer for each combo increment
-        comboTimer = comboTimerReset + Minecraft.getInstance().level.getGameTime();
     }
 
-    public void resetCombos() {
+    public void resetCombos(Player player) {
         combos = 0;
+
+        if(!player.level().isClientSide()) {
+            markDirty();
+        }
+    }
+
+    /// Networking section
+
+
+    public void sync(int combos, float timer) {
+        this.combos = combos;
+        if(!(combos == 0))
+            this.setComboTimer(timer);
+        else this.comboTimer = 0;
     }
 
     public void tick(Player player) {
         /// Combo Logic
         if(combos > 0) {
-            if(player.level().getGameTime() >= comboTimer) {
-                NormalDungeonMod.LOGGER.info("Combos reset");
-                resetCombos();
+            if(comboTimer > 0) {
+                comboTimer--;
+
+                if(comboTimer <= 0) {
+                    NormalDungeonMod.LOGGER.info("Combos reset");
+                    resetCombos(player);
+                }
             }
         }
     }
