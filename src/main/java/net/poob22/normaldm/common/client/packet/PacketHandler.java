@@ -58,6 +58,13 @@ public class PacketHandler {
                 StatsDataPacket::decode,
                 StatsDataPacket::handle
         );
+        CHANNEL.registerMessage(
+                packetId++,
+                CombatDebugPacket.class,
+                CombatDebugPacket::encode,
+                CombatDebugPacket::decode,
+                CombatDebugPacket::handle
+        );
     }
 
     public static void sendToTracking(Entity entity, Object packet) {
