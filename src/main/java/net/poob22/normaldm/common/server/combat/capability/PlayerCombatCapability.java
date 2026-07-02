@@ -1,4 +1,4 @@
-package net.poob22.normaldm.common.server.combat.capability.data;
+package net.poob22.normaldm.common.server.combat.capability;
 
 import net.minecraft.world.entity.player.Player;
 import net.poob22.normaldm.NormalDungeonMod;
@@ -7,9 +7,12 @@ import net.poob22.normaldm.common.client.packet.PacketHandler;
 import net.poob22.normaldm.common.client.packet.combat.ComponentDataPacket;
 import net.poob22.normaldm.common.client.packet.combat.CooldownDataPacket;
 import net.poob22.normaldm.common.client.packet.combat.StatsDataPacket;
+import net.poob22.normaldm.common.server.combat.capability.data.CombosDataComponent;
+import net.poob22.normaldm.common.server.combat.capability.data.CooldownDataComponent;
+import net.poob22.normaldm.common.server.combat.capability.data.StatsDataComponent;
 import net.poob22.normaldm.common.server.combat.capability.data.stats.StatType;
 
-public class PlayerCombatData {
+public class PlayerCombatCapability {
     private final CombosDataComponent combos = new CombosDataComponent();
     private final CooldownDataComponent cooldown = new CooldownDataComponent();
     private final StatsDataComponent stats = new StatsDataComponent();

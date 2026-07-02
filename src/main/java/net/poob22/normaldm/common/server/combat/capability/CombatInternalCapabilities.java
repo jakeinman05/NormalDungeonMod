@@ -10,13 +10,12 @@ import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.poob22.normaldm.common.server.combat.capability.data.PlayerCombatData;
 import net.poob22.normaldm.common.server.combat.capability.data.CombatProvider;
 
 import static net.poob22.normaldm.NormalDungeonMod.MODID;
 
 public class CombatInternalCapabilities {
-    public static final Capability<PlayerCombatData> COMBAT = CapabilityManager.get(new CapabilityToken<>() {});
+    public static final Capability<PlayerCombatCapability> COMBAT = CapabilityManager.get(new CapabilityToken<>() {});
 
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class ForgeBusEvents {

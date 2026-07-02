@@ -8,7 +8,7 @@ public class StatsDataComponent extends SyncableComponent {
     private final EnumMap<StatType, Float> baseStats = new EnumMap<>(StatType.class);
     private final EnumMap<StatType, Float> stats = new EnumMap<>(StatType.class);
 
-    StatsDataComponent() {
+    public StatsDataComponent() {
         baseStats.put(StatType.DAMAGE, 1.0f);
         baseStats.put(StatType.REACH, 3.0f);
         baseStats.put(StatType.HEALTH, 20.0f);
