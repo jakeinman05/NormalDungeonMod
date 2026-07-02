@@ -1,5 +1,7 @@
 package net.poob22.normaldm.common.server.combat.capability.data;
 
+import net.minecraft.nbt.CompoundTag;
+import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.server.combat.capability.data.stats.StatType;
 
 import java.util.EnumMap;
@@ -42,6 +44,24 @@ public class StatsDataComponent extends SyncableComponent {
         stats.put(StatType.ATTACK_SPEED, atkSpeed);
         stats.put(StatType.MOVEMENT_SPEED, moveSpeed);
         stats.put(StatType.COMBO_MULTIPLIER, cooldownMult);
+    }
+
+    public CompoundTag save() {
+        CompoundTag tag = new CompoundTag();
+
+        for(StatType type : StatType.values()) {
+            tag.putFloat(type.getSerializedName(), stats.get(type));
+            NormalDungeonMod.LOGGER.info("Saved stat " + type.getSerializedName() + " with value: " + stats.get(type));
+        }
+
+        return tag;
+    }
+
+    public void load(CompoundTag tag) {
+        for(StatType type : StatType.values()) {
+            setStat(type, tag.getFloat(type.getSerializedName()));
+            NormalDungeonMod.LOGGER.info("Loaded stat " + type.getSerializedName() + " with value: " + stats.get(type));
+        }
     }
 
     public float getStat(StatType type) {

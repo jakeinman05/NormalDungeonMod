@@ -1,5 +1,6 @@
 package net.poob22.normaldm.common.server.combat.capability;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.client.packet.combat.ComboDataPacket;
@@ -69,5 +70,17 @@ public class PlayerCombatCapability {
 
     private <T> void sendPacket(Player player, ComponentDataPacket packet) {
         PacketHandler.sendToTracking(player, packet);
+    }
+
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
+
+        tag.put("Stats", stats.save());
+
+        return tag;
+    }
+
+    public void deserializeNBT(CompoundTag tag) {
+        stats.load(tag.getCompound("Stats"));
     }
 }
