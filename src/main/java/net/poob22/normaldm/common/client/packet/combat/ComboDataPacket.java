@@ -34,7 +34,6 @@ public class ComboDataPacket implements ComponentDataPacket {
 
             if(player == null) {
                 NormalDungeonMod.LOGGER.error("normaldm:ComboDataPacket::handle: player is null, packet ignored.");
-                ctx.get().setPacketHandled(false);
                 return;
             }
 
