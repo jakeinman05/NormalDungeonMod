@@ -15,20 +15,24 @@ public class GuiOverlayRenderer {
         Player player = mc.player;
 
         if(player != null) {
-            gui.drawString(mc.font, "Combat Debug", 10, 126, 0XFFFFFF);
-            gui.drawString(mc.font, "Reach: " + calculateReach(player, player.getDeltaMovement()), 10, 136, 0XFFFFFF);
-            gui.drawString(mc.font, "Capability Present: " + player.getCapability(COMBAT).isPresent(), 10, 146, 0XFFFFFF);
-
             player.getCapability(COMBAT).ifPresent(c -> {
-                gui.drawString(mc.font, "Combos: " + c.getCombosData().getCombos(), 10, 156, 0XFFFFFF);
-                gui.drawString(mc.font, "Combo Timer: " + Math.max(0, c.getCombosData().getComboTimer()), 10, 166, 0XFFFFFF);
-                gui.drawString(mc.font, "Cooldown: " + c.getCooldownData().getCooldown(), 10, 176, 0XFFFFFF);
+                if(c.showDebug()) {
+                    gui.drawString(mc.font, "Combat Debug", 10, 126, 0XFFFFFF);
+                    gui.drawString(mc.font, "Reach: " + calculateReach(player, player.getDeltaMovement()), 10, 136, 0XFFFFFF);
+                    gui.drawString(mc.font, "Capability Present: " + player.getCapability(COMBAT).isPresent(), 10, 146, 0XFFFFFF);
 
-                StatsDataComponent stats = c.getStats();
-                for(int i = 0; i < StatType.values().length; i++) {
-                    gui.drawString(mc.font, StatType.values()[i].getSerializedName() + ": " + stats.getStat(StatType.values()[i]), 10, 186 + (i* 10), 0XFFFFFF);
+                    gui.drawString(mc.font, "Combos: " + c.getCombosData().getCombos(), 10, 156, 0XFFFFFF);
+                    gui.drawString(mc.font, "Combo Timer: " + Math.max(0, c.getCombosData().getComboTimer()), 10, 166, 0XFFFFFF);
+                    gui.drawString(mc.font, "Cooldown: " + c.getCooldownData().getCooldown(), 10, 176, 0XFFFFFF);
+
+                    StatsDataComponent stats = c.getStats();
+                    for(int i = 0; i < StatType.values().length; i++) {
+                        gui.drawString(mc.font, StatType.values()[i].getSerializedName() + ": " + stats.getStat(StatType.values()[i]), 10, 186 + (i* 10), 0XFFFFFF);
+                    }
                 }
             });
+
+
         }
     }
 }

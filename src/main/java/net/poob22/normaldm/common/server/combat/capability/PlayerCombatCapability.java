@@ -13,6 +13,8 @@ import net.poob22.normaldm.common.server.combat.capability.data.StatsDataCompone
 import net.poob22.normaldm.common.server.combat.capability.data.stats.StatType;
 
 public class PlayerCombatCapability {
+    private boolean SHOW_DEBUG = false;
+
     private final CombosDataComponent combos = new CombosDataComponent();
     private final CooldownDataComponent cooldown = new CooldownDataComponent();
     private final StatsDataComponent stats = new StatsDataComponent();
@@ -29,25 +31,39 @@ public class PlayerCombatCapability {
         return stats;
     }
 
+    public boolean showDebug() {
+        return SHOW_DEBUG;
+    }
+
+    public void toggleDebug(boolean b) {
+        SHOW_DEBUG = b;
+    }
+
+    public void toggleDebug() {
+        this.SHOW_DEBUG = !this.SHOW_DEBUG;
+    }
+
     public void tick(Player player) {
         combos.tick(player);
         cooldown.tick(player);
 
         // networking
-        if(combos.isDirty()) {
-            NormalDungeonMod.LOGGER.info("Sent combo packet");
-            sendPacket(player, new ComboDataPacket(combos.getCombos(), combos.getComboTimer()));
-            combos.clearDirty();
-        }
-        if(cooldown.isDirty()) {
-            NormalDungeonMod.LOGGER.info("Sent cooldown packet");
-            sendPacket(player, new CooldownDataPacket(cooldown.getCooldown()));
-            cooldown.clearDirty();
-        }
-        if(stats.isDirty()) {
-            NormalDungeonMod.LOGGER.info("Sent stats packet");
-            sendPacket(player, new StatsDataPacket(stats.getStat(StatType.DAMAGE), stats.getStat(StatType.REACH), stats.getStat(StatType.HEALTH), stats.getStat(StatType.ATTACK_SPEED), stats.getStat(StatType.MOVEMENT_SPEED), stats.getStat(StatType.COMBO_MULTIPLIER)));
-            stats.clearDirty();
+        if(SHOW_DEBUG) {
+            if(combos.isDirty()) {
+                NormalDungeonMod.LOGGER.info("Sent combo packet");
+                sendPacket(player, new ComboDataPacket(combos.getCombos(), combos.getComboTimer()));
+                combos.clearDirty();
+            }
+            if(cooldown.isDirty()) {
+                NormalDungeonMod.LOGGER.info("Sent cooldown packet");
+                sendPacket(player, new CooldownDataPacket(cooldown.getCooldown()));
+                cooldown.clearDirty();
+            }
+            if(stats.isDirty()) {
+                NormalDungeonMod.LOGGER.info("Sent stats packet");
+                sendPacket(player, new StatsDataPacket(stats.getStat(StatType.DAMAGE), stats.getStat(StatType.REACH), stats.getStat(StatType.HEALTH), stats.getStat(StatType.ATTACK_SPEED), stats.getStat(StatType.MOVEMENT_SPEED), stats.getStat(StatType.COMBO_MULTIPLIER)));
+                stats.clearDirty();
+            }
         }
     }
 
