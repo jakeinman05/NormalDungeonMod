@@ -5,7 +5,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 import net.poob22.normaldm.NormalDungeonMod;
-import net.poob22.normaldm.common.server.combat.capability.PlayerCombatCapability;
 
 import java.util.function.Supplier;
 
@@ -35,7 +34,9 @@ public class CombatDebugPacket {
                 return;
             }
 
-            player.getCapability(COMBAT).ifPresent(PlayerCombatCapability::toggleDebug);
+            player.getCapability(COMBAT).ifPresent(c -> {
+                c.toggleDebug(msg.val);
+            });
         });
 
         ctx.get().setPacketHandled(true);
