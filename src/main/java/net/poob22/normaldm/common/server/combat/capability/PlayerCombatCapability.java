@@ -47,6 +47,7 @@ public class PlayerCombatCapability {
     public void tick(Player player) {
         combos.tick(player);
         cooldown.tick(player);
+        stats.tick(player);
 
         // networking
         if(SHOW_DEBUG) {
@@ -62,13 +63,13 @@ public class PlayerCombatCapability {
             }
             if(stats.isDirty()) {
                 NormalDungeonMod.LOGGER.info("Sent stats packet");
-                sendPacket(player, new StatsDataPacket(stats.getStat(StatType.DAMAGE), stats.getStat(StatType.REACH), stats.getStat(StatType.HEALTH), stats.getStat(StatType.ATTACK_SPEED), stats.getStat(StatType.MOVEMENT_SPEED), stats.getStat(StatType.COMBO_MULTIPLIER)));
+                sendPacket(player, new StatsDataPacket(stats.get(StatType.DAMAGE), stats.get(StatType.REACH), stats.get(StatType.HEALTH), stats.get(StatType.ATTACK_SPEED), stats.get(StatType.MOVEMENT_SPEED), stats.get(StatType.COMBO_MULTIPLIER)));
                 stats.clearDirty();
             }
         }
     }
 
-    private <T> void sendPacket(Player player, ComponentDataPacket packet) {
+    private void sendPacket(Player player, ComponentDataPacket packet) {
         PacketHandler.sendToTracking(player, packet);
     }
 

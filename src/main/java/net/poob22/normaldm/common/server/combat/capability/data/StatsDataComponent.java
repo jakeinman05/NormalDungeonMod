@@ -1,6 +1,8 @@
 package net.poob22.normaldm.common.server.combat.capability.data;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.server.combat.capability.data.stats.StatType;
 
@@ -13,9 +15,9 @@ public class StatsDataComponent extends SyncableComponent {
     public StatsDataComponent() {
         baseStats.put(StatType.DAMAGE, 1.0f);
         baseStats.put(StatType.REACH, 3.0f);
-        baseStats.put(StatType.HEALTH, 20.0f);
+        baseStats.put(StatType.HEALTH, 6.0f);
         baseStats.put(StatType.ATTACK_SPEED, 5.0f); // ticks
-        baseStats.put(StatType.MOVEMENT_SPEED, 1.0f); // multiplier of base movement speed
+        baseStats.put(StatType.MOVEMENT_SPEED, 0.1f);
         baseStats.put(StatType.COMBO_MULTIPLIER, 1.2f);
         stats.clear();
         stats.putAll(baseStats);
@@ -37,6 +39,11 @@ public class StatsDataComponent extends SyncableComponent {
         markDirty();
     }
 
+    public void applyPlayerAttributeStats(Player player) {
+        player.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(this.get(StatType.MOVEMENT_SPEED));
+        player.getAttribute(Attributes.MAX_HEALTH).setBaseValue(this.get(StatType.HEALTH));
+    }
+
     public void sync(float damage, float reach, float health, float atkSpeed, float moveSpeed, float cooldownMult) {
         stats.put(StatType.DAMAGE, damage);
         stats.put(StatType.REACH, reach);
@@ -44,6 +51,10 @@ public class StatsDataComponent extends SyncableComponent {
         stats.put(StatType.ATTACK_SPEED, atkSpeed);
         stats.put(StatType.MOVEMENT_SPEED, moveSpeed);
         stats.put(StatType.COMBO_MULTIPLIER, cooldownMult);
+    }
+
+    public void tick(Player player) {
+        applyPlayerAttributeStats(player);
     }
 
     public CompoundTag save() {
@@ -64,7 +75,7 @@ public class StatsDataComponent extends SyncableComponent {
         }
     }
 
-    public float getStat(StatType type) {
+    public float get(StatType type) {
         return stats.get(type);
     }
 }

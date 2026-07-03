@@ -27,7 +27,7 @@ public class GuiOverlayRenderer {
 
                     StatsDataComponent stats = c.getStats();
                     for(int i = 0; i < StatType.values().length; i++) {
-                        gui.drawString(mc.font, StatType.values()[i].getSerializedName() + ": " + stats.getStat(StatType.values()[i]), 10, 186 + (i* 10), 0XFFFFFF);
+                        gui.drawString(mc.font, StatType.values()[i].getSerializedName() + ": " + stats.get(StatType.values()[i]), 10, 186 + (i* 10), 0XFFFFFF);
                     }
                 }
             });

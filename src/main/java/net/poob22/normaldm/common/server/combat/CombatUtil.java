@@ -48,7 +48,7 @@ public class CombatUtil {
             var damageHolder = player.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(NDMDamageTypes.BEAM_DAMAGE);
             DamageSource source = new DamageSource(damageHolder, player);
 
-            float damage = player.getCapability(COMBAT).map(c -> c.getStats().getStat(StatType.DAMAGE)).orElse(1.0f);
+            float damage = player.getCapability(COMBAT).map(c -> c.getStats().get(StatType.DAMAGE)).orElse(1.0f);
             return entity.hurt(source, damage);
         }
         return false;
@@ -56,7 +56,7 @@ public class CombatUtil {
 
     public static double calculateReach(Player player, Vec3 deltaMovement) {
         Vec3 d = new Vec3(deltaMovement.x, deltaMovement.y, deltaMovement.z);
-        double reach = player.getCapability(COMBAT).map(c -> c.getStats().getStat(StatType.REACH)).orElse(3.0f);
+        double reach = player.getCapability(COMBAT).map(c -> c.getStats().get(StatType.REACH)).orElse(3.0f);
         double movementSpeed = player.onGround() ? (d.length() - 0.0784000015258789) : d.length();
         double forwardMovement = Math.max(0, d.dot(player.getLookAngle())) * 4;
         return reach + forwardMovement + movementSpeed;

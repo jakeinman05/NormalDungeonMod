@@ -17,7 +17,7 @@ public class CombosDataComponent extends SyncableComponent {
     but they have a short time frame to still pause and land consecutive hits.
     So maybe something like: playerCooldown + (playerCooldown/2)
      */
-    private final int comboTimerReset = 30;
+    private final int DEFAULT_TIMER_RESET = 10;
     private int combos;
     private float comboTimer = 0;
 
@@ -33,13 +33,13 @@ public class CombosDataComponent extends SyncableComponent {
         // calculate based on player stats
         if(player.getCapability(COMBAT).isPresent()) {
             player.getCapability(COMBAT).ifPresent(c -> {
-                float attackSpeed = c.getStats().getStat(StatType.ATTACK_SPEED);
-                float comboMultiplier = c.getStats().getStat(StatType.COMBO_MULTIPLIER);
+                float attackSpeed = c.getStats().get(StatType.ATTACK_SPEED);
+                float comboMultiplier = c.getStats().get(StatType.COMBO_MULTIPLIER);
                 this.comboTimer = attackSpeed * comboMultiplier + (5 * comboMultiplier);
             });
         }
         else
-            this.comboTimer = comboTimerReset;
+            this.comboTimer = DEFAULT_TIMER_RESET;
     }
 
     public void setComboTimer(float timer) {

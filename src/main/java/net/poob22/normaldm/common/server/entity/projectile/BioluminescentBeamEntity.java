@@ -87,7 +87,7 @@ public class BioluminescentBeamEntity extends Entity {
         this.entityData.set(SHOOTER_UUID, shooter.getId());
 
         // scale damage based on players damage stat in dungeon
-        this.damage = this.shooter instanceof Player player ? player.getCapability(COMBAT).map(c -> c.getStats().getStat(StatType.DAMAGE)).orElse(1.0f) : 1.0F;
+        this.damage = this.shooter instanceof Player player ? player.getCapability(COMBAT).map(c -> c.getStats().get(StatType.DAMAGE)).orElse(1.0f) : 1.0F;
 
         this.type = type;
         this.target = target;
