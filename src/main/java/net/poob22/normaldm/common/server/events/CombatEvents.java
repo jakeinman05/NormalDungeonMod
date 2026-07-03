@@ -8,24 +8,11 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.poob22.normaldm.common.client.packet.PacketHandler;
-import net.poob22.normaldm.common.client.packet.PlayerLeftClickEmptyPacket;
-import net.poob22.normaldm.common.server.combat.LeftClickHandler;
 
 import static net.poob22.normaldm.NormalDungeonMod.MODID;
 
 @Mod.EventBusSubscriber
 public class CombatEvents {
-    @SubscribeEvent
-    public static void dungeonLeftClickEmpty(PlayerInteractEvent.LeftClickEmpty event) {
-        Player player = event.getEntity();
-        if(player != null) {
-            if(checkLevel(player)) {
-                PacketHandler.sendToServer(new PlayerLeftClickEmptyPacket(player.getUUID(), player.getDeltaMovement()));
-            }
-        }
-    }
-
     @SubscribeEvent
     public static void dungeonLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
         punchEvent(event);
@@ -40,7 +27,7 @@ public class CombatEvents {
         Player player = event.getEntity();
         if(player != null) {
             if(checkLevel(player)) {
-                LeftClickHandler.catchInput(player, player.getDeltaMovement());
+                //LeftClickHandler.catchInput(player, player.getDeltaMovement());
                 event.setCanceled(true);
             }
         }
