@@ -33,7 +33,6 @@ public class PlayerHoldingLClickPacket {
                 NormalDungeonMod.LOGGER.error("normaldm:PlayerHoldingLClickPacket::handle: player is null, packet ignored.");
                 return;
             }
-            NormalDungeonMod.LOGGER.info("Packet Received");
 
             LeftClickHandler.catchInput(player, msg.v);
         });
