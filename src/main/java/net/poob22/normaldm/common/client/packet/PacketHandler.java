@@ -5,6 +5,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
+import net.poob22.normaldm.common.client.packet.combat.PlayerHoldingLClickPacket;
 import net.poob22.normaldm.common.client.packet.combat.ComboDataPacket;
 import net.poob22.normaldm.common.client.packet.combat.CooldownDataPacket;
 import net.poob22.normaldm.common.client.packet.combat.StatsDataPacket;
@@ -64,6 +65,13 @@ public class PacketHandler {
                 CombatDebugPacket::encode,
                 CombatDebugPacket::decode,
                 CombatDebugPacket::handle
+        );
+        CHANNEL.registerMessage(
+                packetId++,
+                PlayerHoldingLClickPacket.class,
+                PlayerHoldingLClickPacket::encode,
+                PlayerHoldingLClickPacket::decode,
+                PlayerHoldingLClickPacket::handle
         );
     }
 

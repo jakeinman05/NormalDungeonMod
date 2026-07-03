@@ -5,6 +5,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkEvent;
+import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.server.combat.LeftClickHandler;
 
 import java.util.UUID;
@@ -35,7 +36,10 @@ public class PlayerLeftClickEmptyPacket {
             Level level = ctx.get().getSender().level();
             Player player = level.getPlayerByUUID(msg.playerUUID);
 
-            if(player == null) throw new NullPointerException("ServerPlayer on normaldm:CombatInputPacket is null");
+            if(player == null) {
+                NormalDungeonMod.LOGGER.error("normaldm:PlayerLeftClickEmptyPacket::handle: player is null, packet ignored.");
+                return;
+            }
 
             LeftClickHandler.catchInput(player, msg.deltaMovement);
         });
