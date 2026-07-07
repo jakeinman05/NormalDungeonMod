@@ -19,7 +19,7 @@ public class LeftClickHandler {
 
         if(flag) capability.ifPresent(c -> {
             // grab cooldown from capability
-            c.getCooldownData().setCooldown(c.getStats().get(StatType.ATTACK_SPEED));
+            c.getCooldownData().setCooldown(20/c.getStats().get(StatType.ATTACK_SPEED));
         });
 
         return flag;
