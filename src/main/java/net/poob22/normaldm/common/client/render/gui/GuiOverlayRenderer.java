@@ -23,16 +23,14 @@ public class GuiOverlayRenderer {
 
                     gui.drawString(mc.font, "Combos: " + c.getCombosData().getCombos(), 10, 156, 0XFFFFFF);
                     gui.drawString(mc.font, "Combo Timer: " + Math.max(0, c.getCombosData().getComboTimer()), 10, 166, 0XFFFFFF);
-                    gui.drawString(mc.font, "Cooldown: " + c.getCooldownData().getCooldown(), 10, 176, 0XFFFFFF);
+                    gui.drawString(mc.font, "Cooldown: %.2f".formatted(c.getCooldownData().getCooldown()), 10, 176, 0XFFFFFF);
 
                     StatsDataComponent stats = c.getStats();
                     for(int i = 0; i < StatType.values().length; i++) {
-                        gui.drawString(mc.font, StatType.values()[i].getSerializedName() + ": " + stats.get(StatType.values()[i]), 10, 186 + (i* 10), 0XFFFFFF);
+                        gui.drawString(mc.font, StatType.values()[i].getSerializedName() + ": %.2f".formatted(stats.get(StatType.values()[i])), 10, 186 + (i* 10), 0XFFFFFF);
                     }
                 }
             });
-
-
         }
     }
 }
