@@ -52,17 +52,17 @@ public class PlayerCombatCapability {
         // networking
         if(SHOW_DEBUG) {
             if(combos.isDirty()) {
-                NormalDungeonMod.LOGGER.info("Sent combo packet");
+                //NormalDungeonMod.LOGGER.info("Sent combo packet");
                 sendPacket(player, new ComboDataPacket(combos.getCombos(), combos.getComboTimer()));
                 combos.clearDirty();
             }
             if(cooldown.isDirty()) {
-                NormalDungeonMod.LOGGER.info("Sent cooldown packet");
+                //NormalDungeonMod.LOGGER.info("Sent cooldown packet");
                 sendPacket(player, new CooldownDataPacket(cooldown.getCooldown()));
                 cooldown.clearDirty();
             }
             if(stats.isDirty()) {
-                NormalDungeonMod.LOGGER.info("Sent stats packet");
+                //NormalDungeonMod.LOGGER.info("Sent stats packet");
                 sendPacket(player, new StatsDataPacket(stats.get(StatType.DAMAGE), stats.get(StatType.REACH), stats.get(StatType.HEALTH), stats.get(StatType.ATTACK_SPEED), stats.get(StatType.MOVEMENT_SPEED), stats.get(StatType.COMBO_MULTIPLIER)));
                 stats.clearDirty();
             }
