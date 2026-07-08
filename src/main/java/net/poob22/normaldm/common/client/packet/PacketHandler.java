@@ -5,6 +5,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
+import net.poob22.normaldm.common.client.packet.combat.PlayerHoldingLClickPacket;
+import net.poob22.normaldm.common.client.packet.combat.ComboDataPacket;
+import net.poob22.normaldm.common.client.packet.combat.CooldownDataPacket;
+import net.poob22.normaldm.common.client.packet.combat.StatsDataPacket;
 
 import static net.poob22.normaldm.NormalDungeonMod.MODID;
 
@@ -27,9 +31,55 @@ public class PacketHandler {
                 BloodPoolPacket::decode,
                 BloodPoolPacket::handle
         );
+        CHANNEL.registerMessage(
+                packetId++,
+                PlayerLeftClickEmptyPacket.class,
+                PlayerLeftClickEmptyPacket::encode,
+                PlayerLeftClickEmptyPacket::decode,
+                PlayerLeftClickEmptyPacket::handle
+        );
+        CHANNEL.registerMessage(
+                packetId++,
+                ComboDataPacket.class,
+                ComboDataPacket::encode,
+                ComboDataPacket::decode,
+                ComboDataPacket::handle
+        );
+        CHANNEL.registerMessage(
+                packetId++,
+                CooldownDataPacket.class,
+                CooldownDataPacket::encode,
+                CooldownDataPacket::decode,
+                CooldownDataPacket::handle
+        );
+        CHANNEL.registerMessage(
+                packetId++,
+                StatsDataPacket.class,
+                StatsDataPacket::encode,
+                StatsDataPacket::decode,
+                StatsDataPacket::handle
+        );
+        CHANNEL.registerMessage(
+                packetId++,
+                CombatDebugPacket.class,
+                CombatDebugPacket::encode,
+                CombatDebugPacket::decode,
+                CombatDebugPacket::handle
+        );
+        CHANNEL.registerMessage(
+                packetId++,
+                PlayerHoldingLClickPacket.class,
+                PlayerHoldingLClickPacket::encode,
+                PlayerHoldingLClickPacket::decode,
+                PlayerHoldingLClickPacket::handle
+        );
     }
 
     public static void sendToTracking(Entity entity, Object packet) {
         CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), packet);
+    }
+
+    public static void sendToServer(Object packet) {
+        CHANNEL.sendToServer(packet);
     }
 }

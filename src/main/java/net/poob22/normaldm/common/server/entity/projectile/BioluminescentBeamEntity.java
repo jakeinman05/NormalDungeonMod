@@ -24,6 +24,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.poob22.normaldm.common.client.particles.NDMParticles;
+import net.poob22.normaldm.common.server.combat.capability.data.stats.StatType;
 import net.poob22.normaldm.common.server.misc.NDMDamageTypes;
 import net.poob22.normaldm.common.server.entity.ai.AiUtil;
 import net.poob22.normaldm.common.server.entity.definition.LaserType;
@@ -35,6 +36,10 @@ import org.joml.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
+
+import static net.poob22.normaldm.common.server.combat.capability.CombatInternalCapabilities.COMBAT;
 
 public class BioluminescentBeamEntity extends Entity {
     public static final EntityDataAccessor<Integer> SHOOTER_UUID = SynchedEntityData.defineId(BioluminescentBeamEntity.class, EntityDataSerializers.INT);
@@ -82,7 +87,7 @@ public class BioluminescentBeamEntity extends Entity {
         this.entityData.set(SHOOTER_UUID, shooter.getId());
 
         // scale damage based on players damage stat in dungeon
-        this.damage = this.shooter instanceof Player ? 1.0F : 1.0F;
+        this.damage = this.shooter instanceof Player player ? player.getCapability(COMBAT).map(c -> c.getStats().get(StatType.DAMAGE)).orElse(1.0f) : 1.0F;
 
         this.type = type;
         this.target = target;
@@ -182,13 +187,12 @@ public class BioluminescentBeamEntity extends Entity {
 
                 if(level() instanceof ServerLevel sl) {
                     if(this.tickCount % 2 == 0) {
-                        clearJustHit();
-                        if(checkSegmentDamage()) {
-                            for(LivingEntity entity : justHit) {
-                                Vec3 entityCenter = entity.getBoundingBox().getCenter();
-                                sl.sendParticles(ParticleTypes.SMOKE, entityCenter.x, entityCenter.y, entityCenter.z, 5, random.nextDouble() - 0.5, random.nextDouble() - 0.5, random.nextDouble() - 0.5, 0.0F);
-                            }
-                        }
+                        clearJustHit(entity -> !(entity instanceof Player));
+                        checkSegmentDamage();
+                    }
+
+                    if(this.tickCount % 10 == 0) {
+                        clearJustHit(entity -> entity instanceof Player);
                     }
 
                     if(hitPoint != null) {
@@ -203,12 +207,19 @@ public class BioluminescentBeamEntity extends Entity {
                         sl.sendParticles(type, v.x, v.y, v.z, 5, random.nextDouble() - 0.5, random.nextDouble() - 0.5, random.nextDouble() - 0.5, 0.0F);
                     }
 
+                    if(this.getLifetime() <= 10) {
+                        this.s = (float) Mth.absMax((float)(1.0 - (1.0 - this.getLifetime() * 0.1)), 0.1);
+                        this.segmentRadius = this.segmentRadius * s;
+                    }
+
                     for(int i = 1; i < points.size(); i++) {
                         if(random.nextDouble() > 0.8) {
                             Vec3 v0 = points.get(i - 1);
                             Vec3 v1 = points.get(i);
                             Vec3 pos = v0.lerp(v1, random.nextDouble());
-                            sl.sendParticles(NDMParticles.BEAM_PLASMA_PARTICLE.get(), pos.x, pos.y, pos.z, 1, random.nextDouble() - 0.5, 0, random.nextDouble() - 0.5, 0.0F);
+                            double x = ThreadLocalRandom.current().nextDouble(-segmentRadius, segmentRadius);
+                            double z = ThreadLocalRandom.current().nextDouble(-segmentRadius, segmentRadius);
+                            sl.sendParticles(NDMParticles.BEAM_PLASMA_PARTICLE.get(), pos.x, pos.y, pos.z, 1, x, 0, z, 0.0F);
                         }
                     }
                 }
@@ -284,7 +295,7 @@ public class BioluminescentBeamEntity extends Entity {
         }
     }
 
-    private boolean checkSegmentDamage() {
+    private void checkSegmentDamage() {
         if(!points.isEmpty()) {
             for(int i = 1; i < points.size(); i++) {
                 Vec3 start = points.get(i - 1);
@@ -333,14 +344,13 @@ public class BioluminescentBeamEntity extends Entity {
                         DamageSource source = new DamageSource(damageHolder, shooter);
                         if(ent.hurt(source, damage)) {
                             addJustHit(ent);
-                            return true;
+                            Vec3 entityCenter = ent.getBoundingBox().getCenter();
+                            ((ServerLevel) level()).sendParticles(ParticleTypes.SMOKE, entityCenter.x, entityCenter.y, entityCenter.z, 5, random.nextDouble() - 0.5, random.nextDouble() - 0.5, random.nextDouble() - 0.5, 0.1F);
                         }
                     }
                 }
             }
         }
-
-        return false;
     }
 
     public void addPoint(Vec3 point) {
@@ -354,12 +364,11 @@ public class BioluminescentBeamEntity extends Entity {
     }
 
     private void addJustHit(LivingEntity entity) {
-        if(entity instanceof Player)
-            this.justHit.add(entity);
+        this.justHit.add(entity);
     }
 
-    private void clearJustHit() {
-        this.justHit.clear();
+    private void clearJustHit(Predicate<LivingEntity> predicate) {
+        this.justHit.removeIf(predicate);
     }
 
     private void setLifetime(int lifetime) {

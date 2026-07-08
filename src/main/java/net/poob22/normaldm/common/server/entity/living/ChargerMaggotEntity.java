@@ -40,7 +40,7 @@ public class ChargerMaggotEntity extends DungeonMob implements IChargingMob {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(0, new ChargeAttackCardinalDirectionGoal(this, 2.0F, 20, 60, false, true));
+        this.goalSelector.addGoal(0, new ChargeAttackCardinalDirectionGoal(this, 2.0F, 20, 60, false, true, 0.0D));
         this.goalSelector.addGoal(2, new RandomStrollCardinalDirectionsGoal(this, 1.0D, 100, false));
 
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, false));
