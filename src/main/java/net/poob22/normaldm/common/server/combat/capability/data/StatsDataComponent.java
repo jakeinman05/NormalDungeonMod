@@ -23,9 +23,10 @@ public class StatsDataComponent extends SyncableComponent {
         stats.putAll(baseStats);
     }
 
-    public void resetStats() {
+    public void resetStats(Player player) {
         stats.clear();
         stats.putAll(baseStats);
+        applyPlayerAttributeStats(player);
         markDirty();
     }
 
@@ -42,6 +43,10 @@ public class StatsDataComponent extends SyncableComponent {
     public void applyPlayerAttributeStats(Player player) {
         player.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(this.get(StatType.MOVEMENT_SPEED));
         player.getAttribute(Attributes.MAX_HEALTH).setBaseValue(this.get(StatType.HEALTH));
+
+        if(player.getHealth() > this.get(StatType.HEALTH)) {
+            player.setHealth(this.get(StatType.HEALTH));
+        }
     }
 
     public void sync(float damage, float reach, float health, float atkSpeed, float moveSpeed, float cooldownMult) {
@@ -53,9 +58,7 @@ public class StatsDataComponent extends SyncableComponent {
         stats.put(StatType.COMBO_MULTIPLIER, cooldownMult);
     }
 
-    public void tick(Player player) {
-        applyPlayerAttributeStats(player);
-    }
+    public void tick(Player player) {}
 
     public CompoundTag save() {
         CompoundTag tag = new CompoundTag();

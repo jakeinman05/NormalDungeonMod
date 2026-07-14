@@ -108,7 +108,7 @@ public class CombatCommands {
                                     ServerPlayer player = getPlayerFrom(ctx);
 
                                     player.getCapability(COMBAT).ifPresent(c -> {
-                                        c.getStats().resetStats();
+                                        c.getStats().resetStats(player);
                                     });
 
                                     return 1;
