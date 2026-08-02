@@ -10,8 +10,8 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.poob22.normaldm.common.client.render.gui.ItemPickupNotification;
-import net.poob22.normaldm.common.client.render.gui.NotificationManager;
+import net.poob22.normaldm.common.client.notifications.ItemPickupNotification;
+import net.poob22.normaldm.common.client.notifications.NotificationManager;
 import net.poob22.normaldm.common.server.items.stat_modifiers.StatItem;
 import net.poob22.normaldm.common.server.misc.NDMTagRegistry;
 

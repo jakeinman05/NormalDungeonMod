@@ -7,7 +7,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.poob22.normaldm.common.client.render.gui.GuiOverlayRenderer;
-import net.poob22.normaldm.common.client.render.gui.NotificationManager;
+import net.poob22.normaldm.common.client.notifications.NotificationManager;
 
 import static net.poob22.normaldm.NormalDungeonMod.MODID;
 

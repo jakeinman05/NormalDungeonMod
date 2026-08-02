@@ -1,4 +1,4 @@
-package net.poob22.normaldm.common.client.render.gui;
+package net.poob22.normaldm.common.client.notifications;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
