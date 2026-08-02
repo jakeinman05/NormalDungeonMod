@@ -10,7 +10,6 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.client.render.gui.ItemPickupNotification;
 import net.poob22.normaldm.common.client.render.gui.NotificationManager;
 import net.poob22.normaldm.common.server.items.stat_modifiers.StatItem;
@@ -46,9 +45,6 @@ public class CommonBusEvents {
                 // allows for achievements to be processed
                 event.setResult(Event.Result.ALLOW);
             }
-
-        } else {
-            NormalDungeonMod.LOGGER.info("Event: onItemPickup:: checkLevel failed");
         }
     }
 
