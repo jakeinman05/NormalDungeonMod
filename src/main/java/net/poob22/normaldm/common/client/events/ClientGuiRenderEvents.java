@@ -17,7 +17,7 @@ public class ClientGuiRenderEvents {
     public static void onRenderGuiOverlay(RenderGuiOverlayEvent.Post event) {
         if(event.getOverlay().id().equals(VanillaGuiOverlay.HOTBAR.id())) {
             GuiOverlayRenderer.render(event.getGuiGraphics());
-            NotificationManager.showItemTitles(event.getPartialTick(), event.getGuiGraphics());
+            NotificationManager.displayFirstNotification(event.getPartialTick(), event.getGuiGraphics());
         }
     }
 

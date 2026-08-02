@@ -3,7 +3,6 @@ package net.poob22.normaldm.common.server.events;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.coremod.transformer.CoreModBaseTransformer;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
@@ -12,7 +11,7 @@ import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.poob22.normaldm.NormalDungeonMod;
-import net.poob22.normaldm.common.client.render.gui.ItemTitleRenderer;
+import net.poob22.normaldm.common.client.render.gui.ItemPickupNotification;
 import net.poob22.normaldm.common.client.render.gui.NotificationManager;
 import net.poob22.normaldm.common.server.items.stat_modifiers.StatItem;
 import net.poob22.normaldm.common.server.misc.NDMTagRegistry;
@@ -43,7 +42,7 @@ public class CommonBusEvents {
             if(stack.getItem() instanceof StatItem statItem) {
                 statItem.applyStats(player);
                 stack.shrink(1);
-                NotificationManager.addItemTitleRenderer(new ItemTitleRenderer(statItem.getTitle(), statItem.getSubtitle(), 80, 2));
+                NotificationManager.addItemPickupNotification(new ItemPickupNotification(statItem.getTitle(), statItem.getSubtitle(), 80, 2));
                 // allows for achievements to be processed
                 event.setResult(Event.Result.ALLOW);
             }
