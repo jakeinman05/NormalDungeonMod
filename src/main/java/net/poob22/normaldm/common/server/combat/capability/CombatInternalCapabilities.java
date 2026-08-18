@@ -1,16 +1,18 @@
 package net.poob22.normaldm.common.server.combat.capability;
 
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.common.capabilities.CapabilityToken;
+import net.minecraftforge.common.capabilities.*;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.poob22.normaldm.common.server.combat.capability.data.CombatProvider;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static net.poob22.normaldm.NormalDungeonMod.MODID;
 
@@ -24,7 +26,7 @@ public class CombatInternalCapabilities {
             var entity = event.getObject();
 
             if(entity instanceof Player) {
-                event.addCapability(ResourceLocation.fromNamespaceAndPath(MODID, "player_dungeon_combat"), new CombatProvider());
+                event.addCapability(ResourceLocation.fromNamespaceAndPath(MODID, "player_dungeon_combat"), new CombatCapabilityProvider());
             }
         }
     }
@@ -47,6 +49,27 @@ public class CombatInternalCapabilities {
                     cap.tick(player);
                 });
             }
+        }
+    }
+
+    public static class CombatCapabilityProvider implements ICapabilityProvider, ICapabilitySerializable<CompoundTag> {
+        private final PlayerCombatCapability data = new PlayerCombatCapability();
+
+        private final LazyOptional<PlayerCombatCapability> optional = LazyOptional.of(() -> data);
+
+        @Override
+        public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
+            return optional.cast();
+        }
+
+        @Override
+        public CompoundTag serializeNBT() {
+            return data.serializeNBT();
+        }
+
+        @Override
+        public void deserializeNBT(CompoundTag tag) {
+            data.deserializeNBT(tag);
         }
     }
 }
