@@ -3,6 +3,7 @@ package net.poob22.normaldm.common.server.combat;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
 
+@Deprecated
 public enum AttackType implements StringRepresentable {
     LIGHT_ATTACK,
     HEAVY_ATTACK;
