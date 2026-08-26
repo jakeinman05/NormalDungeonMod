@@ -6,14 +6,16 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.poob22.normaldm.common.server.combat.capability.data.stats.StatType;
 import net.poob22.normaldm.common.server.entity.living.DungeonMob;
 
 import static net.poob22.normaldm.common.server.combat.CombatUtil.*;
 import static net.poob22.normaldm.common.server.combat.capability.CombatInternalCapabilities.COMBAT;
 
+/// Handles executing attacks
 public class MainCombatHandler {
-    public static void punch(Player player, Vec3 deltaMovement) {
-        double reach = calculateReach(player, deltaMovement);
+    public static void punch(Player player, Vec3 deltaMovement, AttackContext context) {
+        double reach = calculateReach(player, deltaMovement, context.stats().get(StatType.REACH));
 
         Vec3 from = player.getEyePosition();
         Vec3 to = from.add(player.getViewVector(1.0F).scale(reach));
@@ -22,7 +24,7 @@ public class MainCombatHandler {
 
         EntityHitResult entityHitResult = getEntityHitResult(player.level(), player, from, to, searchBox, entity -> entity instanceof DungeonMob);
 
-        boolean flag = checkEntityHitResult(entityHitResult, player);
+        boolean flag = checkEntityHitResultAndHurt(entityHitResult, player, context.stats().get(StatType.DAMAGE));
 
         // if flag, check combos and increment them
         if (flag) {
