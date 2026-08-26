@@ -8,13 +8,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.poob22.normaldm.common.server.combat.capability.data.stats.StatType;
 import net.poob22.normaldm.common.server.misc.NDMDamageTypes;
 
 import java.util.Optional;
 import java.util.function.Predicate;
-
-import static net.poob22.normaldm.common.server.combat.capability.CombatInternalCapabilities.COMBAT;
 
 public class CombatUtil {
     private static final double SMALLEST_HITBOX_WIDTH = 1.2;
