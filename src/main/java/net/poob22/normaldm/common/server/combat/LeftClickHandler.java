@@ -13,7 +13,7 @@ public class LeftClickHandler {
         Level level = player.level();
         if(!level.isClientSide() && checkPunch(player)) {
             player.getCapability(COMBAT).ifPresent(c -> {
-                AttackContext context = new AttackContext(player, c.getStats());
+                AttackContext context = new AttackContext(player, c.getStats().copy());
                 MainCombatHandler.punch(player, deltaMovement, context);
             });
 //            MainCombatHandler.punch(player, deltaMovement);

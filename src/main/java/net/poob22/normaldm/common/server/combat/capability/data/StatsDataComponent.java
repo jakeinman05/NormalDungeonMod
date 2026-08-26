@@ -58,6 +58,17 @@ public class StatsDataComponent extends SyncableComponent {
         stats.put(StatType.COMBO_MULTIPLIER, cooldownMult);
     }
 
+    public StatsDataComponent copy() {
+        StatsDataComponent copy = new StatsDataComponent();
+        copy.setStat(StatType.DAMAGE, this.get(StatType.DAMAGE));
+        copy.setStat(StatType.REACH, this.get(StatType.REACH));
+        copy.setStat(StatType.HEALTH, this.get(StatType.HEALTH));
+        copy.setStat(StatType.ATTACK_SPEED, this.get(StatType.ATTACK_SPEED));
+        copy.setStat(StatType.MOVEMENT_SPEED, this.get(StatType.MOVEMENT_SPEED));
+        copy.setStat(StatType.COMBO_MULTIPLIER, this.get(StatType.COMBO_MULTIPLIER));
+        return copy;
+    }
+
     public void tick(Player player) {}
 
     public CompoundTag save() {
