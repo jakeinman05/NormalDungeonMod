@@ -10,6 +10,7 @@ import net.poob22.normaldm.common.server.combat.capability.PlayerCombatCapabilit
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@Deprecated
 public class CombatProvider implements ICapabilityProvider, ICapabilitySerializable<CompoundTag> {
     private final PlayerCombatCapability data = new PlayerCombatCapability();
 
