@@ -16,6 +16,7 @@ import static net.poob22.normaldm.common.server.combat.capability.CombatInternal
 public class MainCombatHandler {
     public static void punch(Player player, Vec3 deltaMovement, AttackContext context) {
         double reach = calculateReach(player, deltaMovement, context.stats().get(StatType.REACH));
+        float damage = context.stats().get(StatType.DAMAGE);
 
         Vec3 from = player.getEyePosition();
         Vec3 to = from.add(player.getViewVector(1.0F).scale(reach));
@@ -24,13 +25,11 @@ public class MainCombatHandler {
 
         EntityHitResult entityHitResult = getEntityHitResult(player.level(), player, from, to, searchBox, entity -> entity instanceof DungeonMob);
 
-        boolean flag = checkEntityHitResultAndHurt(entityHitResult, player, context.stats().get(StatType.DAMAGE));
+        boolean flag = checkEntityHitResultAndHurt(entityHitResult, player, damage);
 
         // if flag, check combos and increment them
         if (flag) {
-            player.getCapability(COMBAT).ifPresent(cap -> {
-                cap.getCombosData().incrementCombos(player);
-            });
+            player.getCapability(COMBAT).ifPresent(cap -> cap.getCombosData().incrementCombos(player));
         }
 
         ServerLevel world = (ServerLevel)player.level();
