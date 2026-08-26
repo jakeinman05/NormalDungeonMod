@@ -19,19 +19,19 @@ import static net.poob22.normaldm.common.server.combat.capability.CombatInternal
 public class CombatUtil {
     private static final double SMALLEST_HITBOX_WIDTH = 1.2;
 
-    public static EntityHitResult getEntityHitResult(Level pLevel, Entity pProjectile, Vec3 pStartVec, Vec3 pEndVec, AABB pBoundingBox, Predicate<Entity> pFilter) {
+    public static EntityHitResult getEntityHitResult(Level level, Entity attacker, Vec3 from, Vec3 to, AABB boundingBox, Predicate<Entity> entityFilter) {
         double d0 = Double.MAX_VALUE;
         Entity entity = null;
 
-        for(Entity entity1 : pLevel.getEntities(pProjectile, pBoundingBox, pFilter)) {
+        for(Entity entity1 : level.getEntities(attacker, boundingBox, entityFilter)) {
             double entityWidth = entity1.getBbWidth();
             double inflationAmount = Math.max(0, (SMALLEST_HITBOX_WIDTH - entityWidth) / 2.0);
 
             AABB aabb = entity1.getBoundingBox().inflate(inflationAmount);
 
-            Optional<Vec3> optional = aabb.clip(pStartVec, pEndVec);
+            Optional<Vec3> optional = aabb.clip(from, to);
             if (optional.isPresent()) {
-                double d1 = pStartVec.distanceToSqr(optional.get());
+                double d1 = from.distanceToSqr(optional.get());
                 if (d1 < d0) {
                     entity = entity1;
                     d0 = d1;
