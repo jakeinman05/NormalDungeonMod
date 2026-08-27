@@ -35,7 +35,7 @@ public class StatsDataComponent extends SyncableComponent {
         markDirty();
     }
 
-    public void modifyStat(StatType type, float value) {
+    public void addToStat(StatType type, float value) {
         stats.put(type, stats.get(type) + value);
         markDirty();
     }

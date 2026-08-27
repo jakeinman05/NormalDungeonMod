@@ -15,8 +15,8 @@ public class WoodenSpoon extends StatItem {
     @Override
     public void applyStats(Player player) {
         player.getCapability(COMBAT).ifPresent(c -> {
-            c.getStats().modifyStat(StatType.REACH, 0.5f);
-            c.getStats().modifyStat(StatType.MOVEMENT_SPEED, 0.02f);
+            c.getStats().addToStat(StatType.REACH, 0.5f);
+            c.getStats().addToStat(StatType.MOVEMENT_SPEED, 0.02f);
             c.getStats().applyPlayerAttributeStats(player);
         });
 
