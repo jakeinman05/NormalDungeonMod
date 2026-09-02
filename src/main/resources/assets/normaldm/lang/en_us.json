@@ -28,5 +28,7 @@
   "item.normaldm.flesh_guy_egg": "Flesh Guy Spawn Egg",
   "item.normaldm.barrel_nose_egg": "Barrel Nose Spawn Egg",
   "item.normaldm.big_fella_egg": "Big Fella Spawn Egg",
-  "item.normaldm.crescent_egg": "Crescent Spawn Egg"
+  "item.normaldm.crescent_egg": "Crescent Spawn Egg",
+
+  "effect.normaldm.acid": "Acidified"
 }
