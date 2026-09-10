@@ -8,8 +8,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class FleshParticle extends TextureSheetParticle {
 
-    protected FleshParticle(ClientLevel pLevel, double pX, double pY, double pZ) {
-        super(pLevel, pX, pY, pZ, 0.0F, 0.0F, 0.0F);
+    protected FleshParticle(ClientLevel pLevel, double pX, double pY, double pZ, double xs, double ys, double zs) {
+        super(pLevel, pX, pY, pZ, xs, ys, zs);
         this.xd *= 1.3F;
         this.yd *= 0.8F;
         this.zd *= 1.3F;
@@ -47,8 +47,8 @@ public class FleshParticle extends TextureSheetParticle {
         }
 
         @Override
-        public @Nullable Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
-            FleshParticle particle = new FleshParticle(pLevel, pX, pY, pZ);
+        public @Nullable Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double xs, double ys, double zs) {
+            FleshParticle particle = new FleshParticle(pLevel, pX, pY, pZ, xs, ys, zs);
             particle.pickSprite(this.sprites);
             return particle;
         }
