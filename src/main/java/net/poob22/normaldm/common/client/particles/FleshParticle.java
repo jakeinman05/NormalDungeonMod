@@ -3,10 +3,12 @@ package net.poob22.normaldm.common.client.particles;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.poob22.normaldm.NormalDungeonMod;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class FleshParticle extends TextureSheetParticle {
+    float rotationSpeed;
 
     protected FleshParticle(ClientLevel pLevel, double pX, double pY, double pZ, double xs, double ys, double zs) {
         super(pLevel, pX, pY, pZ, xs, ys, zs);
@@ -20,7 +22,7 @@ public class FleshParticle extends TextureSheetParticle {
         this.hasPhysics = true;
         this.lifetime = 160 + random.nextInt(40);
         this.roll = random.nextFloat() * ((float)Math.PI * 2F);
-        this.oRoll = roll;
+        this.rotationSpeed = (random.nextFloat() - 0.5F) * 0.2F;
     }
 
     @Override
@@ -29,6 +31,13 @@ public class FleshParticle extends TextureSheetParticle {
             this.yd *= -0.5;
             this.xd *= 0.7;
             this.zd *= 0.7;
+        }
+
+        if((this.yd * this.yd ) > 0.005) {
+            this.oRoll = this.roll;
+            this.roll += 0.15F;
+        } else {
+            this.oRoll = this.roll;
         }
 
         super.tick();
