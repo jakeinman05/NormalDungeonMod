@@ -8,9 +8,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.poob22.normaldm.common.server.combat.capability.data.stats.StatType;
+import net.poob22.normaldm.common.server.items.attack_modifiers.AttackModItem;
+import net.poob22.normaldm.common.server.items.stat_modifiers.StatItem;
 import net.poob22.normaldm.common.server.misc.NDMDamageTypes;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -50,6 +52,16 @@ public class CombatUtil {
             DamageSource source = new DamageSource(damageHolder, player);
 
             //float damage = player.getCapability(COMBAT).map(c -> c.getStats().get(StatType.DAMAGE)).orElse(1.0f);
+            player.getCapability(COMBAT).ifPresent(c -> {
+                List<StatItem> inv = c.getInventory().getInventory();
+
+                for(StatItem statItem : inv) {
+                    if(statItem instanceof AttackModItem item) {
+                        item.doEffectOn(entity);
+                    }
+                }
+            });
+
             return entity.hurt(source, damage);
         }
         return false;
