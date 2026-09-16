@@ -40,6 +40,11 @@ public class CommonBusEvents {
             ItemStack stack = event.getItem().getItem();
             if(stack.getItem() instanceof StatItem statItem) {
                 statItem.applyStats(player);
+
+                player.getCapability(COMBAT).ifPresent(c -> {
+                    c.getInventory().addItem(statItem);
+                });
+
                 stack.shrink(1);
                 NotificationManager.addItemPickupNotification(new ItemPickupNotification(statItem.getTitle(), statItem.getSubtitle(), 80, 2));
                 // allows for achievements to be processed
