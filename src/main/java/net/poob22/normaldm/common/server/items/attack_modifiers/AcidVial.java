@@ -1,10 +1,11 @@
 package net.poob22.normaldm.common.server.items.attack_modifiers;
 
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.coremod.transformer.CoreModBaseTransformer;
-import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.server.combat.capability.data.stats.StatType;
+import net.poob22.normaldm.common.server.mobeffects.NDMEffects;
 
 import static net.poob22.normaldm.common.server.combat.capability.CombatInternalCapabilities.COMBAT;
 
@@ -12,13 +13,16 @@ public class AcidVial extends AttackModItem {
     public AcidVial(Properties pProperties) {
         super(pProperties);
         setTitle("Acid Vial");
-        setSubtitle("MY HANDS ARE MELTING AAAAAAAAAH!!!");
+        setSubtitle("Acid Hands");
     }
 
     @Override
     public void doEffectOn(Entity entity) {
-        NormalDungeonMod.LOGGER.info("Yay did an effect yippee!");
-        // apply custom acid effect on entity
+        if(entity instanceof LivingEntity livingEntity) {
+            if(livingEntity.addEffect(new MobEffectInstance(NDMEffects.ACID.get(), 200, 0, false, false))) {
+
+            }
+        }
     }
 
     @Override
