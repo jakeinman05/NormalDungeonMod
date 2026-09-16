@@ -73,5 +73,7 @@ public class ClientModEvents {
         event.registerSpriteSet(NDMParticles.FLESH_PARTICLE.get(), FleshParticle.Factory::new);
         event.registerSpriteSet(NDMParticles.SNOT_PARTICLE.get(), SnotParticle.Factory::new);
         event.registerSpriteSet(NDMParticles.BEAM_PLASMA_PARTICLE.get(), BeamPlasmaParticle.Factory::new);
+        event.registerSpriteSet(NDMParticles.ACID_PARTICLE.get(), AcidParticle.Factory::new);
+        event.registerSpriteSet(NDMParticles.ACID_SPLASH_DROPLET.get(), AcidSplashDroplet.Factory::new);
     }
 }
