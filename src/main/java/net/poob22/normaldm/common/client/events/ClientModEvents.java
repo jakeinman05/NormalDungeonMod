@@ -99,7 +99,6 @@ public class ClientModEvents {
     }
 
     private static <T extends LivingEntity, M extends EntityModel<T>> void addLivingEntityLayer(LivingEntityRenderer<T, M> renderer) {
-        NormalDungeonMod.LOGGER.info("Adding living entity layer for " + renderer.toString());
         renderer.addLayer(new AcidOverlayLayer<>(renderer));
     }
 }
