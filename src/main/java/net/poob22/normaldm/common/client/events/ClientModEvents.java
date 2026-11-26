@@ -1,24 +1,32 @@
 package net.poob22.normaldm.common.client.events;
 
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.ForgeRenderTypes;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.poob22.normaldm.NormalDungeonMod;
 import net.poob22.normaldm.common.client.model.BaseShotModel;
 import net.poob22.normaldm.common.client.model.BioluminescentBeamSegmentModel;
 import net.poob22.normaldm.common.client.model.crescent.TallCrescentModel;
 import net.poob22.normaldm.common.client.particles.*;
 import net.poob22.normaldm.common.client.render.entity.projectile.BaseBioLumBeamRenderer;
 import net.poob22.normaldm.common.client.render.entity.projectile.BaseProjectileRenderer;
+import net.poob22.normaldm.common.client.render.layer.AcidOverlayLayer;
 import net.poob22.normaldm.common.server.blocks.NDMBlocks;
 import net.poob22.normaldm.common.server.entity.definition.DungeonMobDefinition;
 import net.poob22.normaldm.common.server.entity.registry.DungeonMobRegistry;
@@ -75,5 +83,23 @@ public class ClientModEvents {
         event.registerSpriteSet(NDMParticles.BEAM_PLASMA_PARTICLE.get(), BeamPlasmaParticle.Factory::new);
         event.registerSpriteSet(NDMParticles.ACID_PARTICLE.get(), AcidParticle.Factory::new);
         event.registerSpriteSet(NDMParticles.ACID_SPLASH_DROPLET.get(), AcidSplashDroplet.Factory::new);
+    }
+
+    /// Add Layers
+
+    @SubscribeEvent
+    public static void addLayers(EntityRenderersEvent.AddLayers event) {
+        for(EntityType<?> type : ForgeRegistries.ENTITY_TYPES.getValues()) {
+            EntityRenderer<?> renderer = event.getEntityRenderer(type);
+
+            if(renderer instanceof LivingEntityRenderer<?, ?> livingEntityRenderer) {
+                addLivingEntityLayer(livingEntityRenderer);
+            }
+        }
+    }
+
+    private static <T extends LivingEntity, M extends EntityModel<T>> void addLivingEntityLayer(LivingEntityRenderer<T, M> renderer) {
+        NormalDungeonMod.LOGGER.info("Adding living entity layer for " + renderer.toString());
+        renderer.addLayer(new AcidOverlayLayer<>(renderer));
     }
 }

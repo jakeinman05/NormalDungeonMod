@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import net.poob22.normaldm.common.server.mobeffects.NDMEffects;
+import net.poob22.normaldm.common.client.render.state.ClientEffectState;
 
 import static net.poob22.normaldm.NormalDungeonMod.MODID;
 
@@ -23,7 +23,7 @@ public class AcidOverlayLayer<T extends LivingEntity, M extends EntityModel<T>> 
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, T entity, float v, float v1, float v2, float v3, float v4, float v5) {
-        if(!entity.hasEffect(NDMEffects.ACID.get())) {
+        if(!ClientEffectState.hasAcid(entity)) {
             return;
         }
 
