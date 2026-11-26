@@ -10,7 +10,6 @@ import net.poob22.normaldm.common.server.entity.ai.AiUtil;
 
 public class AcidEffect extends MobEffect {
     int damageInterval = 10;
-    int ticksTillDamage = 0;
 
     public AcidEffect() {
         super(MobEffectCategory.HARMFUL, 0X00FF00);
@@ -21,12 +20,9 @@ public class AcidEffect extends MobEffect {
         if(!entity.level().isClientSide) {
             if(entity.getRandom().nextFloat() < 0.25F)
                 AiUtil.sendParticlesInBox(entity.getBoundingBox(), NDMParticles.ACID_PARTICLE.get(), RandomSource.create().nextInt(3), (ServerLevel) entity.level(), entity.level().random);
-            if(ticksTillDamage >= damageInterval) {
+            if(entity.tickCount % damageInterval == 0) {
                 entity.hurt(entity.damageSources().lava(), 1);
-                ticksTillDamage = 0;
             }
-
-            ticksTillDamage++;
         }
 
         super.applyEffectTick(entity, amplifier);
