@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public class ClientEffectState {
     // add additional effect sets
-    public static final Set<UUID> ACID_ENTITIES = new HashSet<>();
+    private static final Set<UUID> ACID_ENTITIES = new HashSet<>();
 
     public static void set(UUID id, boolean active) {
         if(active) {
