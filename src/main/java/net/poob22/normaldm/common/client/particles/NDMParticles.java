@@ -17,6 +17,8 @@ public class NDMParticles {
     public static final RegistryObject<SimpleParticleType> FLESH_PARTICLE = DEF_REG.register("flesh_particle", () -> new SimpleParticleType(false));
     public static final RegistryObject<SimpleParticleType> SNOT_PARTICLE = DEF_REG.register("snot_particle", () -> new SimpleParticleType(false));
     public static final RegistryObject<SimpleParticleType> BEAM_PLASMA_PARTICLE = DEF_REG.register("beam_particle", () -> new SimpleParticleType(false));
+    public static final RegistryObject<SimpleParticleType> ACID_PARTICLE = DEF_REG.register("acid_particle", () -> new SimpleParticleType(false));
+    public static final RegistryObject<SimpleParticleType> ACID_SPLASH_DROPLET = DEF_REG.register("acid_splash_droplet", () -> new SimpleParticleType(false));
 
     public static void register(IEventBus bus) {
         DEF_REG.register(bus);

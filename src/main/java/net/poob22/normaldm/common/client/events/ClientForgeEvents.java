@@ -7,16 +7,23 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.poob22.normaldm.common.client.packet.PacketHandler;
 import net.poob22.normaldm.common.client.packet.combat.PlayerHoldingLClickPacket;
+import net.poob22.normaldm.common.client.render.state.ClientEffectState;
 
 import static net.poob22.normaldm.NormalDungeonMod.MODID;
 
 @Mod.EventBusSubscriber(modid = MODID, value = Dist.CLIENT)
 public class ClientForgeEvents {
+    @SubscribeEvent
+    public static void onClientLogout(ClientPlayerNetworkEvent.LoggingOut event) {
+        ClientEffectState.clearAcid();
+    }
+
     @SubscribeEvent
     public static void checkPlayerClick(TickEvent.ClientTickEvent event) {
         Minecraft mc = Minecraft.getInstance();

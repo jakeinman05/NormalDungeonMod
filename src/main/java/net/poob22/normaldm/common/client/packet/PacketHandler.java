@@ -73,6 +73,13 @@ public class PacketHandler {
                 PlayerHoldingLClickPacket::decode,
                 PlayerHoldingLClickPacket::handle
         );
+        CHANNEL.registerMessage(
+                packetId++,
+                EffectInstanceSyncPacket.class,
+                EffectInstanceSyncPacket::encode,
+                EffectInstanceSyncPacket::decode,
+                EffectInstanceSyncPacket::handle
+        );
     }
 
     public static void sendToTracking(Entity entity, Object packet) {

@@ -10,8 +10,8 @@ public class HurtParticle extends TextureSheetParticle {
     private final SpriteSet sprites;
     private int onGroundTime;
 
-    protected HurtParticle(ClientLevel level, double x, double y, double z, SpriteSet sprites) {
-        super(level, x, y, z, 0.0D, 0.0D, 0.0D);
+    protected HurtParticle(ClientLevel level, double x, double y, double z, double xs, double ys, double zs, SpriteSet sprites) {
+        super(level, x, y, z, xs, ys, zs);
 
         this.friction = 0.96F;
         this.gravity = 1.0F;
@@ -59,7 +59,7 @@ public class HurtParticle extends TextureSheetParticle {
 
         @Override
         public @Nullable Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xs, double ys, double zs) {
-            return new HurtParticle(level, x, y, z, this.sprites);
+            return new HurtParticle(level, x, y, z, xs, ys, zs, this.sprites);
         }
     }
 }

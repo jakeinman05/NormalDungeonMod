@@ -94,7 +94,7 @@ public class CombatCommands {
 
                                                     player.getCapability(COMBAT).ifPresent(c -> {
                                                         StatType type = StatType.valueOf(stat.toUpperCase());
-                                                        c.getStats().modifyStat(type, value);
+                                                        c.getStats().addToStat(type, value);
                                                     });
 
                                                     return 1;

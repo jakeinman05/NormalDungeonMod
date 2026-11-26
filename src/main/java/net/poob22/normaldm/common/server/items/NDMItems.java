@@ -4,9 +4,9 @@ import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
 import net.poob22.normaldm.common.server.entity.registry.DungeonMobs;
+import net.poob22.normaldm.common.server.items.attack_modifiers.AcidVial;
 import net.poob22.normaldm.common.server.items.stat_modifiers.EmptyHands;
 import net.poob22.normaldm.common.server.items.stat_modifiers.LaysBag;
 import net.poob22.normaldm.common.server.items.stat_modifiers.WoodenSpoon;
@@ -33,6 +33,7 @@ public class NDMItems {
     public static final RegistryObject<Item> EMPTY_HANDS = ITEMS.register("empty_hands", () -> new EmptyHands(new Item.Properties()));
     public static final RegistryObject<Item> LAYS_BAG = ITEMS.register("lays_bag", () -> new LaysBag(new Item.Properties()));
     public static final RegistryObject<Item> WOODEN_SPOON = ITEMS.register("wooden_spoon", () -> new WoodenSpoon(new Item.Properties()));
+    public static final RegistryObject<Item> ACID_VIAL = ITEMS.register("acid_vial", () -> new AcidVial(new Item.Properties()));
 
     public static void register(IEventBus bus) {ITEMS.register(bus);}
 }

@@ -15,7 +15,7 @@ public class LaysBag extends StatItem {
     @Override
     public void applyStats(Player player) {
         player.getCapability(COMBAT).ifPresent(c -> {
-            c.getStats().modifyStat(StatType.HEALTH, 2f);
+            c.getStats().addToStat(StatType.HEALTH, 2f);
             c.getStats().applyPlayerAttributeStats(player);
             player.heal(2.0f);
         });

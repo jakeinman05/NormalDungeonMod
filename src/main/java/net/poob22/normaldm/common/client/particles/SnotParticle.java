@@ -10,8 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class SnotParticle extends HurtParticle {
-    protected SnotParticle(ClientLevel level, double x, double y, double z, SpriteSet sprites) {
-        super(level, x, y, z, sprites);
+    protected SnotParticle(ClientLevel level, double x, double y, double z, double xs, double ys, double zs, SpriteSet sprites) {
+        super(level, x, y, z, xs, ys, zs, sprites);
     }
 
     @Override
@@ -40,8 +40,8 @@ public class SnotParticle extends HurtParticle {
         }
 
         @Override
-        public @Nullable Particle createParticle(@NotNull SimpleParticleType pType, @NotNull ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
-            return new SnotParticle(pLevel, pX, pY, pZ, this.sprites);
+        public @Nullable Particle createParticle(@NotNull SimpleParticleType pType, @NotNull ClientLevel pLevel, double pX, double pY, double pZ, double xs, double ys, double zs) {
+            return new SnotParticle(pLevel, pX, pY, pZ, xs, ys, zs, this.sprites);
         }
     }
 }
