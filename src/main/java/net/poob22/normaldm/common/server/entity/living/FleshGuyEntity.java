@@ -82,6 +82,7 @@ public class FleshGuyEntity extends DungeonMob {
                 blob.heal((float) health < 1e-16 ? 1 : (float) health);
                 blob.setPos(this.getX(), this.getY(), this.getZ());
                 blob.setTypeInt(this.getTypeInt());
+                this.getActiveEffects().forEach(blob::addEffect);
                 level().addFreshEntity(blob);
             }
         }
