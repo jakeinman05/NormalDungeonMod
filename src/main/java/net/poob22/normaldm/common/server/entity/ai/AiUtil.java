@@ -27,6 +27,21 @@ public class AiUtil {
         return false;
     }
 
+    public static void spawnDownedStateOnDeath(DungeonMob mob, EntityType<? extends DungeonMob> toSpawn, double healthDecrement) {
+        DungeonMob downed = toSpawn.create(mob.level());
+        if(downed != null) {
+            double health = mob.getAttribute(Attributes.MAX_HEALTH).getValue() - healthDecrement;
+            downed.getAttribute(Attributes.MAX_HEALTH).setBaseValue(health);
+            if(downed.getAttributeBaseValue(Attributes.MAX_HEALTH) < 1e-16) {
+                downed.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1);
+            }
+            downed.heal((float) health < 1e-16 ? 1 : (float) health);
+            downed.setPos(mob.getX(), mob.getY(), mob.getZ());
+            mob.getActiveEffects().forEach(downed::addEffect);
+            mob.level().addFreshEntity(downed);
+        }
+    }
+
     public static void spawnEnemiesOnDeath(DungeonMob mob, List<EntityType<? extends DungeonMob>> toSpawn, boolean randomOffset) {
         if(!(mob.level() instanceof ServerLevel level)) return;
 
