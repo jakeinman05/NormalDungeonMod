@@ -8,32 +8,27 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.poob22.normaldm.common.server.items.attack_modifiers.AttackModItem;
-import net.poob22.normaldm.common.server.items.stat_modifiers.StatItem;
 import net.poob22.normaldm.common.server.misc.NDMDamageTypes;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-
-import static net.poob22.normaldm.common.server.combat.capability.CombatInternalCapabilities.COMBAT;
 
 public class CombatUtil {
     private static final double SMALLEST_HITBOX_WIDTH = 1.2;
 
-    public static EntityHitResult getEntityHitResult(Level pLevel, Entity pProjectile, Vec3 pStartVec, Vec3 pEndVec, AABB pBoundingBox, Predicate<Entity> pFilter) {
+    public static EntityHitResult getEntityHitResult(Level level, Entity attacker, Vec3 from, Vec3 to, AABB boundingBox, Predicate<Entity> entityFilter) {
         double d0 = Double.MAX_VALUE;
         Entity entity = null;
 
-        for(Entity entity1 : pLevel.getEntities(pProjectile, pBoundingBox, pFilter)) {
+        for(Entity entity1 : level.getEntities(attacker, boundingBox, entityFilter)) {
             double entityWidth = entity1.getBbWidth();
             double inflationAmount = Math.max(0, (SMALLEST_HITBOX_WIDTH - entityWidth) / 2.0);
 
             AABB aabb = entity1.getBoundingBox().inflate(inflationAmount);
 
-            Optional<Vec3> optional = aabb.clip(pStartVec, pEndVec);
+            Optional<Vec3> optional = aabb.clip(from, to);
             if (optional.isPresent()) {
-                double d1 = pStartVec.distanceToSqr(optional.get());
+                double d1 = from.distanceToSqr(optional.get());
                 if (d1 < d0) {
                     entity = entity1;
                     d0 = d1;
@@ -52,16 +47,6 @@ public class CombatUtil {
             DamageSource source = new DamageSource(damageHolder, player);
 
             //float damage = player.getCapability(COMBAT).map(c -> c.getStats().get(StatType.DAMAGE)).orElse(1.0f);
-            player.getCapability(COMBAT).ifPresent(c -> {
-                List<StatItem> inv = c.getInventory().getInventory();
-
-                for(StatItem statItem : inv) {
-                    if(statItem instanceof AttackModItem item) {
-                        item.doEffectOn(entity);
-                    }
-                }
-            });
-
             return entity.hurt(source, damage);
         }
         return false;
